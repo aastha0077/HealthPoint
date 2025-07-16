@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/controllers/auth.controllers.ts","./src/routes/auth.routes.ts","./src/services/user.service.ts","./src/types/user.types.ts","./src/utils/auth.utils.ts"],"version":"5.8.3"}
