@@ -8,45 +8,56 @@ datasource db {
 }
 
 model User {
-    id        Int      @id @default(autoincrement())
-    email     String   @unique
-    role      String
-    password  String
-    createdAt DateTime @default(now())
-    Patient   Patient?
-    Doctor    Doctor?
-}
-
-model Patient {
-    id            Int    @id @default(autoincrement())
-    userId        Int    @unique
-    user          User   @relation(fields: [userId], references: [id])
+    id            Int      @id @default(autoincrement())
+    email         String   @unique
+    role          String
+    password      String
     firstName     String
     lastName      String
     contactNumber String
-    district      String
-    municipality  String
-    wardNo        String
-    address       String
+    createdAt     DateTime @default(now())
+    Patient       Patient?
+    Doctor        Doctor?
+}
+
+model Patient {
+    id           Int           @id @default(autoincrement())
+    user         User          @relation(fields: [id], references: [id])
+    district     String
+    municipality String
+    wardNo       String
+    gender       String        @default("Male")
+    Appointment  Appointment[]
+}
+
+model Appointment {
+    id                  Int        @id @default(autoincrement())
+    appointmentDateTime DateTime
+    patient             Patient    @relation(fields: [patientId], references: [id])
+    doctor              Doctor     @relation(fields: [doctorId], references: [id])
+    patientId           Int
+    doctorId            Int
+    department          Department @relation(fields: [departmentId], references: [id])
+    departmentId        Int
 }
 
 model Doctor {
-    id           Int        @id @default(autoincrement())
-    userId       Int        @unique
-    user         User       @relation(fields: [userId], references: [id])
+    id           Int           @id @default(autoincrement())
+    user         User          @relation(fields: [id], references: [id])
     speciality   String
-    phone        String
-    email        String
-    available    Boolean    @default(true)
+    available    Boolean       @default(true)
     departmentId Int
-    department   Department @relation(fields: [departmentId], references: [id])
+    address      String
+    department   Department    @relation(fields: [departmentId], references: [id])
+    Appointments Appointment[]
 }
 
 model Department {
-    id          Int      @id @default(autoincrement())
+    id          Int           @id @default(autoincrement())
     name        String
     description String
     doctors     Doctor[]
+    Appointment Appointment[]
 }
 
 // enum Role {

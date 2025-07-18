@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { LoginType, SignupType } from "../types/user.types";
-import { userService } from "../services/user.service";
+import { userService } from "../services/user.services";
 
 async function loginController(req: Request, res: Response) {
     const user: LoginType = req.body;

@@ -1,3 +1,5 @@
+import { Doctor, User } from "@prisma/client"
+
 interface LoginType {
     email: string
     password: string
@@ -17,6 +19,7 @@ interface SignupType {
     role: string
 }
 
+type DoctorType = User & Doctor
 
 
-export { LoginType, SignupType }
+export { LoginType, SignupType, DoctorType }
