@@ -24,7 +24,7 @@ async function saveUser(user: SignupType) {
             lastName: user.lastName,
             contactNumber: user.contactNumber,
             password: hash,
-            role: user.role,
+            role: "USER",
         }
     })
 
@@ -59,7 +59,7 @@ async function saveDoctor(user: DoctorType) {
             lastName: user.lastName,
             contactNumber: user.contactNumber,
             password: hash,
-            role: user.role,
+            role: "DOCTOR",
         }
     })
 
@@ -68,8 +68,9 @@ async function saveDoctor(user: DoctorType) {
             id: result.id,
             address: user.address,
             speciality: user.speciality,
-            departmentId: user.departmentId,
             available: true,
+            departmentId: user.departmentId
+
         }
     })
     return result;

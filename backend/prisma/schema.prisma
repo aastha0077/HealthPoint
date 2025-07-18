@@ -48,6 +48,7 @@ model Doctor {
     available    Boolean       @default(true)
     departmentId Int
     address      String
+    bio          String
     department   Department    @relation(fields: [departmentId], references: [id])
     Appointments Appointment[]
 }
