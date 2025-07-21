@@ -17,17 +17,24 @@ async function createAppointment(patientId: number, doctorId: number, appointmen
         patientId: patientId,
         doctorId: doctorId,
         departmentId: doctor.departmentId,
-        appointmentDateTime: appointmentDateTime
+        appointmentDateTime: new Date(appointmentDateTime).toISOString()
     }
     const createdAppointment = await prisma.appointment.create({
         data: appointment
     })
-    return createAppointment;
+    return createdAppointment;
 
 }
 
+
+async function getAllAppointments() {
+    const appointments = await prisma.appointment.findMany();
+    return appointments;
+}
+
 const appointmentService = {
-    createAppointment: createAppointment
+    createAppointment: createAppointment,
+    getAllAppointments: getAllAppointments
 }
 
 export { appointmentService }

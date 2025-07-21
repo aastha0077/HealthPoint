@@ -39,6 +39,7 @@ model Appointment {
     doctorId            Int
     department          Department @relation(fields: [departmentId], references: [id])
     departmentId        Int
+    // createdTime         DateTime
 }
 
 model Doctor {

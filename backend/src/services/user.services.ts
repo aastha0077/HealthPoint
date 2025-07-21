@@ -69,22 +69,14 @@ async function saveDoctor(user: DoctorType) {
             address: user.address,
             speciality: user.speciality,
             available: true,
-            departmentId: user.departmentId
+            departmentId: user.departmentId,
+            bio: user.bio
 
         }
     })
     return result;
 }
 
-
-// id           Int           @id @default(autoincrement())
-//     user         User          @relation(fields: [id], references: [id])
-//     speciality   String
-//     available    Boolean       @default(true)
-//     departmentId Int
-//     address      String
-//     department   Department    @relation(fields: [departmentId], references: [id])
-//     Appointment  Appointment[]
 async function isValidUser(user: LoginType) {
     const result = await prisma.user.findFirst({
         where: {
@@ -109,7 +101,5 @@ const userService = {
     isValidUser: isValidUser,
     saveDoctor: saveDoctor
 }
-
-
 
 export { userService }

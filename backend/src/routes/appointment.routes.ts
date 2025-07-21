@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { createAppointmentController } from "../controllers/appointment.controllers";
+import { createAppointmentController, getAllAppointmentsController } from "../controllers/appointment.controllers";
 const appointmentRoutes = Router();
 
-appointmentRoutes.post('/:patientId', createAppointmentController)
+appointmentRoutes.post('/:patientId/:doctorId', createAppointmentController)
+
+appointmentRoutes.get('/', getAllAppointmentsController)
 
 export { appointmentRoutes }

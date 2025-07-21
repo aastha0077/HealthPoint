@@ -7,6 +7,4 @@ async function createDoctorController(req: Request, res: Response) {
     res.send(result);
 
 }
-
-
-export { createDoctorController }
+export { createDoctorController } 

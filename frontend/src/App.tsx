@@ -5,8 +5,8 @@ import Header from "./components/layout/Header";
 function App() {
   return (
     <>
-      {/* <RouterProvider router={router}></RouterProvider> */}
       <Header></Header>
+      <RouterProvider router={router}></RouterProvider>
     </>
   );
 }

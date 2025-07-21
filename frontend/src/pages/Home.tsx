@@ -1,7 +1,7 @@
 function Home() {
   return (
     <div>
-      <h1>This is Lumibini united hospital</h1>
+      <img src="" alt="Hospital Image"></img>
     </div>
   );
 }

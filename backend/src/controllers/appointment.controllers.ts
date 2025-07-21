@@ -9,4 +9,10 @@ async function createAppointmentController(req: Request, res: Response) {
 }
 
 
-export { createAppointmentController }
+async function getAllAppointmentsController(req: Request, res: Response) {
+    const appointments = await appointmentService.getAllAppointments();
+    res.send(appointments);
+}
+
+
+export { createAppointmentController, getAllAppointmentsController }
