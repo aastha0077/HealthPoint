@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-async function createAppointment(patientId: number, doctorId: number, appointmentDateTime: string) {
+async function createNewAppointment(patientId: number, doctorId: number, appointmentDateTime: string) {
     // const doctor = await prisma.$queryRaw`Select * from Doctor where doctorId=${doctorId}`;
     const doctor = await prisma.doctor.findFirst({
         where: {
@@ -32,8 +32,18 @@ async function getAllAppointments() {
     return appointments;
 }
 
+async function getAppointmentById(id: number) {
+    const appointment = await prisma.appointment.findFirst({
+        where: {
+            id: id
+        }
+    })
+    return appointment;
+
+}
+
 const appointmentService = {
-    createAppointment: createAppointment,
+    createNewAppointment: createNewAppointment,
     getAllAppointments: getAllAppointments
 }
 

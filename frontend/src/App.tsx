@@ -1,12 +1,18 @@
-import { RouterProvider } from "react-router-dom";
+import { Route, Routes } from "react-router";
 import "./App.css";
-import router from "./routes/userRoutes";
-import Header from "./components/layout/Header";
+import { LoginForm } from "./components/login-form";
+import { Header } from "./components/layouts/Header";
+import { Home } from "./pages/Home";
+
 function App() {
   return (
     <>
       <Header></Header>
-      <RouterProvider router={router}></RouterProvider>
+      <Routes>
+        <Route path="/login" element={<LoginForm />}></Route>
+        <Route path="/signup" element={""}></Route>
+        <Route path="/" element={<Home></Home>}></Route>
+      </Routes>
     </>
   );
 }

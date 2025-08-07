@@ -1,9 +1,7 @@
+import { CarouselCard } from "@/components/carousel";
+
 function Home() {
-  return (
-    <div>
-      <img src="" alt="Hospital Image"></img>
-    </div>
-  );
+  return <CarouselCard></CarouselCard>;
 }
 
-export default Home;
+export { Home };

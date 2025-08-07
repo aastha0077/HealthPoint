@@ -8,21 +8,23 @@ datasource db {
 }
 
 model User {
-    id            Int      @id @default(autoincrement())
-    email         String   @unique
+    id            Int           @id @default(autoincrement())
+    email         String        @unique
     role          String
     password      String
     firstName     String
     lastName      String
     contactNumber String
-    createdAt     DateTime @default(now())
+    createdAt     DateTime      @default(now())
     Patient       Patient?
     Doctor        Doctor?
+    Appointment   Appointment[]
 }
 
 model Patient {
     id           Int           @id @default(autoincrement())
     user         User          @relation(fields: [id], references: [id])
+    fullName     String
     district     String
     municipality String
     wardNo       String
@@ -33,7 +35,11 @@ model Patient {
 model Appointment {
     id                  Int        @id @default(autoincrement())
     appointmentDateTime DateTime
+    // Appointed patient
     patient             Patient    @relation(fields: [patientId], references: [id])
+    // Who appoointed the patient
+    user                User       @relation(fields: [userId], references: [id])
+    userId              Int
     doctor              Doctor     @relation(fields: [doctorId], references: [id])
     patientId           Int
     doctorId            Int
