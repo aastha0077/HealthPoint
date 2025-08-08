@@ -1,7 +1,11 @@
 import { CarouselCard } from "@/components/carousel";
 
 function Home() {
-  return <CarouselCard></CarouselCard>;
+  return (
+    <div>
+      <CarouselCard></CarouselCard>
+    </div>
+  );
 }
 
 export { Home };

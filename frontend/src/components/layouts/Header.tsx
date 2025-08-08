@@ -14,7 +14,7 @@ function Header() {
     { href: "/services", label: "Our Services" },
     { href: "/lab-report", label: "Lab Report" },
     { href: "/health-package", label: "Health Package" },
-    { href: "/contact-us", label: "Contact Us" },
+    { href: "/contact", label: "Contact Us" },
   ];
 
   return (
