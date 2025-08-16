@@ -24,7 +24,6 @@ model User {
 model Patient {
     id           Int           @id @default(autoincrement())
     user         User          @relation(fields: [id], references: [id])
-    fullName     String
     district     String
     municipality String
     wardNo       String

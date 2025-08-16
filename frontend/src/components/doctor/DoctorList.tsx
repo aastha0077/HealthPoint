@@ -17,15 +17,44 @@ function DoctorList() {
       specialities: ["Parkinson"],
       name: "Sudarshan Pokhrel",
     },
+    {
+      qualifications: ["Phd"],
+      specialities: ["Parkinson"],
+      name: "Sudarshan Pokhrel",
+    },
+    {
+      qualifications: ["Phd"],
+      specialities: ["Parkinson"],
+      name: "Sudarshan Pokhrel",
+    },
+    {
+      qualifications: ["Phd"],
+      specialities: ["Parkinson"],
+      name: "Sudarshan Pokhrel",
+    },
+    {
+      qualifications: ["Phd"],
+      specialities: ["Parkinson"],
+      name: "Sudarshan Pokhrel",
+    },
+    {
+      qualifications: ["Phd"],
+      specialities: ["Parkinson"],
+      name: "Sudarshan Pokhrel",
+    },
   ];
 
-  return doctors.map((doctor) => (
-    <DoctorInfoCard
-      specialities={doctor.specialities}
-      qualifications={doctor.qualifications}
-      name={doctor.name}
-    />
-  ));
+  return (
+    <div className="grid grid-cols-3 m-14">
+      {doctors.map((doctor) => (
+        <DoctorInfoCard
+          specialities={doctor.specialities}
+          qualifications={doctor.qualifications}
+          name={doctor.name}
+        />
+      ))}
+    </div>
+  );
 }
 
 export { DoctorList };
