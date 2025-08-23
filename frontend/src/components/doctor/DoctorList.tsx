@@ -20,7 +20,7 @@ function DoctorList() {
     {
       qualifications: ["Phd"],
       specialities: ["Parkinson"],
-      name: "Sudarshan Pokhrel",
+      name: "Mina Pokhrel",
     },
     {
       qualifications: ["Phd"],
