@@ -18,7 +18,7 @@ interface SignupType {
     role: string
 }
 
-type DoctorType = User & Doctor
+type DoctorType = User & Doctor & { timeSlots: string[] }
 
 
 export { LoginType, SignupType, DoctorType }

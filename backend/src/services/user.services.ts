@@ -45,7 +45,6 @@ async function saveUser(user: SignupType) {
     };
 }
 async function saveDoctor(user: DoctorType) {
-
     const output = await prisma.user.findFirst({
         where: {
             email: user.email
@@ -56,6 +55,26 @@ async function saveDoctor(user: DoctorType) {
             message: "User with this email already exists"
         }
     }
+
+    let timeSlots = user.timeSlots
+    console.log(timeSlots)
+    const allTimeSlots = await prisma.time.findMany()
+    const newResult = await Promise.all(timeSlots.map(async (timeSlot, index) => {
+        console.log(index)
+        const existing = allTimeSlots.filter(t => {
+            return (t.time === timeSlot)
+        })
+
+        console.log(existing)
+        if (existing[0]) {
+            return existing[0]
+        }
+        console.log('code runs')
+        return await prisma.time.create({
+            data: { time: timeSlot }
+        })
+    }))
+    console.log(newResult)
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
     const result = await prisma.user.create({
@@ -69,6 +88,7 @@ async function saveDoctor(user: DoctorType) {
         }
     })
 
+
     const doctor = await prisma.doctor.create({
         data: {
             id: result.id,
@@ -76,7 +96,7 @@ async function saveDoctor(user: DoctorType) {
             speciality: user.speciality,
             available: true,
             departmentId: user.departmentId,
-            bio: user.bio
+            bio: user.bio,
 
         }
     })
@@ -105,13 +125,11 @@ async function isValidUser(user: LoginType) {
         }
     }
 
-
 }
-
 const userService = {
-    saveUser: saveUser,
-    isValidUser: isValidUser,
-    saveDoctor: saveDoctor
+    saveUser,
+    isValidUser,
+    saveDoctor
 }
 
 export { userService }

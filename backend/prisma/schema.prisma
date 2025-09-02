@@ -56,7 +56,7 @@ model Doctor {
     bio          String
     department   Department    @relation(fields: [departmentId], references: [id])
     Appointments Appointment[]
-    Timeslots    Timeslots[]
+    timeSlots    Timeslots[]
 }
 
 model Department {
