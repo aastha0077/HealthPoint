@@ -20,6 +20,7 @@ async function createNewAppointment(patientId: number, doctorId: number, appoint
         appointmentDateTime: new Date(appointmentDateTime).toISOString()
     }
     const createdAppointment = await prisma.appointment.create({
+        //@ts-ignore
         data: appointment
     })
     return createdAppointment;

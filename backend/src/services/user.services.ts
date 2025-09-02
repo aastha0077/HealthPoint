@@ -12,7 +12,8 @@ async function saveUser(user: SignupType) {
     })
     if (output) {
         return {
-            message: "User with this email already exists"
+            message: "User with this email already exists",
+            success: false
         }
     }
     const salt = await bcrypt.genSalt(10);
@@ -36,7 +37,12 @@ async function saveUser(user: SignupType) {
             wardNo: user.wardNo,
         }
     })
-    return result;
+
+
+    return {
+        message: "signup successfull",
+        success: true
+    };
 }
 async function saveDoctor(user: DoctorType) {
 
@@ -85,15 +91,21 @@ async function isValidUser(user: LoginType) {
     })
     if (!result) {
         return {
-            message: "Email doesnot exists"
+            message: "Email doesnot exists",
+            success: false
         }
     }
     if (result?.password != null) {
         if (await bcrypt.compare(user.password, result.password)) {
-            //@ts-ignore
-            return jwt.sign(user.email, process.env.JWT)
+            return {
+                token: jwt.sign({ email: user.email }, process.env.JWT || "", { expiresIn: "1h" }),
+                success: true,
+                message: "login successfull"
+            }
         }
     }
+
+
 }
 
 const userService = {

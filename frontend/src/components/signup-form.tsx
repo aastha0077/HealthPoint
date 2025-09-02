@@ -2,30 +2,43 @@ import type React from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { apiClient } from "@/apis/apis";
+import { useNavigate } from "react-router";
 
 function SignupForm() {
+
+  const navigate = useNavigate()
+
   const inputStyle = {
     width: "375px",
   };
 
   async function submitForm(event: React.FormEvent<HTMLFormElement>) {
-    try{
-      event.preventDefault();
-      const formData = new FormData(event.currentTarget);
-      const formValues = {
-            email: formData.get("email"),
-            firstName: formData.get("firstName"),
-            lastName: formData.get("lastName"),
-            district: formData.get("district"),
-            municipality: formData.get("municipality"),
-            wardNo: formData.get("wardNo"),
-      };
-       const result = await apiClient.post('/auth/signup',formValues)
-       console.log(result)
-       alert("singup successfull")
-    }catch(error){
-      console.log(error)
-      alert("Error occured")
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const formValues = {
+      email: String(formData.get("email") || ""),
+      firstName: String(formData.get("firstName") || ""),
+      lastName: String(formData.get("lastName") || ""),
+      district: String(formData.get("district") || ""),
+      municipality: String(formData.get("municipality") || ""),
+      wardNo: String(formData.get("wardNo") || ""),
+      contactNumber: String(formData.get("contactNumber") || ""),
+      password: formData.get("password")
+    };
+
+    try {
+      const res = await apiClient.post('/api/auth/signup', formValues);
+      if (res.status == 201) {
+        alert("Signup successfull")
+        navigate("/login")
+        return
+      }
+
+      alert("User with this email already exists")
+    } catch (err) {
+      console.error(err);
+      alert("Error occurred");
     }
   }
   return (
@@ -75,7 +88,7 @@ function SignupForm() {
         ></Input>
 
         <Input
-          name="confirmPassword"
+          name="password"
           style={inputStyle}
           placeholder="Enter  password"
         ></Input>
