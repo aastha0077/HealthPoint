@@ -3,10 +3,20 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { apiClient } from "@/apis/apis";
 import { useNavigate } from "react-router";
+import { useAuth } from "@/contexts/AuthProvider";
+import { useEffect } from "react";
 
 function SignupForm() {
 
   const navigate = useNavigate()
+
+  const auth = useAuth()
+
+  useEffect(function () {
+    if (auth?.token) {
+      navigate('/')
+    }
+  })
 
   const inputStyle = {
     width: "375px",
