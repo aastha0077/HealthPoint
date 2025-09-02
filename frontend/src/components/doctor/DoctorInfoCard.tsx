@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 interface Doctor {
   name: string;
   qualifications: string[];
@@ -68,7 +70,7 @@ function DoctorInfoCard(doctor: Doctor) {
         {/* Action Buttons */}
         <div className="flex gap-2">
           <button className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded text-sm font-medium">
-            Book Appointment
+            <Link to={"/book-appointment"} >Book Appointment</Link>
           </button>
           <button className="flex-1 bg-white text-red-600 border border-red-600 hover:bg-red-50 py-2 px-3 rounded text-sm font-medium">
             Call Now

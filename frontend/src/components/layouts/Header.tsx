@@ -1,9 +1,12 @@
+import { useAuth } from "@/contexts/AuthProvider";
 import { Button } from "../ui/button";
-import { Menu, X, User, Calendar, Phone } from "lucide-react";
+import { Menu, X, User, Calendar } from "lucide-react";
 import { useState } from "react";
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const auth = useAuth()
+  const token = auth?.token
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -57,7 +60,7 @@ function Header() {
             </Button>
 
             {/* Auth Buttons */}
-            <div className="flex items-center space-x-2 border-l border-red-300 pl-4">
+            {!token && <div className="flex items-center space-x-2 border-l border-red-300 pl-4">
               <Button
                 variant="ghost"
                 onClick={() => {
@@ -77,6 +80,10 @@ function Header() {
                 Sign Up
               </Button>
             </div>
+            }
+            {
+              token && <div className="ml-10"><Button variant={"default"}>Profile</Button> <Button onClick={() => auth.logout()} variant={"outline"}>Logout</Button></div>
+            }
           </div>
 
           {/* Mobile menu button */}

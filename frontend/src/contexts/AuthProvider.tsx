@@ -7,7 +7,7 @@ interface AuthContextType {
     token: string | null
     handleLogin: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
     handleSignup: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
-
+    logout: () => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -67,12 +67,19 @@ function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
-    return <AuthContext.Provider value={{ token, handleLogin, handleSignup }}>{children}</AuthContext.Provider>
+
+    function logout() {
+        localStorage.removeItem("token")
+        navigate("/login")
+    }
+
+    return <AuthContext.Provider value={{ token, handleLogin, handleSignup, logout }}>{children}</AuthContext.Provider>
 }
 
 
+
 function useAuth() {
-    const context = useContext(AuthContext)
+    const context: AuthContextType | null = useContext(AuthContext)
     return context
 }
 
