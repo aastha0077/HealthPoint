@@ -8,15 +8,17 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 
 export default function Calendar20() {
   const [date, setDate] = React.useState<Date | undefined>(
-    new Date(2025, 5, 12)
+    new Date(Date.now())
   )
   const [selectedTime, setSelectedTime] = React.useState<string | null>("10:00")
-  const timeSlots = Array.from({ length: 37 }, (_, i) => {
-    const totalMinutes = i * 15
-    const hour = Math.floor(totalMinutes / 60) + 9
-    const minute = totalMinutes % 60
-    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
-  })
+  // const timeSlots = Array.from({ length: 37 }, (_, i) => {
+  //   const totalMinutes = i * 15
+  //   const hour = Math.floor(totalMinutes / 60) + 9
+  //   const minute = totalMinutes % 60
+  //   return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
+  // })
+
+  const timeSlots = ["8:00", "10:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
 
   const bookedDates = Array.from(
     { length: 3 },
@@ -67,7 +69,7 @@ export default function Calendar20() {
         <div className="text-sm">
           {date && selectedTime ? (
             <>
-              Your meeting is booked for{" "}
+              Your appointment is booked for{" "}
               <span className="font-medium">
                 {" "}
                 {date?.toLocaleDateString("en-US", {
