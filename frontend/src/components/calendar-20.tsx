@@ -1,6 +1,6 @@
-"use client"
 
 import * as React from "react"
+import { useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -11,6 +11,7 @@ export default function Calendar20() {
     new Date(Date.now())
   )
   const [selectedTime, setSelectedTime] = React.useState<string | null>("10:00")
+
   // const timeSlots = Array.from({ length: 37 }, (_, i) => {
   //   const totalMinutes = i * 15
   //   const hour = Math.floor(totalMinutes / 60) + 9
@@ -18,13 +19,32 @@ export default function Calendar20() {
   //   return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
   // })
 
-  const timeSlots = ["8:00", "10:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+  const timeSlots = ["8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
 
   const bookedDates = Array.from(
     { length: 3 },
     (_, i) => new Date(2025, 5, 17 + i)
   )
 
+  function combineDateTime(date: Date | undefined, time: string | null): Date | null {
+    if (!date || !time) return null
+
+    const [hours, minutes] = time.split(":").map(Number)
+    const combined = new Date(date)
+
+    combined.setHours(hours, minutes, 0, 0) // set h:m:s:ms
+    return combined
+  }
+
+  useEffect(() => {
+    const finalDate = combineDateTime(date, selectedTime)
+    if (finalDate != undefined && finalDate.getTime() < Date.now()) {
+      // alert("Please select valid time")
+    }
+  }, [date, selectedTime])
+
+  console.log(date)
+  console.log(selectedTime)
   return (
     <Card className="gap-0 p-0">
       <CardContent className="relative p-0 md:pr-48">
