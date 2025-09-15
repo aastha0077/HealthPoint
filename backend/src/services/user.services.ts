@@ -132,10 +132,40 @@ async function isValidUser(user: LoginType) {
     }
 
 }
+
+async function getDoctors(pageNumber: number, pageSize: number) {
+    const result = await prisma.doctor.findMany({
+        skip: (pageNumber - 1) * pageSize,
+        take: pageSize,
+        select:{
+            user:true,
+            speciality:true,
+            bio:true,
+            address:true,
+            available:true,
+            department:true,
+            timeSlots:{
+                select:{
+                    Time:{
+                        select:{
+                            time:true
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const doctors = result.map(doc =>
+        ({ ...doc.user, speciality: doc.speciality, bio: doc.bio, address: doc.address, available: doc.available, department: doc.department, timeSlots: doc.timeSlots.map(ts => ts.Time.time) })
+    );
+    return { doctors, totalDoctors: await prisma.doctor.count() };
+}
 const userService = {
     saveUser,
     isValidUser,
-    saveDoctor
+    saveDoctor,
+    getDoctors
 }
 
 export { userService }

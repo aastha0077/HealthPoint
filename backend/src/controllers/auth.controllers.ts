@@ -34,7 +34,6 @@ async function signupController(req: Request, res: Response) {
                 message: result.message
             });
         }
-
         res.status(409).json({
             message: result.message
         })

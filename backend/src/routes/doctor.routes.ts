@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { createDoctorController } from "../controllers/doctor.controllers";
+import { createDoctorController, getDoctorsController } from "../controllers/doctor.controllers";
 const doctorRoutes = Router();
 
 doctorRoutes.post('/', createDoctorController);
+
+doctorRoutes.get('/:pageNumber/:pageSize', getDoctorsController);
 
 export { doctorRoutes }

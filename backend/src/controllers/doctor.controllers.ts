@@ -15,4 +15,18 @@ async function createDoctorController(req: Request, res: Response) {
     }
 
 }
-export { createDoctorController } 
+
+
+async function getDoctorsController(req: Request, res: Response) {
+    try {
+        const { pageNumber, pageSize } = req.params;
+        const doctors = await userService.getDoctors(parseInt(pageNumber), parseInt(pageSize));
+        res.send(doctors);
+    }
+    catch (error) {
+        console.log(error)
+        res.status(400).json({ message: "Internal error occured" })
+    }
+}
+
+export { createDoctorController, getDoctorsController } 

@@ -28,11 +28,11 @@ app.get('/api/protected', verifyUser)
 
 app.use('/api/auth', authRouter)
 
-app.use('/api/appointment', appointmentRoutes)
+app.use('/api/appointments', appointmentRoutes)
 
-app.use('/api/doctor', doctorRoutes)
+app.use('/api/doctors', doctorRoutes)
 
-app.use('/api/department', departmentRoutes)
+app.use('/api/departments', departmentRoutes)
 
 app.listen(8000, function () {
     console.log("Listening on port 8000;")
