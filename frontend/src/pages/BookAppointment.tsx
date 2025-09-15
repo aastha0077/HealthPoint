@@ -1,6 +1,5 @@
 import Calendar20 from "@/components/calendar-20";
 
-// Calendar20 component (simulated since we don't have the actual shadcn component)
 
 // Types
 interface Doctor {
@@ -9,7 +8,7 @@ interface Doctor {
   experience: string;
   qualification: string;
   image: string;
-  specialties: string[];
+  speciality: string;
 }
 
 interface DoctorInfoProps {
@@ -39,15 +38,10 @@ function DoctorInfo({ doctor }: DoctorInfoProps) {
           <p className="text-gray-600 mt-1">{doctor.age} Years Old</p>
           <p className="text-gray-600">{doctor.experience} of experience</p>
           <p className="text-gray-600">{doctor.qualification}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {doctor.specialties.map((specialty: string, index: number) => (
-              <span
-                key={index}
-                className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full"
-              >
-                {specialty}
-              </span>
-            ))}
+          <div className="mt-4">
+            <span className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">
+              {doctor.speciality}
+            </span>
           </div>
         </div>
       </div>
@@ -114,12 +108,7 @@ function BookAppointment() {
     qualification: "MD in Cardiology, Cardiovascular Surgeon",
     image:
       "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face",
-    specialties: [
-      "Cardiology",
-      "Cardiovascular Surgery",
-      "Aortic Surgery",
-      "Minimally Invasive Surgery",
-    ],
+    speciality: "Cardiology",
   };
 
   const education = [
