@@ -1,15 +1,11 @@
-
 import {
   Heart,
   Stethoscope,
   Activity,
-  Brain,
-  Baby,
   Users,
   Clock,
   Shield,
   Award,
-  Phone,
   Calendar,
   ChevronRight,
   CheckCircle,
@@ -19,9 +15,8 @@ import {
   Zap,
   Target,
   TrendingUp,
-  UserCheck,
   FileText,
-  MessageCircle
+  MessageCircle,
 } from "lucide-react";
 
 const HealthPackage = () => {
@@ -42,14 +37,14 @@ const HealthPackage = () => {
         "Blood Pressure Check",
         "BMI Assessment",
         "General Physical Examination",
-        "Doctor Consultation"
+        "Doctor Consultation",
       ],
       benefits: [
         "Early disease detection",
         "Baseline health metrics",
-        "Preventive care guidance"
+        "Preventive care guidance",
       ],
-      savings: "Save $100"
+      savings: "Save $100",
     },
     {
       id: 2,
@@ -70,15 +65,15 @@ const HealthPackage = () => {
         "ECG",
         "Chest X-Ray",
         "Ultrasound Abdomen",
-        "Specialist Consultation"
+        "Specialist Consultation",
       ],
       benefits: [
         "Comprehensive health overview",
         "Multiple organ assessment",
         "Detailed health report",
-        "Personalized health plan"
+        "Personalized health plan",
       ],
-      savings: "Save $200"
+      savings: "Save $200",
     },
     {
       id: 3,
@@ -89,7 +84,8 @@ const HealthPackage = () => {
       icon: Crown,
       color: "red",
       popular: false,
-      description: "Premium health package with advanced imaging and specialized tests",
+      description:
+        "Premium health package with advanced imaging and specialized tests",
       includes: [
         "All Comprehensive Package tests",
         "CT Scan (Chest/Abdomen)",
@@ -100,16 +96,16 @@ const HealthPackage = () => {
         "Eye Examination",
         "Dental Checkup",
         "Nutritionist Consultation",
-        "Cardiologist Consultation"
+        "Cardiologist Consultation",
       ],
       benefits: [
         "Executive-level healthcare",
         "Advanced disease screening",
         "Multiple specialist consultations",
         "Priority scheduling",
-        "Detailed wellness report"
+        "Detailed wellness report",
       ],
-      savings: "Save $400"
+      savings: "Save $400",
     },
     {
       id: 4,
@@ -120,7 +116,8 @@ const HealthPackage = () => {
       icon: Users,
       color: "red",
       popular: false,
-      description: "Specialized health screening designed for women's unique health needs",
+      description:
+        "Specialized health screening designed for women's unique health needs",
       includes: [
         "Complete Blood Count",
         "Thyroid Function Test",
@@ -129,15 +126,15 @@ const HealthPackage = () => {
         "Pelvic Ultrasound",
         "Bone Density Test",
         "Iron Studies",
-        "Gynecologist Consultation"
+        "Gynecologist Consultation",
       ],
       benefits: [
         "Women-specific health screening",
         "Reproductive health assessment",
         "Breast and cervical cancer screening",
-        "Hormonal health evaluation"
+        "Hormonal health evaluation",
       ],
-      savings: "Save $150"
+      savings: "Save $150",
     },
     {
       id: 5,
@@ -148,7 +145,8 @@ const HealthPackage = () => {
       icon: Heart,
       color: "red",
       popular: false,
-      description: "Comprehensive health package tailored for seniors (60+ years)",
+      description:
+        "Comprehensive health package tailored for seniors (60+ years)",
       includes: [
         "Complete Blood Count",
         "Diabetes Screening",
@@ -158,15 +156,15 @@ const HealthPackage = () => {
         "Chest X-Ray",
         "Eye Examination",
         "Bone Density Test",
-        "Geriatrician Consultation"
+        "Geriatrician Consultation",
       ],
       benefits: [
         "Age-appropriate health screening",
         "Chronic disease monitoring",
         "Mobility and cognitive assessment",
-        "Senior-friendly care"
+        "Senior-friendly care",
       ],
-      savings: "Save $150"
+      savings: "Save $150",
     },
     {
       id: 6,
@@ -177,7 +175,8 @@ const HealthPackage = () => {
       icon: Activity,
       color: "red",
       popular: false,
-      description: "Specialized package focusing on heart health and cardiovascular wellness",
+      description:
+        "Specialized package focusing on heart health and cardiovascular wellness",
       includes: [
         "Lipid Profile",
         "Blood Sugar Tests",
@@ -186,16 +185,16 @@ const HealthPackage = () => {
         "Stress Test",
         "Chest X-Ray",
         "Blood Pressure Monitoring",
-        "Cardiologist Consultation"
+        "Cardiologist Consultation",
       ],
       benefits: [
         "Comprehensive heart assessment",
         "Cardiovascular risk evaluation",
         "Early detection of heart disease",
-        "Personalized cardiac care plan"
+        "Personalized cardiac care plan",
       ],
-      savings: "Save $200"
-    }
+      savings: "Save $200",
+    },
   ];
 
   const features = [
@@ -203,32 +202,32 @@ const HealthPackage = () => {
       icon: Award,
       title: "Expert Medical Team",
       description: "Experienced doctors and specialists",
-      color: "red"
+      color: "red",
     },
     {
       icon: Zap,
       title: "Advanced Technology",
       description: "State-of-the-art diagnostic equipment",
-      color: "red"
+      color: "red",
     },
     {
       icon: FileText,
       title: "Detailed Reports",
       description: "Comprehensive health analysis",
-      color: "red"
+      color: "red",
     },
     {
       icon: Clock,
       title: "Quick Results",
       description: "Fast turnaround time",
-      color: "red"
-    }
+      color: "red",
+    },
   ];
 
   const stats = [
     { number: "500+", label: "Packages Completed", icon: TrendingUp },
     { number: "98%", label: "Customer Satisfaction", icon: Star },
-    { number: "24/7", label: "Support Available", icon: Shield }
+    { number: "24/7", label: "Support Available", icon: Shield },
   ];
 
   const testimonials = [
@@ -236,20 +235,20 @@ const HealthPackage = () => {
       name: "Sarah Johnson",
       package: "Comprehensive Health Package",
       rating: 5,
-      text: "Excellent service! The comprehensive package gave me complete peace of mind about my health."
+      text: "Excellent service! The comprehensive package gave me complete peace of mind about my health.",
     },
     {
       name: "Michael Chen",
       package: "Executive Health Package",
       rating: 5,
-      text: "Worth every penny. The executive package was thorough and the staff was incredibly professional."
+      text: "Worth every penny. The executive package was thorough and the staff was incredibly professional.",
     },
     {
       name: "Emily Davis",
       package: "Women's Health Package",
       rating: 5,
-      text: "Perfect for women's health needs. The gynecologist consultation was very helpful and reassuring."
-    }
+      text: "Perfect for women's health needs. The gynecologist consultation was very helpful and reassuring.",
+    },
   ];
 
   return (
@@ -264,8 +263,9 @@ const HealthPackage = () => {
               <span className="text-red-600">Packages</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-              Comprehensive health checkup packages designed to meet your specific needs.
-              Choose from our range of preventive healthcare solutions.
+              Comprehensive health checkup packages designed to meet your
+              specific needs. Choose from our range of preventive healthcare
+              solutions.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 font-medium flex items-center justify-center">
@@ -289,17 +289,25 @@ const HealthPackage = () => {
               Why Choose Our Health Packages?
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              We provide comprehensive health solutions with the latest technology and expert care
+              We provide comprehensive health solutions with the latest
+              technology and expert care
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="text-center p-6 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                <div className={`w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4`}>
+              <div
+                key={index}
+                className="text-center p-6 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+              >
+                <div
+                  className={`w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4`}
+                >
                   <feature.icon className={`w-8 h-8 text-red-600`} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-gray-900">{feature.title}</h3>
+                <h3 className="text-lg font-semibold mb-2 text-gray-900">
+                  {feature.title}
+                </h3>
                 <p className="text-gray-600 text-sm">{feature.description}</p>
               </div>
             ))}
@@ -323,8 +331,11 @@ const HealthPackage = () => {
             {packages.map((pkg) => (
               <div
                 key={pkg.id}
-                className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative ${pkg.popular ? 'ring-2 ring-red-500 scale-105' : 'hover:-translate-y-1'
-                  }`}
+                className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative ${
+                  pkg.popular
+                    ? "ring-2 ring-red-500 scale-105"
+                    : "hover:-translate-y-1"
+                }`}
               >
                 {pkg.popular && (
                   <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center">
@@ -335,7 +346,9 @@ const HealthPackage = () => {
 
                 <div className="p-8">
                   <div className="text-center mb-6">
-                    <div className={`w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4`}>
+                    <div
+                      className={`w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4`}
+                    >
                       <pkg.icon className={`w-10 h-10 text-red-600`} />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">
@@ -345,10 +358,16 @@ const HealthPackage = () => {
                       {pkg.description}
                     </p>
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className="text-3xl font-bold text-red-600">{pkg.price}</span>
-                      <span className="text-lg text-gray-400 line-through">{pkg.originalPrice}</span>
+                      <span className="text-3xl font-bold text-red-600">
+                        {pkg.price}
+                      </span>
+                      <span className="text-lg text-gray-400 line-through">
+                        {pkg.originalPrice}
+                      </span>
                     </div>
-                    <div className={`inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold mb-2`}>
+                    <div
+                      className={`inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold mb-2`}
+                    >
                       {pkg.savings}
                     </div>
                     <p className="text-sm text-gray-500 flex items-center justify-center">
@@ -387,7 +406,9 @@ const HealthPackage = () => {
                     </ul>
                   </div>
 
-                  <button className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center bg-red-600 hover:bg-red-700 text-white`}>
+                  <button
+                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center bg-red-600 hover:bg-red-700 text-white`}
+                  >
                     Book Package
                     <ChevronRight className="w-4 h-4 ml-2" />
                   </button>
@@ -405,7 +426,9 @@ const HealthPackage = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               What Our Patients Say
             </h2>
-            <p className="text-gray-600">Real experiences from our health package customers</p>
+            <p className="text-gray-600">
+              Real experiences from our health package customers
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -435,7 +458,8 @@ const HealthPackage = () => {
               Ready to Prioritize Your Health?
             </h2>
             <p className="text-xl mb-8 opacity-90">
-              Book your health package today and take the first step towards a healthier tomorrow.
+              Book your health package today and take the first step towards a
+              healthier tomorrow.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <button className="bg-white text-red-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center">

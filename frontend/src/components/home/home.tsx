@@ -11,9 +11,6 @@ import {
   Pill,
   Activity,
   Camera,
-  MapPin,
-  Phone,
-  Mail,
 } from "lucide-react";
 
 // Hero Section Component
@@ -340,61 +337,6 @@ function TestimonialsSection() {
         </div>
       </div>
     </section>
-  );
-}
-
-// Footer Component
-function Footer() {
-  return (
-    <footer className="bg-red-600 text-white py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2">
-            With PLU, You're Never Alone on the Journey to Recovery
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h3 className="font-semibold mb-4">For Patients</h3>
-            <ul className="space-y-2 text-sm">
-              <li>Find a Doctor</li>
-              <li>Medical Services</li>
-              <li>Patient Portal</li>
-              <li>Health Resources</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              <li>About Us</li>
-              <li>Careers</li>
-              <li>News & Events</li>
-              <li>Contact Us</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-4">Contact Us</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center">
-                <Phone className="w-4 h-4 mr-2" />
-                <span>Emergency: 24/7</span>
-              </div>
-              <div className="flex items-center">
-                <MapPin className="w-4 h-4 mr-2" />
-                <span>Kathmandu, Nepal</span>
-              </div>
-              <div className="flex items-center">
-                <Mail className="w-4 h-4 mr-2" />
-                <span>info@pluhospital.com</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-red-500 mt-8 pt-8 text-center text-sm">
-          <p>&copy; 2024 PLU Hospital. All rights reserved.</p>
-        </div>
-      </div>
-    </footer>
   );
 }
 
