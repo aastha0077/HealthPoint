@@ -1,6 +1,5 @@
 import Calendar20 from "@/components/calendar-20";
 
-
 // Types
 interface Doctor {
   name: string;
@@ -85,22 +84,93 @@ function Education({ education }: EducationProps) {
 function Publications({ publications }: PublicationsProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
-        Research and Publications
-      </h2>
-      <ol className="space-y-3 list-decimal list-inside">
+      <div className="flex items-center mb-6">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-2 rounded-lg mr-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800">
+          Research & Publications
+        </h2>
+      </div>
+      
+      <div className="space-y-4">
         {publications.map((pub: string, index: number) => (
-          <li key={index} className="text-gray-700 pl-2">
-            {pub}
-          </li>
+          <div key={index} className="group hover:bg-gray-50 p-4 rounded-lg transition-colors duration-200 border border-gray-100 hover:border-blue-200">
+            <div className="flex items-start">
+              <div className="flex-shrink-0 mr-4">
+                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm group-hover:bg-blue-200 transition-colors">
+                  {index + 1}
+                </div>
+              </div>
+              <div className="flex-1">
+                <p className="text-gray-700 leading-relaxed text-sm group-hover:text-gray-900 transition-colors">
+                  {pub}
+                </p>
+                <div className="flex items-center mt-2 text-xs text-gray-500">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Published Research
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
-      </ol>
+      </div>
+      
+      <div className="mt-6 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between text-sm text-gray-600">
+          <span className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-1 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {publications.length} Publications
+          </span>
+          <span className="text-blue-600 font-medium">Peer Reviewed</span>
+        </div>
+      </div>
     </div>
   );
 }
 
 // Main Component
 function BookAppointment() {
+
   const doctor = {
     name: "Dr. Bijoy G Rajbanshi",
     age: 42,
@@ -128,10 +198,10 @@ function BookAppointment() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+      <div className="mx-auto px-2 max-w-none">
+        <div className="grid grid-cols-1 xl:grid-cols-7 gap-6 max-w-8xl mx-auto">
           {/* Left Column - Doctor Info and Details */}
-          <div className="xl:col-span-2 space-y-6">
+          <div className="xl:col-span-4 space-y-6">
             <DoctorInfo doctor={doctor} />
 
             <div className="bg-white rounded-lg shadow-md p-6">

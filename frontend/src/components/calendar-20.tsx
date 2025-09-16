@@ -5,28 +5,36 @@ import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { useToast } from "@/components/ui/toast-provider"
 
 export default function Calendar20() {
-  const [date, setDate] = React.useState<Date | undefined>(
-    new Date(Date.now())
-  )
-  const [selectedTime, setSelectedTime] = React.useState<string | null>("10:00")
-
-  // const timeSlots = Array.from({ length: 37 }, (_, i) => {
-  //   const totalMinutes = i * 15
-  //   const hour = Math.floor(totalMinutes / 60) + 9
-  //   const minute = totalMinutes % 60
-  //   return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`
-  // })
+  const [date, setDate] = React.useState<Date | undefined>()
+  const [selectedTime, setSelectedTime] = React.useState<string | null | undefined>()
+  const [lastErrorTime, setLastErrorTime] = React.useState<number>(0)
+  const { showToast } = useToast()
 
   const timeSlots = ["8:00", "9:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+
+  // Calculate date range: today to 15 days from now
+  const today = new Date()
+  const maxDate = new Date()
+  maxDate.setDate(today.getDate() + 15)
 
   const bookedDates = Array.from(
     { length: 3 },
     (_, i) => new Date(2025, 5, 17 + i)
   )
 
-  function combineDateTime(date: Date | undefined, time: string | null): Date | null {
+  // Function to disable dates outside the 15-day range
+  const isDateDisabled = (date: Date) => {
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const maxDateOnly = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate())
+    
+    return dateOnly < todayOnly || dateOnly > maxDateOnly
+  }
+
+  function combineDateTime(date: Date | undefined, time: string | null | undefined): Date | null {
     if (!date || !time) return null
 
     const [hours, minutes] = time.split(":").map(Number)
@@ -38,13 +46,28 @@ export default function Calendar20() {
 
   useEffect(() => {
     const finalDate = combineDateTime(date, selectedTime)
-    if (finalDate != undefined && finalDate.getTime() < Date.now()) {
-      // alert("Please select valid time")
-    }
-  }, [date, selectedTime])
+    console.log('date:',date?.getMonth())
+    console.log('selectedTime:',selectedTime)
+    console.log('finalDate:',finalDate?.getMonth())
 
-  console.log(date)
-  console.log(selectedTime)
+    // Only validate if we have a valid combined date
+    if (finalDate) {
+      // Check if the selected date/time is in the past
+      if (finalDate.getTime() < Date.now()) {
+        // Prevent spam by only showing error once every 3 seconds
+        const now = Date.now()
+        if (now - lastErrorTime > 3000) {
+          showToast({
+            message: "Please select a valid future date and time",
+            variant: "error",
+            duration: 4000
+          })
+          setLastErrorTime(now)
+        }
+      }
+    }
+  }, [date, selectedTime, showToast, lastErrorTime])
+
   return (
     <Card className="gap-0 p-0">
       <CardContent className="relative p-0 md:pr-48">
@@ -53,8 +76,12 @@ export default function Calendar20() {
             mode="single"
             selected={date}
             onSelect={setDate}
-            defaultMonth={date}
-            disabled={bookedDates}
+            defaultMonth={date || new Date()}
+            disabled={(date) => isDateDisabled(date) || bookedDates.some(bookedDate => 
+              date.getDate() === bookedDate.getDate() && 
+              date.getMonth() === bookedDate.getMonth() && 
+              date.getFullYear() === bookedDate.getFullYear()
+            )}
             showOutsideDays={false}
             modifiers={{
               booked: bookedDates,
@@ -104,13 +131,6 @@ export default function Calendar20() {
             <>Select a date and time for your meeting.</>
           )}
         </div>
-        <Button
-          disabled={!date || !selectedTime}
-          className="w-full md:ml-auto md:w-auto"
-          variant="outline"
-        >
-          Continue
-        </Button>
       </CardFooter>
     </Card>
   )
