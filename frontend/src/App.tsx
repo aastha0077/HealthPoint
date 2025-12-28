@@ -12,16 +12,18 @@ import { OurServices } from "./pages/OurServices";
 import { LabReport } from "./pages/LabReport";
 import { HealthPackage } from "./pages/HealthPackage";
 import { ToastProvider } from "./components/ui/toast-provider";
+import UserLayout from "./layouts/UserLayout";
 
 function App() {
   return (
     <ToastProvider>
       <Header />
       <Routes>
+        <Route path="/" element={<UserLayout />} />
         <Route path="/login" element={<LoginForm />} />
-        <Route path="/" element={<Home></Home>} />
+        <Route index element={<Home></Home>} />
         <Route path="/appointment" element={<DoctorList />} />
-        <Route path="contact" element={<ContactPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/book-appointment" element={<BookAppointment />} />
         <Route path="/services" element={<OurServices />} />

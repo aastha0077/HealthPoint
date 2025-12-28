@@ -5,8 +5,10 @@ import { useState } from "react";
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const auth = useAuth()
-  const token = auth?.token
+  const auth = useAuth();
+  const token = auth?.token;
+  const isAuthenticated = auth?.isAuthenticated
+
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -28,13 +30,13 @@ function Header() {
           <div className="flex-shrink-0">
             <a href="/" className="flex items-center">
               <div className="text-2xl font-bold text-red-600 hover:text-red-700 transition-colors">
-                PLU
+                Health Point
               </div>
             </a>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-6">
             {navigationItems.map((item) => (
               <a
                 key={item.href}
@@ -60,30 +62,36 @@ function Header() {
             </Button>
 
             {/* Auth Buttons */}
-            {!token && <div className="flex items-center space-x-2 border-l border-red-300 pl-4">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  window.location.href = "/login";
-                }}
-                className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium"
-              >
-                <User className="w-4 h-4 mr-1" />
-                Login
-              </Button>
-              <Button
-                onClick={() => {
-                  window.location.href = "/signup";
-                }}
-                className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 text-sm font-medium rounded-md"
-              >
-                Sign Up
-              </Button>
-            </div>
-            }
-            {
-              token && <div className="ml-10"><Button variant={"default"}>Profile</Button> <Button onClick={() => auth.logout()} variant={"outline"}>Logout</Button></div>
-            }
+            {!isAuthenticated && (
+              <div className="flex items-center space-x-2 border-l border-red-300 pl-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    window.location.href = "/login";
+                  }}
+                  className="text-gray-700 hover:text-red-600 px-3 py-2 text-sm font-medium"
+                >
+                  <User className="w-4 h-4 mr-1" />
+                  Login
+                </Button>
+                <Button
+                  onClick={() => {
+                    window.location.href = "/signup";
+                  }}
+                  className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 text-sm font-medium rounded-md"
+                >
+                  Sign Up
+                </Button>
+              </div>
+            )}
+            {isAuthenticated && (
+              <div className="ml-10">
+                <Button variant={"default"}>Profile</Button>{" "}
+                <Button onClick={() => auth.logout()} variant={"outline"}>
+                  Logout
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}

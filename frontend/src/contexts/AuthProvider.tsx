@@ -1,89 +1,102 @@
 import { apiClient } from "@/apis/apis";
-import { createContext, useContext, type ReactNode } from "react";
+import type { SignupType } from "@/types/user";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 
-
 interface AuthContextType {
-    token: string | null
-    handleLogin: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
-    handleSignup: (event: React.FormEvent<HTMLFormElement>) => Promise<void>
-    logout: () => void
+  token: string | null;
+  handleLogin: (email: string, password: string) => Promise<LoginResponse>;
+  handleSignup: (user: SignupType) => Promise<SignupResponse>;
+  logout: () => void;
+  isAuthenticated: boolean;
+  loading: boolean;
 }
+
+interface ApiResponse {
+  status?: number;
+  message: string;
+}
+
+type LoginResponse = ApiResponse;
+type SignupResponse = ApiResponse;
+
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-
 function AuthProvider({ children }: { children: ReactNode }) {
-    const token = localStorage.getItem("token")
-    const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  const token = localStorage.getItem("token");
+  const [loading, setIsLoading] = useState<boolean>(true)
 
-    async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        const formData = new FormData(event.currentTarget)
-        const email = formData.get("email")
-        const password = formData.get("password")
-        const response = await apiClient.post('/api/auth/login', { email, password },
-            {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }
-        )
-
-        alert(response.data.message)
-        if (response.data.token) {
-            localStorage.setItem("token", response.data.token)
-            navigate("/")
-
-        }
+  useState(() => {
+    if (token) {
+      setIsAuthenticated(true)
+      setIsLoading(false)
     }
-    async function handleSignup(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
+  })
 
-        const formData = new FormData(event.currentTarget);
-        const formValues = {
-            email: String(formData.get("email") || ""),
-            firstName: String(formData.get("firstName") || ""),
-            lastName: String(formData.get("lastName") || ""),
-            district: String(formData.get("district") || ""),
-            municipality: String(formData.get("municipality") || ""),
-            wardNo: String(formData.get("wardNo") || ""),
-            contactNumber: String(formData.get("contactNumber") || ""),
-            password: formData.get("password")
-        };
+  async function handleLogin(email: string, password: string): Promise<LoginResponse> {
+    let response;
 
-        try {
-            const res = await apiClient.post('/api/auth/signup', formValues);
-            if (res.status == 201) {
-                alert("Signup successfull")
-                navigate("/login")
-                return
-            }
 
-            alert("User with this email already exists")
-        } catch (err) {
-            console.error(err);
-            alert("Error occurred");
-        }
+    response = await apiClient.post(
+      "/api/auth/login",
+      { email, password },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("response:", response)
+    setIsAuthenticated(true)
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
+      setIsAuthenticated(true)
+    }
+    return {
+      status: response.status,
+      message: response.data.message
     }
 
-
-    function logout() {
-        localStorage.removeItem("token")
-        navigate("/login")
+  }
+  async function handleSignup(
+    user: SignupType
+  ): Promise<SignupResponse> {
+    const formValues = {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      district: user.district,
+      municipality: user.municipality,
+      wardNo: user.wardNo,
+      contactNumber: user.contactNumber,
+      password: user.password,
+    };
+    const res = await apiClient.post("/api/auth/signup", formValues);
+    return {
+      status: res.status,
+      message: res.data.message
     }
 
-    return <AuthContext.Provider value={{ token, handleLogin, handleSignup, logout }}>{children}</AuthContext.Provider>
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    setIsAuthenticated(true)
+    navigate("/login");
+  }
+
+  return (
+    <AuthContext.Provider value={{ token, handleLogin, handleSignup, logout, isAuthenticated, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
-
-
-
 function useAuth() {
-    const context: AuthContextType | null = useContext(AuthContext)
-    return context
+  const context: AuthContextType | null = useContext(AuthContext);
+  return context;
 }
 
-
-export { useAuth, AuthProvider }
-
-
+export { useAuth, AuthProvider };

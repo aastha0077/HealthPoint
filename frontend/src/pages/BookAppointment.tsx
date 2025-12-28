@@ -105,10 +105,13 @@ function Publications({ publications }: PublicationsProps) {
           Research & Publications
         </h2>
       </div>
-      
+
       <div className="space-y-4">
         {publications.map((pub: string, index: number) => (
-          <div key={index} className="group hover:bg-gray-50 p-4 rounded-lg transition-colors duration-200 border border-gray-100 hover:border-blue-200">
+          <div
+            key={index}
+            className="group hover:bg-gray-50 p-4 rounded-lg transition-colors duration-200 border border-gray-100 hover:border-blue-200"
+          >
             <div className="flex items-start">
               <div className="flex-shrink-0 mr-4">
                 <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm group-hover:bg-blue-200 transition-colors">
@@ -141,7 +144,7 @@ function Publications({ publications }: PublicationsProps) {
           </div>
         ))}
       </div>
-      
+
       <div className="mt-6 pt-4 border-t border-gray-200">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <span className="flex items-center">
@@ -170,7 +173,6 @@ function Publications({ publications }: PublicationsProps) {
 
 // Main Component
 function BookAppointment() {
-
   const doctor = {
     name: "Dr. Bijoy G Rajbanshi",
     age: 42,

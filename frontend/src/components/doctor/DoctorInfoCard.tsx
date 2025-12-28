@@ -1,4 +1,6 @@
+import { useAuth } from "@/contexts/AuthProvider";
 import { Link } from "react-router";
+import { useToast } from "../ui/toast-provider";
 
 // Define the Doctor interface
 interface Doctor {
@@ -28,6 +30,9 @@ interface DoctorInfoCardProps {
 
 function DoctorInfoCard({ doctor }: DoctorInfoCardProps) {
   const doctorImageUrl = `https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=300&fit=crop&crop=face`;
+  const auth = useAuth();
+  const isAuthenticated = auth?.isAuthenticated
+  const toast = useToast();
 
   return (
     <div className="group bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200">
@@ -45,9 +50,8 @@ function DoctorInfoCard({ doctor }: DoctorInfoCardProps) {
           />
           <div className="absolute -top-1 -right-1">
             <span
-              className={`${
-                doctor.available ? "bg-emerald-500" : "bg-red-500"
-              } text-white px-2 py-0.5 rounded-full text-xs font-semibold`}
+              className={`${doctor.available ? "bg-emerald-500" : "bg-red-500"
+                } text-white px-2 py-0.5 rounded-full text-xs font-semibold`}
             >
               {doctor.available ? "✓" : "✗"}
             </span>
@@ -140,8 +144,12 @@ function DoctorInfoCard({ doctor }: DoctorInfoCardProps) {
       {/* Action Buttons - Compact */}
       <div className="px-4 pb-4">
         <div className="flex gap-2">
-          <Link to="/book-appointment" className="flex-1">
-            <button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md shadow-red-600/20 hover:shadow-lg hover:shadow-red-600/25">
+          <Link to={isAuthenticated ? "/book-appointment" : "/login"} className="flex-1">
+            <button onClick={() => {
+              if (!isAuthenticated) {
+                toast.showToast({ "message": "Please login to book appointment", variant: "error" })
+              }
+            }} className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md shadow-red-600/20 hover:shadow-lg hover:shadow-red-600/25">
               Book Appointment
             </button>
           </Link>
