@@ -1,0 +1,265 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id               Int            @id @default(autoincrement())
+    email            String         @unique
+    role             String
+    password         String
+    firstName        String
+    lastName         String
+    createdAt        DateTime       @default(now())
+    refreshToken     String?        @db.Text
+    profilePicture   String?
+    Doctor           Doctor?
+    patients         Patient[]
+    sentMessages     ChatMessage[]  @relation("SentMessages")
+    receivedMessages ChatMessage[]  @relation("ReceivedMessages")
+    reviews          Review[]
+    favorites        Favorite[]
+    notifications    Notification[]
+}
+
+model Patient {
+    id           Int           @id @default(autoincrement())
+    firstName    String
+    lastName     String
+    district     String
+    municipality String
+    wardNo       Int
+    gender       String        @default("Male")
+    Appointment  Appointment[]
+    user         User?         @relation(fields: [userId], references: [id])
+    userId       Int?
+    reviews      Review[]
+}
+
+model Appointment {
+    id                Int               @id @default(autoincrement())
+    appointmentNumber String            @unique
+    dateTime          DateTime
+    patient           Patient           @relation(fields: [patientId], references: [id])
+    patientId         Int
+    doctor            Doctor            @relation(fields: [doctorId], references: [id])
+    doctorId          Int
+    status            AppointmentStatus @default(PENDING)
+    department        Department?       @relation(fields: [departmentId], references: [id])
+    departmentId      Int?
+    cancelledAt       DateTime?
+    missedAt          DateTime?
+    reminderSent      Boolean           @default(false)
+    review            Review?
+    payment           Payment?
+    refundRequest     RefundRequest?
+    symptoms          String?           @db.Text
+    diagnosis         String?           @db.Text
+    treatment         String?           @db.Text
+    additionalNotes   String?           @db.Text
+    documents         Document[]
+    chatMessages      ChatMessage[]
+    startedAt         DateTime?
+    completedAt       DateTime?
+    arrivedAt         DateTime?
+    consultationDuration Int?
+    audioRecordingUrl    String?
+}
+
+model Payment {
+    id            Int           @id @default(autoincrement())
+    amount        Float         @default(0.0)
+    method        String
+    status        PaymentStatus @default(PENDING)
+    transactionId String?       @unique
+    refundId      String?
+    createdAt     DateTime      @default(now())
+    appointment   Appointment   @relation(fields: [appointmentId], references: [id])
+    appointmentId Int           @unique
+}
+
+enum AppointmentStatus {
+    PENDING
+    BOOKED
+    WAITING
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+    NO_SHOW
+    MISSED
+}
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    REFUNDED
+    REFUND_REQUESTED
+    FAILED
+}
+
+model RefundRequest {
+    id                Int           @id @default(autoincrement())
+    appointment       Appointment   @relation(fields: [appointmentId], references: [id])
+    appointmentId     Int           @unique
+    reason            String        @db.Text
+    bankName          String?
+    accountNumber     String?
+    accountHolderName String?
+    qrCodeUrl         String?
+    status            String        @default("PENDING") // PENDING, PROCESSING, COMPLETED, REJECTED
+    proofUrl          String?
+    adminNotes        String?       @db.Text
+    createdAt         DateTime      @default(now())
+    updatedAt         DateTime      @updatedAt
+}
+
+model Doctor {
+    id             Int                  @id @default(autoincrement())
+    user           User                 @relation(fields: [userId], references: [id])
+    userId         Int                  @unique
+    speciality     String
+    available      Boolean              @default(true)
+    departmentId   Int
+    bio            String
+    qualifications String?
+    department     Department           @relation(fields: [departmentId], references: [id])
+    Appointments   Appointment[]
+    timeSlots      Timeslots[]
+    reviews        Review[]
+    favorites      Favorite[]
+    availabilities DoctorAvailability[]
+    unavailableDates DoctorUnavailableDate[]
+    organs         Organ[]              @relation("DoctorOrgans")
+    symptoms       Symptom[]            @relation("DoctorSymptoms")
+}
+
+model Department {
+    id          Int           @id @default(autoincrement())
+    name        String        @unique
+    description String
+    doctors     Doctor[]
+    appointments Appointment[]
+}
+
+model Timeslots {
+    id       Int    @id @default(autoincrement())
+    doctor   Doctor @relation(fields: [doctorId], references: [id])
+    doctorId Int
+    Time     Time   @relation(fields: [timeId], references: [id])
+    timeId   Int
+}
+
+model Time {
+    id        Int         @id @default(autoincrement())
+    time      String      @unique
+    timeSlots Timeslots[]
+}
+
+model ChatMessage {
+    id            Int          @id @default(autoincrement())
+    sender        User         @relation("SentMessages", fields: [senderId], references: [id])
+    senderId      Int
+    receiver      User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+    receiverId    Int
+    content       String
+    fileUrl       String?
+    fileType      String?
+    isRead        Boolean      @default(false)
+    isEdited      Boolean      @default(false)
+    createdAt     DateTime     @default(now())
+    appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+    appointmentId Int?
+}
+
+model Review {
+    id            Int          @id @default(autoincrement())
+    rating        Int
+    comment       String?
+    createdAt     DateTime     @default(now())
+    patient       Patient?     @relation(fields: [patientId], references: [id])
+    patientId     Int?
+    doctor        Doctor       @relation(fields: [doctorId], references: [id])
+    doctorId      Int
+    appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+    appointmentId Int?         @unique
+    user          User         @relation(fields: [userId], references: [id])
+    userId        Int
+}
+
+model Favorite {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int
+    doctor    Doctor   @relation(fields: [doctorId], references: [id])
+    doctorId  Int
+
+    @@unique([userId, doctorId])
+}
+
+model Notification {
+    id        Int      @id @default(autoincrement())
+    message   String
+    type      String   @default("INFO")
+    isRead    Boolean  @default(false)
+    createdAt DateTime @default(now())
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int
+    appointmentId Int?
+}
+
+model DoctorAvailability {
+    id        Int    @id @default(autoincrement())
+    dayOfWeek Int // 0 (Sun) - 6 (Sat)
+    startTime String // e.g., "09:00"
+    endTime   String // e.g., "17:00"
+    doctor    Doctor @relation(fields: [doctorId], references: [id])
+    doctorId  Int
+}
+
+model DoctorUnavailableDate {
+    id        Int      @id @default(autoincrement())
+    date      DateTime
+    reason    String?  @default("Unavailable")
+    createdAt DateTime @default(now())
+    doctor    Doctor   @relation(fields: [doctorId], references: [id])
+    doctorId  Int
+
+    @@unique([doctorId, date])
+}
+
+model Document {
+    id            Int          @id @default(autoincrement())
+    fileName      String
+    fileUrl       String
+    fileType      String
+    uploadedAt    DateTime     @default(now())
+    appointment   Appointment  @relation(fields: [appointmentId], references: [id])
+    appointmentId Int
+}
+
+model BodyRegion {
+    id     Int     @id @default(autoincrement())
+    name   String  @unique
+    organs Organ[]
+}
+
+model Organ {
+    id       Int        @id @default(autoincrement())
+    name     String     @unique
+    region   BodyRegion @relation(fields: [regionId], references: [id])
+    regionId Int
+    symptoms Symptom[]  @relation("OrganSymptoms")
+    doctors  Doctor[]   @relation("DoctorOrgans")
+}
+
+model Symptom {
+    id      Int      @id @default(autoincrement())
+    name    String   @unique
+    organs  Organ[]  @relation("OrganSymptoms")
+    doctors Doctor[] @relation("DoctorSymptoms")
+}
