@@ -304,7 +304,7 @@ export function DoctorDetails() {
                                     and advanced treatment protocols.
                                 </p>
                                 <p>
-                                    Currently leading the {doctor.department?.name} at Public Lumbini United Hospital, they emphasize
+                                    Currently leading the {doctor.department?.name} at HealthPoint Medical Center, they emphasize
                                     preventative healthcare and evidence-based medicine.
                                 </p>
                                 {doctor.qualifications && (

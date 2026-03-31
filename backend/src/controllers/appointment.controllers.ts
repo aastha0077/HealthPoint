@@ -67,12 +67,25 @@ const getAllAppointmentsController: RequestHandler = async (req, res) => {
             }
 
             total = await prisma.appointment.count({ where: { doctorId: doctor.id } });
-            appointments = await prisma.appointment.findMany({
+            const results = await prisma.appointment.findMany({
                 where: { doctorId: doctor.id },
                 include: { doctor: { include: { user: true } }, patient: true, department: true },
                 orderBy: { dateTime: 'desc' },
                 skip,
                 take: limit
+            });
+            // Doctors should not see recording URL
+            appointments = results.map((appt: any) => {
+                const { audioRecordingUrl, ...rest } = appt;
+                return rest;
+            });
+        } else if (user?.role === 'ADMIN') {
+            const results = await getAllAppointments();
+            total = results.length;
+            // Admins should not see recording URL
+            appointments = results.map((appt: any) => {
+                const { audioRecordingUrl, ...rest } = appt;
+                return rest;
             });
         } else {
             appointments = await getAllAppointments();
@@ -166,11 +179,23 @@ const rescheduleAppointmentController: RequestHandler = async (req, res) => {
 const searchAppointmentByNumberController: RequestHandler = async (req, res) => {
     try {
         const { appointmentNumber } = req.params;
+        const user = req.user;
         const result = await getAppointmentByNumber(appointmentNumber);
         if (!result) {
             res.status(404).json({ error: "Appointment not found" });
             return;
         }
+
+        // Only the patient who owns the appointment can see recording
+        // Check if user is the patient associated with this appointment
+        const isPatientOwner = user?.role === 'USER' && result.patient?.userId === user.id;
+        
+        if (!isPatientOwner) {
+            const { audioRecordingUrl, ...rest } = result;
+            res.status(200).json(rest);
+            return;
+        }
+
         res.status(200).json(result);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -200,7 +225,12 @@ const getPatientHistoryController: RequestHandler = async (req, res) => {
             return;
         }
         const history = await getPatientHistory(patientId);
-        res.status(200).json(history);
+        // Doctors/Admins fetching history should not see recordings
+        const filteredHistory = history.map((appt: any) => {
+            const { audioRecordingUrl, ...rest } = appt;
+            return rest;
+        });
+        res.status(200).json(filteredHistory);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
@@ -244,7 +274,12 @@ const getDoctorTodayAppointmentsController: RequestHandler = async (req, res) =>
         }
 
         const appointments = await getDoctorTodayAppointments(doctor.id);
-        res.status(200).json(appointments);
+        // Doctors should not see recording URL
+        const filteredAppointments = appointments.map((appt: any) => {
+            const { audioRecordingUrl, ...rest } = appt;
+            return rest;
+        });
+        res.status(200).json(filteredAppointments);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }

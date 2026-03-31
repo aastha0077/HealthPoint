@@ -188,11 +188,12 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-[#FDFDFF] lg:pl-32 lg:pr-12 py-12 relative">
-            <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] -z-10" />
+            <div className="fixed inset-0 pointer-events-none opacity-40 bg-gradient-to-br from-indigo-50 via-white to-violet-50 -z-10" />
+            <div className="fixed top-0 right-0 w-[800px] h-[800px] bg-indigo-100/40 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
             
             <div className="max-w-7xl mx-auto pb-32">
                 <div className="sticky top-0 z-[40] mb-12">
-                    <div className="bg-white/80 backdrop-blur-3xl border border-slate-200/60 rounded-[3rem] p-5 shadow-2xl shadow-indigo-500/5 flex items-center justify-between">
+                    <div className="bg-white/70 backdrop-blur-3xl border border-white/60 rounded-[3rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-between">
                         <div className="flex items-center gap-6">
                             <motion.div 
                                 onClick={() => setProfileModalOpen(true)}
@@ -246,7 +247,7 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            <div className="inline-flex p-2 bg-white rounded-[2rem] border border-slate-200/60 shadow-lg">
+                            <div className="inline-flex p-2 bg-white/60 backdrop-blur-xl rounded-[2rem] border border-white shadow-xl shadow-indigo-500/5 flex-wrap gap-2">
                                 {[
                                     { key: "UPCOMING", label: "Appointments" },
                                     { key: "HISTORY", label: "Past Visits" },
@@ -256,15 +257,22 @@ export default function Dashboard() {
                                     <button
                                         key={f.key}
                                         onClick={() => setApptSubFilter(f.key as any)}
-                                        className={`px-8 py-3.5 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all duration-300 ${
+                                        className={`relative px-8 py-3.5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                                             apptSubFilter === f.key 
-                                                ? "bg-slate-900 text-white shadow-2xl shadow-slate-900/20" 
-                                                : "text-slate-400 hover:text-slate-900 hover:bg-slate-50"
+                                                ? "text-white shadow-lg shadow-indigo-500/20" 
+                                                : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
                                         }`}
                                     >
-                                        {f.label}
+                                        {apptSubFilter === f.key && (
+                                            <motion.div
+                                                layoutId="activeTabIndicator"
+                                                className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-[1.5rem] -z-10"
+                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            />
+                                        )}
+                                        <span className="relative z-10">{f.label}</span>
                                         {f.key === "MISSED" && missedCount > 0 && (
-                                            <span className="ml-2 bg-rose-500 text-white text-[8px] px-1.5 py-0.5 rounded-full inline-block animate-bounce">{missedCount}</span>
+                                            <span className="relative z-10 ml-2 bg-rose-500 text-white text-[9px] px-2 py-0.5 rounded-full inline-block animate-bounce shadow-sm">{missedCount}</span>
                                         )}
                                     </button>
                                 ))}

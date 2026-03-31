@@ -57,9 +57,9 @@ export const getAppointmentPDFBuffer = async (appointmentId: number): Promise<Bu
 
 const buildPDFContent = (doc: PDFKit.PDFDocument, apt: any) => {
     // --- Header ---
-    doc.fillColor("#e11d48").fontSize(24).text("Public Lumbini United Hospital", { align: "center" });
-    doc.fillColor("#64748b").fontSize(10).text("Resunga, Gulmi, Lumbini Province, Nepal", { align: "center" });
-    doc.text("Phone: +977-9849000000 | Email: info@pluhospital.com", { align: "center" });
+    doc.fillColor("#e11d48").fontSize(24).text("HealthPoint Medical Center", { align: "center" });
+    doc.fillColor("#64748b").fontSize(10).text("Specialized Healthcare & Clinical Excellence", { align: "center" });
+    doc.text("Phone: +977-9849000000 | Email: care@healthpoint.com", { align: "center" });
 
     doc.moveDown(1.5);
     doc.strokeColor("#f1f5f9").lineWidth(1).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
@@ -115,5 +115,5 @@ const buildPDFContent = (doc: PDFKit.PDFDocument, apt: any) => {
     doc.moveDown();
     doc.fillColor("#94a3b8").fontSize(9).text("This is an electronically generated document. No signature required.", { align: "center" });
     doc.moveDown(0.5);
-    doc.fillColor("#0f172a").fontSize(10).font("Helvetica-Bold").text("Thank you for choosing Public Lumbini United Hospital.", { align: "center" });
+    doc.fillColor("#0f172a").fontSize(10).font("Helvetica-Bold").text("Thank you for choosing HealthPoint Medical Center.", { align: "center" });
 };

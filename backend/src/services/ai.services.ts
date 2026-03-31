@@ -20,7 +20,7 @@ export async function getClinicalRecommendation(
     deptContext: string[] = []
 ): Promise<AIRecommendation> {
     const prompt = `
-        As an elite medical diagnostic engine at "Public Lumbini United (PLU) Medical Center", perform a clinical synthesis on the following case:
+        As an elite medical diagnostic engine at "HealthPoint Medical Center", perform a clinical synthesis on the following case:
         
         CASE DATA:
         - Regional Focus: ${regionName}

@@ -26,16 +26,16 @@ function Footer() {
           <div className="lg:col-span-4 space-y-8">
             <Link to="/" className="flex items-center gap-3 group">
               <div className="w-12 h-12 bg-gradient-to-br from-rose-600 to-red-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-rose-900/40 group-hover:rotate-6 transition-transform">
-                <span className="text-white font-black text-xl tracking-tighter">PLU</span>
+                <span className="text-white font-black text-xl tracking-tighter">HP</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-black text-white leading-none tracking-tight">PublicLumbiniUnited</span>
+                <span className="text-lg font-black text-white leading-none tracking-tight">HealthPoint</span>
                 <span className="text-[10px] font-black text-rose-500 uppercase tracking-[0.3em] mt-1.5">Hospital Center</span>
               </div>
             </Link>
 
             <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-sm">
-              Providing world-class medical excellence with compassion. Lumbini's premier
+              Providing world-class medical excellence with compassion. HealthPoint's premier
               healthcare institution dedicated to your family's lifelong wellness
               and advanced clinical care.
             </p>
@@ -148,7 +148,7 @@ function Footer() {
               <span className="text-[10px] font-black uppercase tracking-[0.2em]">ISO 9001 Certified</span>
             </div>
             <p className="text-xs font-bold text-slate-500">
-              &copy; {currentYear} Public Lumbini United Hospital. All rights reserved.
+              &copy; {currentYear} HealthPoint Medical Center. All rights reserved.
             </p>
           </div>
 

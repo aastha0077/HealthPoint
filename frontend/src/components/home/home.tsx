@@ -166,7 +166,7 @@ function CTASection() {
         <div className="relative py-16 px-8 md:px-16 text-center">
           <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6">Ready to prioritize your health?</h2>
           <p className="text-slate-400 text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Join thousands of happy families who trust Public Lumbini United Hospital in Gulmi for their medical needs.
+            Join thousands of happy families who trust HealthPoint Medical Center for their medical needs.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/signup" className="bg-rose-600 text-white px-10 py-4 rounded-2xl hover:bg-rose-700 font-bold text-lg shadow-lg shadow-rose-900 transition-all hover:-translate-y-1">

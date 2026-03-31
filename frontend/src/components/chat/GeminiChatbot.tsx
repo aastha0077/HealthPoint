@@ -3,7 +3,7 @@ import { MessageCircle, X, Send, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-const HOSPITAL_SYSTEM_PROMPT = `You are the AI assistant for Public Lumbini United Hospital (PLU). 
+const HOSPITAL_SYSTEM_PROMPT = `You are the AI assistant for HealthPoint Medical Center. 
 Respond helpfully, politely, and extremely concisely. 
 Limit your response to 2-3 sentences max.
 For medical emergencies, always visit the ER immediately.`;
@@ -22,7 +22,7 @@ const QUICK_QUESTIONS = [
 export function GeminiChatbot() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<{ sender: 'user' | 'bot'; text: string }[]>([
-        { sender: 'bot', text: '👋 Hello! I\'m the assistant at **Public Lumbini United Hospital**. How can I help you today? You can also tap a quick question below!' }
+        { sender: 'bot', text: '👋 Hello! I\'m the assistant at **HealthPoint Medical Center**. How can I help you today? You can also tap a quick question below!' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -85,7 +85,7 @@ export function GeminiChatbot() {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-sm">Hospital Assistant</h3>
-                                    <p className="text-xs text-rose-100">Public Lumbini United Hospital</p>
+                                    <p className="text-xs text-rose-100">HealthPoint Medical Center</p>
                                 </div>
                             </div>
                             <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 p-1.5 rounded-full transition-colors">

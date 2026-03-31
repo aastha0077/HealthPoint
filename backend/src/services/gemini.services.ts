@@ -7,7 +7,7 @@ export async function getGeminiResponse(prompt: string) {
     try {
         const model = genAI.getGenerativeModel({
             model: "gemini-3-flash-preview",
-            systemInstruction: "You are the AI health assistant for PLU (Public Lumbini United Hospital). Your goal is to be helpful, polite, and extremely concise. Respond with simple, effective, and short replies. Avoid long paragraphs. Keep your response under 3 sentences unless absolutely necessary. Use a friendly medical tone."
+            systemInstruction: "You are the AI health assistant for HealthPoint Medical Center. Your goal is to be helpful, polite, and extremely concise. Respond with simple, effective, and short replies. Avoid long paragraphs. Keep your response under 3 sentences unless absolutely necessary. Use a friendly medical tone."
         });
         const result = await model.generateContent(prompt);
         const response = await result.response;
