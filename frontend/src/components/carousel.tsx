@@ -10,12 +10,13 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Link } from "react-router";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SLIDES = [
   {
     id: 0,
-    title: "Public Lumbini United Hospital",
-    description: "Your trusted healthcare partner in Gulmi. Dedicated to providing world-class medical services to our community.",
+    title: "HealthPoint Medical Center",
+    description: "Your trusted healthcare partner. Dedicated to providing world-class medical services to our community.",
     image: "https://images.unsplash.com/photo-1512678193727-b710ac83a303?w=1600&h=900&fit=crop",
     cta: "Contact Us",
     link: "/contact",
@@ -35,14 +36,6 @@ const SLIDES = [
     image: "https://images.unsplash.com/photo-1551076805-e1869033e561?w=1600&h=900&fit=crop",
     cta: "Explore Services",
     link: "/services",
-  },
-  {
-    id: 3,
-    title: "Digital Lab Reports",
-    description: "Review your test results online as soon as they are ready. Fast and secure.",
-    image: "https://images.unsplash.com/photo-1579154234431-da0560a75dc0?w=1600&h=900&fit=crop",
-    cta: "View Lab Results",
-    link: "/lab-report",
   }
 ];
 
@@ -88,26 +81,50 @@ function CarouselCard() {
                 className="absolute inset-0 w-full h-full object-cover"
                 alt={slide.title}
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-900/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/50 to-transparent" />
 
               <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                <div className="max-w-xl space-y-6">
-                  <h2 className="text-4xl md:text-6xl font-extrabold text-white leading-tight">
-                    {slide.title}
-                  </h2>
-                  <p className="text-slate-200 text-lg md:text-xl font-medium">
-                    {slide.description}
-                  </p>
-                  <div className="pt-4">
-                    <Link
-                      to={slide.link}
-                      className="inline-flex items-center gap-2 bg-rose-600 text-white px-8 py-4 rounded-xl hover:bg-rose-700 font-bold text-lg shadow-lg transition-all"
+                <AnimatePresence mode="wait">
+                  {current === slide.id && (
+                    <motion.div
+                      key={slide.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -30 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      className="max-w-xl space-y-6"
                     >
-                      {slide.cta}
-                      <ArrowRight className="w-5 h-5" />
-                    </Link>
-                  </div>
-                </div>
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                        className="inline-block px-3 py-1 bg-rose-500/20 text-rose-300 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-widest border border-rose-500/30"
+                      >
+                        HealthPoint Exclusive
+                      </motion.div>
+                      <h2 className="text-4xl md:text-6xl font-extrabold text-white leading-tight drop-shadow-lg">
+                        {slide.title}
+                      </h2>
+                      <p className="text-slate-200 text-lg md:text-xl font-medium drop-shadow-md">
+                        {slide.description}
+                      </p>
+                      <motion.div 
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }} 
+                        transition={{ delay: 0.4 }}
+                        className="pt-4"
+                      >
+                        <Link
+                          to={slide.link}
+                          className="inline-flex items-center gap-2 bg-gradient-to-r from-rose-500 to-rose-700 text-white px-8 py-4 rounded-full hover:from-rose-600 hover:to-rose-800 font-bold text-lg shadow-[0_0_40px_-10px_rgba(225,29,72,0.8)] transition-all hover:scale-105 active:scale-95"
+                        >
+                          {slide.cta}
+                          <ArrowRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </CarouselItem>
           ))}

@@ -11,7 +11,7 @@ interface ContactInfoProps {
 }
 
 function ContactInfo({
-  hospitalName = "Public Lumbini United Hospital",
+  hospitalName = "HealthPoint Medical Center",
   items,
 }: ContactInfoProps) {
   return (

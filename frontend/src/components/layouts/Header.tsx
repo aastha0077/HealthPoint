@@ -53,10 +53,10 @@ function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-rose-200 transition-transform group-hover:scale-105">
-              <span className="text-white font-black text-lg tracking-tighter">PLU</span>
+              <span className="text-white font-black text-lg tracking-tighter">HP</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-base font-black text-slate-900 leading-none">Public Lumbini United</span>
+              <span className="text-base font-black text-slate-900 leading-none">HealthPoint</span>
               <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mt-1">Medical Center</span>
             </div>
           </Link>

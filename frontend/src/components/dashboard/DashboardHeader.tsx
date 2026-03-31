@@ -26,7 +26,7 @@ export function DashboardHeader({ user, onProfileClick, onBookClick }: Dashboard
                     <h1 className="text-3xl font-bold text-rose-900 leading-tight">
                         Hello, {user?.firstName} 👋
                     </h1>
-                    <p className="text-rose-400 mt-1">Manage your appointments at Public Lumbini United Hospital</p>
+                    <p className="text-rose-400 mt-1">Manage your appointments at HealthPoint Medical Center</p>
                 </div>
             </div>
             <button

@@ -22,7 +22,7 @@ export const sendAppointmentEmail = async (to: string, appointmentDetails: any, 
     const htmlContent = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: ${bgSecondary};">
             <div style="background-color: ${brandColor}; padding: 40px 20px; text-align: center;">
-                <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: -0.5px;">Public Lumbini United</h1>
+                <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: -0.5px;">HealthPoint</h1>
                 <p style="color: rgba(255,255,255,0.8); margin: 10px 0 0; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 1.5px;">Medical Confirmation</p>
             </div>
             
@@ -59,7 +59,7 @@ export const sendAppointmentEmail = async (to: string, appointmentDetails: any, 
             </div>
             
             <div style="padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
-                <p style="margin: 0;">Public Lumbini United Medical Center | Resunga, Gulmi</p>
+                <p style="margin: 0;">HealthPoint Medical Center | Specialized Care</p>
                 <div style="margin-top: 10px;">
                     <a href="#" style="color: ${brandColor}; text-decoration: none; margin: 0 10px;">Our Services</a>
                     <a href="#" style="color: ${brandColor}; text-decoration: none; margin: 0 10px;">Contact Support</a>
@@ -69,7 +69,7 @@ export const sendAppointmentEmail = async (to: string, appointmentDetails: any, 
     `;
 
     const mailOptions: any = {
-        from: `"Public Lumbini United" <${process.env.SMTP_USER}>`,
+        from: `"HealthPoint" <${process.env.SMTP_USER}>`,
         to: to,
         subject: `Appointment Confirmation: ${appointmentNumber}`,
         html: htmlContent
@@ -100,7 +100,7 @@ export const sendNotificationEmail = async (to: string, subject: string, message
     const htmlContent = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background-color: ${bgSecondary};">
             <div style="background-color: ${brandColor}; padding: 40px 20px; text-align: center;">
-                <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: -0.5px;">Public Lumbini United</h1>
+                <h1 style="color: white; margin: 0; font-size: 28px; letter-spacing: -0.5px;">HealthPoint</h1>
                 <p style="color: rgba(255,255,255,0.8); margin: 10px 0 0; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 1.5px;">Update Notification</p>
             </div>
             
@@ -116,7 +116,7 @@ export const sendNotificationEmail = async (to: string, subject: string, message
             </div>
             
             <div style="padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
-                <p style="margin: 0;">Public Lumbini United Medical Center | Resunga, Gulmi</p>
+                <p style="margin: 0;">HealthPoint Medical Center | Specialized Care</p>
                 <div style="margin-top: 10px;">
                     <a href="#" style="color: ${brandColor}; text-decoration: none; margin: 0 10px;">Our Services</a>
                     <a href="#" style="color: ${brandColor}; text-decoration: none; margin: 0 10px;">Contact Support</a>
@@ -126,7 +126,7 @@ export const sendNotificationEmail = async (to: string, subject: string, message
     `;
 
     const mailOptions = {
-        from: `"Public Lumbini United" <${process.env.SMTP_USER}>`,
+        from: `"HealthPoint" <${process.env.SMTP_USER}>`,
         to: to,
         subject: subject,
         text: message,

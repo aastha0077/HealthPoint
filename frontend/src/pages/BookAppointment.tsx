@@ -358,7 +358,7 @@ export function BookAppointment() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-rose-800">Book an Appointment</h1>
-          <p className="text-rose-400 mt-1">Public Lumbini United Hospital, Gulmi</p>
+          <p className="text-rose-400 mt-1">HealthPoint Medical Center</p>
         </div>
 
         {/* Stepper */}

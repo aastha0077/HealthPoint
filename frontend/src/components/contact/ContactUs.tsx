@@ -47,11 +47,11 @@ function ContactPage() {
       ),
       title: "Email Addresses",
       details: [
-        "info@pluhospital.com",
-        "appointments@pluhospital.com",
-        "emergency@pluhospital.com",
+        "info@healthpoint.com",
+        "appointments@healthpoint.com",
+        "emergency@healthpoint.com",
       ],
-      link: "mailto:info@pluhospital.com",
+      link: "mailto:info@healthpoint.com",
     },
     {
       icon: (
@@ -135,7 +135,7 @@ function ContactPage() {
           {/* Contact Information & Emergency */}
           <div className="lg:col-span-1 space-y-8">
             <ContactInfo
-              hospitalName="Public Lumbini United Hospital"
+              hospitalName="HealthPoint Medical Center"
               items={contactItems}
             />
 
@@ -173,7 +173,7 @@ function ContactPage() {
         <div className="mb-20">
           <ContactMap
             title="Visit Our Medical Center"
-            address="Public Lumbini United Hospital, Resunga, Gulmi, Nepal"
+            address="HealthPoint Medical Center, Specialized Care, Nepal"
           />
         </div>
 
