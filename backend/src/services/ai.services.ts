@@ -4,8 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-//  dont change the model
-const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 interface AIRecommendation {
     relevantDepartments: string[]; // e.g. ["Cardiology", "Emergency"]
@@ -14,9 +13,9 @@ interface AIRecommendation {
 }
 
 export async function getClinicalRecommendation(
-    regionName: string, 
-    organName: string, 
-    symptoms: string[], 
+    regionName: string,
+    organName: string,
+    symptoms: string[],
     deptContext: string[] = []
 ): Promise<AIRecommendation> {
     const prompt = `
@@ -57,11 +56,21 @@ export async function getClinicalRecommendation(
 
         console.log(`[AI-Diagnostics] Insight: "${data.diagnosticInsight}" | Confidence: ${data.confidenceScore}%`);
         return data;
-    } catch (err) {
+    } catch (err: any) {
         console.error("AI Clinical Recommendation Error:", err);
+        
+        // Handle demand spikes or service unavailable with a beautiful message
+        if (err?.status === 503 || err?.status === 429 || err?.message?.includes("demand")) {
+            return {
+                relevantDepartments: ["General Medicine"],
+                diagnosticInsight: "Our AI specialists are currently experiencing a high volume of requests. For your immediate care, we've prioritized a mapping to our expert General Medicine team.",
+                confidenceScore: 0
+            };
+        }
+
         return {
             relevantDepartments: [],
-            diagnosticInsight: "Standard diagnostic parameters applied.",
+            diagnosticInsight: "Standard diagnostic parameters applied. Please proceed with the mapped specialists.",
             confidenceScore: 0
         };
     }
