@@ -60,10 +60,10 @@ export const initReminders = () => {
             const now = new Date();
             const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
-            // Find BOOKED appointments whose scheduled time is 30+ minutes in the past
-            const missedAppointments = await prisma.appointment.findMany({
+            // Find BOOKED or WAITING appointments whose scheduled time is 30+ minutes in the past
+            const overdueAppointments = await prisma.appointment.findMany({
                 where: {
-                    status: "BOOKED",
+                    status: { in: ["BOOKED", "WAITING"] },
                     dateTime: {
                         lt: thirtyMinAgo
                     }
@@ -74,38 +74,57 @@ export const initReminders = () => {
                 }
             });
 
-            for (const appt of missedAppointments) {
-                console.log(`[MISSED] Marking appointment #${appt.appointmentNumber} as MISSED`);
+            for (const appt of overdueAppointments) {
+                const isNoShow = !appt.arrivedAt;
+                const newStatus = isNoShow ? "NO_SHOW" : "MISSED";
+
+                console.log(`[OVERDUE] Marking appointment #${appt.appointmentNumber} as ${newStatus}`);
 
                 await prisma.appointment.update({
                     where: { id: appt.id },
                     data: {
-                        status: "MISSED",
+                        status: newStatus,
                         missedAt: now
                     }
                 });
 
-                // Notify patient
-                if (appt.patient.userId) {
-                    const message = `Your appointment #${appt.appointmentNumber} with Dr. ${appt.doctor.user.lastName} was missed — the doctor did not join the session. You can reschedule or request a refund from your dashboard.`;
-                    await createNotification(appt.patient.userId, message, "MISSED");
+                if (isNoShow) {
+                    // Case: User missed the appointment
+                    if (appt.patient.userId) {
+                        const message = `Your appointment #${appt.appointmentNumber} with Dr. ${appt.doctor.user.lastName} was marked as NO-SHOW because you did not join the session. This appointment is non-refundable and cannot be rescheduled.`;
+                        await createNotification(appt.patient.userId, message, "NO_SHOW");
 
-                    if (appt.patient.user?.email) {
-                        await sendNotificationEmail(
-                            appt.patient.user.email,
-                            `Missed Appointment — ${appt.appointmentNumber}`,
-                            `Dear ${appt.patient.firstName},\n\nUnfortunately, your appointment (${appt.appointmentNumber}) with Dr. ${appt.doctor.user.lastName} scheduled for ${appt.dateTime.toLocaleString()} was missed — the doctor did not start the session.\n\nYou have two options:\n• Reschedule to a new time slot\n• Request a full refund\n\nPlease visit your dashboard to proceed.\n\nWe sincerely apologize for the inconvenience.`
-                        );
+                        if (appt.patient.user?.email) {
+                            await sendNotificationEmail(
+                                appt.patient.user.email,
+                                `Appointment No-Show — ${appt.appointmentNumber}`,
+                                `Dear ${appt.patient.firstName},\n\nYour appointment (${appt.appointmentNumber}) with Dr. ${appt.doctor.user.lastName} scheduled for ${appt.dateTime.toLocaleString()} was marked as a No-Show because you did not check in for the session.\n\nPer our policy, no-show appointments are non-refundable and cannot be rescheduled.\n\nThank you for your understanding.`
+                            );
+                        }
+                    }
+                } else {
+                    // Case: Doctor missed the appointment
+                    if (appt.patient.userId) {
+                        const message = `Your appointment #${appt.appointmentNumber} with Dr. ${appt.doctor.user.lastName} was missed — the doctor did not join the session. You can reschedule or request a refund from your dashboard.`;
+                        await createNotification(appt.patient.userId, message, "MISSED");
+
+                        if (appt.patient.user?.email) {
+                            await sendNotificationEmail(
+                                appt.patient.user.email,
+                                `Missed Appointment — ${appt.appointmentNumber}`,
+                                `Dear ${appt.patient.firstName},\n\nUnfortunately, your appointment (${appt.appointmentNumber}) with Dr. ${appt.doctor.user.lastName} scheduled for ${appt.dateTime.toLocaleString()} was missed — the doctor did not start the session.\n\nYou have two options:\n• Reschedule to a new time slot\n• Request a full refund\n\nPlease visit your dashboard to proceed.\n\nWe sincerely apologize for the inconvenience.`
+                            );
+                        }
                     }
                 }
 
                 // Notify doctor
                 if (appt.doctor.userId) {
-                    await createNotification(
-                        appt.doctor.userId,
-                        `Appointment #${appt.appointmentNumber} with ${appt.patient.firstName} ${appt.patient.lastName} has been marked as MISSED. Please review your schedule.`,
-                        "MISSED"
-                    );
+                    const docMessage = isNoShow 
+                        ? `Appointment #${appt.appointmentNumber} with ${appt.patient.firstName} was marked as NO-SHOW as the patient did not arrive.`
+                        : `Appointment #${appt.appointmentNumber} with ${appt.patient.firstName} was missed because you did not start the session.`;
+                    
+                    await createNotification(appt.doctor.userId, docMessage, newStatus);
                 }
 
                 // Notify admins
@@ -113,14 +132,14 @@ export const initReminders = () => {
                 for (const admin of admins) {
                     await createNotification(
                         admin.id,
-                        `Appointment #${appt.appointmentNumber} (Dr. ${appt.doctor.user.lastName} with ${appt.patient.firstName}) was marked as MISSED. The patient may request a refund.`,
+                        `Appointment #${appt.appointmentNumber} (Dr. ${appt.doctor.user.lastName} with ${appt.patient.firstName}) was marked as ${newStatus}.`,
                         "ADMIN_ALERT"
                     );
                 }
             }
 
-            if (missedAppointments.length > 0) {
-                console.log(`[MISSED] Marked ${missedAppointments.length} appointments as MISSED`);
+            if (overdueAppointments.length > 0) {
+                console.log(`[OVERDUE] Marked ${overdueAppointments.length} appointments as MISSED/NO_SHOW`);
             }
         } catch (error) {
             console.error("Error running missed appointment detector:", error);

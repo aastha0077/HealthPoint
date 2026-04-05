@@ -180,10 +180,13 @@ export async function getDoctors(pageNumber: number, pageSize: number, searchTer
         ];
     }
 
+    const skip = isNaN(pageNumber) || isNaN(pageSize) ? 0 : Math.max(0, (pageNumber - 1) * pageSize);
+    const take = isNaN(pageSize) || pageSize <= 0 ? 10 : pageSize;
+
     const result = await prisma.doctor.findMany({
         where,
-        skip: (pageNumber - 1) * pageSize,
-        take: pageSize,
+        skip,
+        take,
         select: {
             id: true,
             user: true,

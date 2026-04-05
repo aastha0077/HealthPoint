@@ -451,11 +451,15 @@ export async function rescheduleAppointment(appointmentId: number, newDateTime: 
 
     if (!appt) throw new Error("Appointment not found");
 
+    if (appt.status === 'NO_SHOW') {
+        throw new Error("No-show appointments are non-refundable and cannot be rescheduled");
+    }
+
     // Allow reschedule for MISSED appointments without the 12h restriction
     if (appt.status !== 'MISSED') {
         const now = new Date();
         if (appt.dateTime.getTime() - now.getTime() < 12 * 60 * 60 * 1000) {
-            throw new Error("Cannot reschedule within 12 hours of the appointment");
+            throw new Error("Cannot reschedule within 12 hours of the scheduled time");
         }
     }
 
@@ -677,6 +681,10 @@ export async function requestRefund(
     });
 
     if (!appt) throw new Error("Appointment not found");
+    if (appt.status === 'NO_SHOW') {
+        throw new Error("No-show appointments are non-refundable");
+    }
+
     if (appt.status !== 'MISSED' && appt.status !== 'CANCELLED') {
         throw new Error("Refund can only be requested for missed or cancelled appointments");
     }
