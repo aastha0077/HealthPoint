@@ -1,4 +1,4 @@
-import { Calendar, Clock, MoreVertical, Search, Filter, Volume2 } from "lucide-react";
+import { Calendar, Clock, MoreVertical, Search, Filter, Volume2, FileDown, AlignLeft } from "lucide-react";
 
 interface AppointmentSectionProps {
     appointments: any[];
@@ -11,6 +11,8 @@ interface AppointmentSectionProps {
     onComplete: (id: number) => void;
     onOpenChat: (apt: any) => void;
     onOpenRecording?: (apt: any) => void;
+    onExport?: () => void;
+    onDownloadInvoice?: (id: number) => void;
 }
 
 export const AppointmentSection = ({
@@ -23,7 +25,9 @@ export const AppointmentSection = ({
     onStart,
     onComplete,
     onOpenChat,
-    onOpenRecording
+    onOpenRecording,
+    onExport,
+    onDownloadInvoice
 }: AppointmentSectionProps) => {
     const statusBadge = (status: string) => {
         const map: Record<string, string> = {
@@ -67,6 +71,15 @@ export const AppointmentSection = ({
                             <option value="CANCELLED">Cancelled</option>
                         </select>
                     </div>
+                )}
+                {onExport && (
+                    <button 
+                        onClick={onExport}
+                        className="px-6 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
+                    >
+                        <FileDown size={16} className="text-rose-500" />
+                        Export Data
+                    </button>
                 )}
             </div>
 
@@ -127,6 +140,18 @@ export const AppointmentSection = ({
                                                             className="px-4 py-2 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 flex items-center gap-2"
                                                         >
                                                             <Volume2 size={14} className="animate-pulse" /> Listen
+                                                        </button>
+                                                    )}
+                                                    {onDownloadInvoice && (
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onDownloadInvoice(apt.id);
+                                                            }} 
+                                                            className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-all border border-blue-100"
+                                                            title="Download Invoice"
+                                                        >
+                                                            <AlignLeft size={14} />
                                                         </button>
                                                     )}
                                                     <button 

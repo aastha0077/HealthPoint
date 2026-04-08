@@ -1,4 +1,4 @@
-import { Calendar, Clock, Download, RefreshCw, Banknote, CheckCircle2, Loader2, Volume2 } from "lucide-react";
+import { Calendar, Clock, Download, RefreshCw, Banknote, CheckCircle2, Loader2, Volume2, XCircle } from "lucide-react";
 
 interface AppointmentCardProps {
     apt: any;
@@ -64,7 +64,11 @@ export function AppointmentCard({
                 )}
                 {filter === "MISSED" && (
                     <>
-                        {refundStatus ? (
+                        {apt.status === "NO_SHOW" ? (
+                            <div className="h-11 px-5 rounded-2xl text-[9px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-100 flex items-center gap-2">
+                                <XCircle size={14} /> Non-refundable (No-Show)
+                            </div>
+                        ) : refundStatus ? (
                             <div className="flex items-center gap-2">
                                 <div className={`h-11 px-5 rounded-2xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 border ${
                                     refundStatus.status === "COMPLETED" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :

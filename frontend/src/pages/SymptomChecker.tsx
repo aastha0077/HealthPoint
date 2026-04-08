@@ -402,8 +402,16 @@ export function SymptomChecker() {
                                                 <div className="bg-slate-900 text-white p-8 md:p-10 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-10">
                                                     <div className="flex-1 space-y-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center"><Brain size={20} /></div>
-                                                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500">Autonomous Synthesis</h3>
+                                                            <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-rose-900/20"><Brain size={20} /></div>
+                                                            <div className="flex flex-col">
+                                                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-rose-500">Autonomous Synthesis</h3>
+                                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                                    <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${confidence > 0 ? "bg-emerald-500" : "bg-amber-500"}`} />
+                                                                    <span className="text-[7px] font-bold uppercase tracking-widest text-slate-400">
+                                                                        AI Status: {confidence > 0 ? "Operational" : "High Demand Fallback"}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <p className="text-xl font-black italic border-l-2 border-rose-600 pl-6">"{clinicalInsight}"</p>
                                                     </div>

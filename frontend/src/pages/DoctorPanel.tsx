@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, Routes, Route } from "react-router";
-import { Activity, X } from "lucide-react";
+import { Activity, X, FileDown } from "lucide-react";
 import toast from "react-hot-toast";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -193,6 +193,40 @@ export function DoctorPanel() {
             fetchAppointments(true);
         } catch (err: any) {
             toast.error(err.response?.data?.error || "Failed to start session");
+        }
+    };
+
+    const handleExportPDF = async (title: string, columns: string[], data: any[]) => {
+        try {
+            const res = await apiClient.post("/api/pdf/table-export", 
+                { title, columns, data }, 
+                { responseType: 'blob' }
+            );
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${title.toLowerCase().replace(/\s+/g, "_")}_export.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            toast.success(`${title} exported successfully`);
+        } catch {
+            toast.error("Failed to export PDF");
+        }
+    };
+
+    const downloadInvoice = async (id: number) => {
+        try {
+            const res = await apiClient.get(`/api/pdf/invoice/${id}`, { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `invoice_hp_${id}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch {
+            toast.error("Failed to download invoice");
         }
     };
 
@@ -437,6 +471,13 @@ export function DoctorPanel() {
                                 onComplete={handleComplete}
                                 onOpenChat={setActiveChatAppointment}
                                 onOpenRecording={setActiveRecordingApt}
+                                onExport={() => handleExportPDF("My Active Queue", ["ID", "Patient", "Date", "Status"], getFilteredAppointments('QUEUE').map(a => ({
+                                    id: a.appointmentNumber,
+                                    patient: `${a.patient.firstName} ${a.patient.lastName}`,
+                                    date: new Date(a.dateTime).toLocaleDateString(),
+                                    status: a.status
+                                })))}
+                                onDownloadInvoice={downloadInvoice}
                             />
                         </motion.div>
                     } />
@@ -453,6 +494,13 @@ export function DoctorPanel() {
                                 onComplete={handleComplete}
                                 onOpenChat={setActiveChatAppointment}
                                 onOpenRecording={setActiveRecordingApt}
+                                onExport={() => handleExportPDF("Clinical History", ["ID", "Patient", "Date", "Status"], getFilteredAppointments('HISTORY').map(a => ({
+                                    id: a.appointmentNumber,
+                                    patient: `${a.patient.firstName} ${a.patient.lastName}`,
+                                    date: new Date(a.dateTime).toLocaleDateString(),
+                                    status: a.status
+                                })))}
+                                onDownloadInvoice={downloadInvoice}
                             />
                         </motion.div>
                     } />

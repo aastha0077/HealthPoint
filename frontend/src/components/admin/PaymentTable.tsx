@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, FileDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Pagination } from "./Pagination";
 
@@ -6,9 +6,10 @@ interface PaymentTableProps {
     appointments: any[];
     search: string;
     setSearch: (s: string) => void;
+    onExport?: () => void;
 }
 
-export function PaymentTable({ appointments, search, setSearch }: PaymentTableProps) {
+export function PaymentTable({ appointments, search, setSearch, onExport }: PaymentTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -31,17 +32,28 @@ export function PaymentTable({ appointments, search, setSearch }: PaymentTablePr
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-2 rounded-[1.5rem] shadow-sm border border-slate-200">
-                <div className="relative">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search by patient name or transaction ID..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-[1.25rem] text-sm focus:ring-4 focus:ring-rose-500/5 focus:bg-white transition-all font-bold text-slate-700 outline-none"
-                    />
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className="bg-white p-2 rounded-[1.5rem] shadow-sm border border-slate-200 flex-1">
+                    <div className="relative">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search by patient name or transaction ID..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-[1.25rem] text-sm focus:ring-4 focus:ring-rose-500/5 focus:bg-white transition-all font-bold text-slate-700 outline-none"
+                        />
+                    </div>
                 </div>
+                {onExport && (
+                    <button 
+                        onClick={onExport}
+                        className="bg-slate-900 text-white px-8 py-4 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+                    >
+                        <FileDown size={18} />
+                        Export Ledger
+                    </button>
+                )}
             </div>
 
             <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">

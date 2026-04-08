@@ -116,8 +116,11 @@ export default function Dashboard() {
     const handleReviewSubmit = async (rating: number, comment: string) => {
         if (!selectedApt) return;
         try {
-            await apiClient.post(`/api/doctors/${selectedApt.doctorId}/reviews`, {
-                rating, comment, appointmentId: selectedApt.id
+            await apiClient.post("/api/reviews", {
+                doctorId: Number(selectedApt.doctorId),
+                rating,
+                comment,
+                appointmentId: selectedApt.id
             });
             toast.success("Review submitted!");
             setReviewModalOpen(false);
@@ -148,7 +151,7 @@ export default function Dashboard() {
     const filteredAppointments = appointments.filter(a => {
         if (apptSubFilter === "UPCOMING") return a.status === "BOOKED" || a.status === "PENDING";
         if (apptSubFilter === "HISTORY") return a.status === "COMPLETED";
-        if (apptSubFilter === "MISSED") return a.status === "MISSED";
+        if (apptSubFilter === "MISSED") return a.status === "MISSED" || a.status === "NO_SHOW";
         return a.status === "CANCELLED";
     }).sort((a, b) => {
         if (apptSubFilter === "MISSED") {
@@ -180,11 +183,12 @@ export default function Dashboard() {
             COMPLETED: "bg-emerald-50 text-emerald-600 border-emerald-100",
             CANCELLED: "bg-slate-50 text-slate-400 border-slate-100",
             MISSED: "bg-red-50 text-red-600 border-red-100",
+            NO_SHOW: "bg-amber-50 text-amber-600 border-amber-100",
         };
         return colors[s] || "bg-slate-50 text-slate-600";
     };
 
-    const missedCount = appointments.filter(a => a.status === "MISSED").length;
+    const missedCount = appointments.filter(a => a.status === "MISSED" || a.status === "NO_SHOW").length;
 
     return (
         <div className="min-h-screen bg-[#FDFDFF] lg:pl-32 lg:pr-12 py-12 relative">

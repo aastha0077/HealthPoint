@@ -1,10 +1,11 @@
-import { Search, Trash2, Filter, UserCheck, Edit3, X, Loader2 } from "lucide-react";
+import { Search, Trash2, Filter, UserCheck, Edit3, X, Loader2, FileDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Pagination } from "./Pagination";
 import { useAuth } from "@/contexts/AuthProvider";
 import { apiClient } from "@/apis/apis";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { ConfirmModal } from "./ConfirmModal";
 
 interface UserPatientManagementProps {
     tab: string;
@@ -13,6 +14,7 @@ interface UserPatientManagementProps {
     users: any[];
     patients: any[];
     onDelete: (type: string, id: number) => void;
+    onExport?: () => void;
 }
 
 export function UserPatientManagement({
@@ -22,6 +24,7 @@ export function UserPatientManagement({
     users,
     patients,
     onDelete,
+    onExport
 }: UserPatientManagementProps) {
     const auth = useAuth();
     const [roleFilter, setRoleFilter] = useState("ALL");
@@ -32,6 +35,9 @@ export function UserPatientManagement({
     const [editType, setEditType] = useState<'users' | 'patients' | null>(null);
     const [editingItem, setEditingItem] = useState<any>({});
     const [isUpdating, setIsUpdating] = useState(false);
+    const [confirmModal, setConfirmModal] = useState<{
+        show: boolean; title: string; message: string; onConfirm: () => void; type: 'DANGER' | 'WARNING' | 'INFO';
+    }>({ show: false, title: "", message: "", onConfirm: () => { }, type: 'INFO' });
 
     const openEdit = (type: 'users' | 'patients', item: any) => {
         setEditType(type);
@@ -111,6 +117,16 @@ export function UserPatientManagement({
                         </div>
                     </div>
                 )}
+                {onExport && (
+                    <button 
+                        onClick={onExport}
+                        className="bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-200 text-slate-400 hover:text-rose-500 transition-all flex items-center justify-center gap-2 group"
+                        title="Export to PDF"
+                    >
+                        <FileDown size={20} className="group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-black uppercase tracking-widest pr-2 hidden md:inline">Export</span>
+                    </button>
+                )}
             </div>
 
             <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
@@ -161,7 +177,17 @@ export function UserPatientManagement({
                                                 <button onClick={() => openEdit('users', u)} className="p-1.5 text-slate-300 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-all border border-transparent hover:border-slate-200" title="Edit User">
                                                     <Edit3 size={14} />
                                                 </button>
-                                                <button onClick={() => onDelete('users', u.id)} className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all border border-transparent hover:border-rose-100" title="Delete User">
+                                                <button 
+                                                    onClick={() => setConfirmModal({
+                                                        show: true,
+                                                        title: "Terminate User",
+                                                        message: `Are you sure you want to remove ${u.firstName} ${u.lastName}? This will disable their system-wide access.`,
+                                                        type: 'DANGER',
+                                                        onConfirm: () => onDelete('users', u.id)
+                                                    })} 
+                                                    className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all border border-transparent hover:border-rose-100" 
+                                                    title="Delete User"
+                                                >
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
@@ -190,7 +216,17 @@ export function UserPatientManagement({
                                             <button onClick={() => openEdit('patients', p)} className="p-1.5 text-slate-300 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-all border border-transparent hover:border-slate-200" title="Edit Patient">
                                                 <Edit3 size={14} />
                                             </button>
-                                            <button onClick={() => onDelete('patients', p.id)} className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all border border-transparent hover:border-rose-100" title="Delete Patient">
+                                            <button 
+                                                onClick={() => setConfirmModal({
+                                                    show: true,
+                                                    title: "Remove Patient Registry",
+                                                    message: `Are you sure you want to delete the record of ${p.firstName} ${p.lastName}? Important clinical history might be detached.`,
+                                                    type: 'DANGER',
+                                                    onConfirm: () => onDelete('patients', p.id)
+                                                })} 
+                                                className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all border border-transparent hover:border-rose-100" 
+                                                title="Delete Patient"
+                                            >
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
@@ -305,6 +341,14 @@ export function UserPatientManagement({
                     </div>
                 )}
             </AnimatePresence>
+            <ConfirmModal
+                show={confirmModal.show}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+            />
         </div>
     );
 }

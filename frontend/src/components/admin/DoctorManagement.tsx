@@ -1,9 +1,10 @@
-import { Search, Stethoscope, Plus, Camera, Image as ImageIcon, Loader2, Edit3, X, Clock, ChevronDown, Trash2, LayoutGrid, List, Mail, Send, Sparkles, AlignLeft, FileText } from "lucide-react";
+import { Search, Stethoscope, Plus, Camera, Image as ImageIcon, Loader2, Edit3, X, Clock, ChevronDown, Trash2, LayoutGrid, List, Mail, Send, Sparkles, AlignLeft, FileText, FileDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { apiClient } from "@/apis/apis";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pagination } from "./Pagination";
+import { ConfirmModal } from "./ConfirmModal";
 
 const ALL_TIME_SLOTS = [
     "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
@@ -44,10 +45,11 @@ interface DoctorManagementProps {
     departments: any[];
     handleDoctorSubmit: (e: React.FormEvent) => void;
     onDelete: (id: number) => void;
+    onExport?: () => void;
 }
 
 export function DoctorManagement({
-    allDoctors, search, setSearch, doctorForm, setDoctorForm, departments, handleDoctorSubmit, onDelete,
+    allDoctors, search, setSearch, doctorForm, setDoctorForm, departments, handleDoctorSubmit, onDelete, onExport
 }: DoctorManagementProps) {
     const [uploading, setUploading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -59,6 +61,20 @@ export function DoctorManagement({
     const [emailSubject, setEmailSubject] = useState("");
     const [emailMessage, setEmailMessage] = useState("");
     const [isSending, setIsSending] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [confirmModal, setConfirmModal] = useState<{
+        show: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        type: 'DANGER' | 'WARNING' | 'INFO';
+    }>({
+        show: false,
+        title: "",
+        message: "",
+        onConfirm: () => { },
+        type: 'INFO'
+    });
     const [viewMode, setViewMode] = useState<'GRID' | 'TABLE'>('GRID');
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
@@ -86,11 +102,18 @@ export function DoctorManagement({
         const file = e.target.files?.[0];
         if (!file) return;
         setUploading(true);
+        setUploadProgress(0);
         const formData = new FormData();
-        formData.append("image", file);
+        formData.append("file", file);
         try {
             const res = await apiClient.post("/api/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" }
+                headers: { "Content-Type": "multipart/form-data" },
+                onUploadProgress: (progressEvent) => {
+                    const progress = progressEvent.total
+                        ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                        : 0;
+                    setUploadProgress(progress);
+                }
             });
             setDoctorForm({ ...doctorForm, profilePicture: res.data.fileUrl });
             toast.success("Image uploaded successfully!");
@@ -98,6 +121,7 @@ export function DoctorManagement({
             toast.error(err.response?.data?.message || "Upload failed");
         } finally {
             setUploading(false);
+            setUploadProgress(0);
         }
     };
 
@@ -262,6 +286,16 @@ export function DoctorManagement({
                         </button>
                     </div>
 
+                    {onExport && (
+                        <button
+                            onClick={onExport}
+                            className="flex items-center justify-center gap-2 px-6 py-4.5 bg-slate-100 text-slate-600 rounded-[1.25rem] font-black text-[11px] uppercase tracking-widest hover:bg-slate-200 transition-all border border-slate-200 whitespace-nowrap"
+                        >
+                            <FileDown size={16} />
+                            Export
+                        </button>
+                    )}
+
                     <button
                         onClick={() => setShowMassEmailModal(true)}
                         className="flex items-center justify-center gap-2 px-6 py-4.5 bg-rose-50 text-rose-600 rounded-[1.25rem] font-black text-[11px] uppercase tracking-widest hover:bg-rose-100 transition-all border border-rose-100 whitespace-nowrap"
@@ -315,7 +349,18 @@ export function DoctorManagement({
                                         <div className="flex flex-col gap-2">
                                             <button onClick={() => { setSelectedDoctor(doc); setShowEmailModal(true); }} className="p-2.5 rounded-xl bg-white text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100" title="Email Personnel"><Mail size={16} /></button>
                                             <button onClick={() => startEdit(doc)} className="p-2.5 rounded-xl bg-white text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100"><Edit3 size={16} /></button>
-                                            <button onClick={() => onDelete(doc.id)} className="p-2.5 rounded-xl bg-white text-slate-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm border border-slate-100"><Trash2 size={16} /></button>
+                                            <button
+                                                onClick={() => setConfirmModal({
+                                                    show: true,
+                                                    title: "Terminate Personnel",
+                                                    message: `Are you sure you want to remove Dr. ${firstName} ${lastName} from the registry? This action is irreversible.`,
+                                                    type: 'DANGER',
+                                                    onConfirm: () => onDelete(doc.id)
+                                                })}
+                                                className="p-2.5 rounded-xl bg-white text-slate-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm border border-slate-100"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     </div>
                                     <div className="flex-1 mb-8">
@@ -392,7 +437,18 @@ export function DoctorManagement({
                                                     <div className="flex items-center justify-end gap-1.5 flex-nowrap">
                                                         <button onClick={() => { setSelectedDoctor(doc); setShowEmailModal(true); }} className="p-1.5 rounded-md bg-white border border-slate-200 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm" title="Dispatch Email"><Mail size={12} /></button>
                                                         <button onClick={() => startEdit(doc)} className="p-1.5 rounded-md bg-white border border-slate-200 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"><Edit3 size={12} /></button>
-                                                        <button onClick={() => onDelete(doc.id)} className="p-1.5 rounded-md bg-white border border-slate-200 text-slate-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm"><Trash2 size={12} /></button>
+                                                        <button
+                                                            onClick={() => setConfirmModal({
+                                                                show: true,
+                                                                title: "Terminate Personnel",
+                                                                message: `Are you sure you want to remove Dr. ${fn} ${ln} from the registry?`,
+                                                                type: 'DANGER',
+                                                                onConfirm: () => onDelete(doc.id)
+                                                            })}
+                                                            className="p-1.5 rounded-md bg-white border border-slate-200 text-slate-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -590,7 +646,18 @@ export function DoctorManagement({
                                                         <div className="w-20 h-20 border-4 border-rose-100 rounded-full animate-pulse" />
                                                         <Loader2 className="w-10 h-10 text-rose-500 animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                                                     </div>
-                                                    <p className="text-xs font-black text-rose-500 uppercase tracking-[0.3em]">Processing Visual Context</p>
+                                                    <p className="text-xs font-black text-rose-500 uppercase tracking-[0.3em]">
+                                                        {uploadProgress > 0 ? `Optimizing... ${uploadProgress}%` : "Processing Visual Context"}
+                                                    </p>
+                                                    {uploadProgress > 0 && (
+                                                        <div className="w-48 h-1 bg-rose-100 rounded-full mt-4 overflow-hidden">
+                                                            <motion.div
+                                                                className="h-full bg-rose-500"
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${uploadProgress}%` }}
+                                                            />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ) : doctorForm.profilePicture ? (
                                                 <div className="relative w-full h-full">
@@ -694,8 +761,8 @@ export function DoctorManagement({
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         {EMAIL_TEMPLATES.map((tpl, i) => (
-                                            <button 
-                                                key={i} 
+                                            <button
+                                                key={i}
                                                 onClick={() => applyTemplate(tpl)}
                                                 className="px-5 py-4 bg-white border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30 rounded-2xl text-left transition-all group"
                                             >
@@ -709,21 +776,21 @@ export function DoctorManagement({
                                 <div className="space-y-8 pt-4">
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Communication Subject</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={emailSubject}
                                             onChange={(e) => setEmailSubject(e.target.value)}
                                             placeholder="Enter high-priority subject line..."
-                                            className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-[1.5rem] p-5 text-sm font-black text-slate-900 outline-none transition-all placeholder:text-slate-300" 
+                                            className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-[1.5rem] p-5 text-sm font-black text-slate-900 outline-none transition-all placeholder:text-slate-300"
                                         />
                                     </div>
                                     <div className="space-y-3">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Dispatch Narrative Content</label>
-                                        <textarea 
+                                        <textarea
                                             value={emailMessage}
                                             onChange={(e) => setEmailMessage(e.target.value)}
                                             placeholder="Formulate official message context here..."
-                                            className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-[2.5rem] p-8 text-sm font-bold text-slate-700 outline-none min-h-[200px] transition-all leading-relaxed placeholder:text-slate-300" 
+                                            className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-[2.5rem] p-8 text-sm font-bold text-slate-700 outline-none min-h-[200px] transition-all leading-relaxed placeholder:text-slate-300"
                                         />
                                     </div>
                                 </div>
@@ -855,7 +922,15 @@ export function DoctorManagement({
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={handleMassEmailSend}
+                                    onClick={() => {
+                                        setConfirmModal({
+                                            show: true,
+                                            title: "Mass Communication",
+                                            message: `You are about to send this message to all registered personnel. This action will trigger a global broadcast. Continue?`,
+                                            type: 'WARNING',
+                                            onConfirm: handleMassEmailSend
+                                        });
+                                    }}
                                     disabled={isSending || !emailSubject || !emailMessage}
                                     className="flex-[2] py-4 bg-slate-900 hover:bg-rose-600 disabled:opacity-50 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-slate-200"
                                 >
@@ -866,6 +941,15 @@ export function DoctorManagement({
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <ConfirmModal
+                show={confirmModal.show}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+            />
         </div>
     );
 }

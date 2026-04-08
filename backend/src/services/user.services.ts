@@ -35,66 +35,63 @@ export async function saveUser(user: SignupType) {
     };
 }
 export async function saveDoctor(user: DoctorType) {
-    const output = await prisma.user.findFirst({
-        where: {
-            email: user.email
-        }
-    })
-    if (output) {
-        return {
-            message: "User with this email already exists"
-        }
+    const existingUser = await prisma.user.findFirst({
+        where: { email: user.email }
+    });
+    if (existingUser) {
+        return { message: "User with this email already exists" };
     }
-    let timeSlots = user.timeSlots
-    const allTimeSlots = await prisma.time.findMany()
-    const timeSlotResult = await Promise.all(timeSlots.map(async (timeSlot, index) => {
-        const existing = allTimeSlots.filter(t => {
-            return (t.time === timeSlot)
-        })
-        if (existing[0]) {
-            return existing[0]
-        }
-        return await prisma.time.create({
-            data: { time: timeSlot }
-        })
-    }))
 
+    // 1. Prepare Time Slots
+    const allTimeSlots = await prisma.time.findMany();
+    const timeSlotsToLink = await Promise.all((user.timeSlots || []).map(async (slot) => {
+        const existing = allTimeSlots.find(t => t.time === slot);
+        if (existing) return existing;
+        return await prisma.time.create({ data: { time: slot } });
+    }));
+
+    // 2. Hash Password
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
-    const result = await prisma.user.create({
-        data: {
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            password: hash,
-            role: "DOCTOR",
-            profilePicture: user.profilePicture
-        }
-    })
 
-    const doctor = await prisma.doctor.create({
-        data: {
-            id: result.id,
-            userId: result.id,
-            speciality: user.speciality,
-            available: true,
-            departmentId: user.departmentId,
-            bio: user.bio,
-        }
-    })
-
-    await Promise.all(timeSlotResult.map(async (time) => {
-        const res = await prisma.timeslots.create({
+    // 3. Execute Transaction
+    return await prisma.$transaction(async (tx) => {
+        // Create User
+        const newUser = await tx.user.create({
             data: {
-                timeId: time.id,
-                doctorId: result.id
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                password: hash,
+                role: "DOCTOR",
+                profilePicture: user.profilePicture
             }
-        })
+        });
 
-        return res
-    }))
+        // Create Doctor Profile (linking to user)
+        await tx.doctor.create({
+            data: {
+                id: newUser.id,
+                userId: newUser.id,
+                speciality: user.speciality,
+                available: true,
+                departmentId: user.departmentId,
+                bio: user.bio,
+            }
+        });
 
-    return result;
+        // Link Time Slots
+        await Promise.all(timeSlotsToLink.map(time => 
+            tx.timeslots.create({
+                data: {
+                    timeId: time.id,
+                    doctorId: newUser.id
+                }
+            })
+        ));
+
+        return newUser;
+    });
 }
 
 export async function isValidUser(user: LoginType) {
@@ -364,73 +361,59 @@ export async function refreshUserToken(token: string) {
 export async function updateDoctor(id: number, data: any) {
     const { firstName, lastName, email, speciality, bio, departmentId, profilePicture, timeSlots, password } = data;
 
-    // First find the doctor to get the userId
-    const doctor = await prisma.doctor.findUnique({
-        where: { id }
-    });
-
+    // 1. Pre-fetch Data
+    const doctor = await prisma.doctor.findUnique({ where: { id } });
     if (!doctor) throw new Error("Doctor not found");
 
-    // Update User details
-    const userData: any = {
-        firstName,
-        lastName,
-        email,
-        profilePicture,
-    };
-
+    const userData: any = { firstName, lastName, email, profilePicture };
     if (password) {
         const salt = await bcrypt.genSalt(10);
         userData.password = await bcrypt.hash(password, salt);
     }
 
-    await prisma.user.update({
-        where: { id: doctor.userId },
-        data: userData
-    });
-
-    // Update Doctor details
-    const doctorUpdateData: any = {
-        speciality,
-        bio,
-    };
-
+    const doctorUpdateData: any = { speciality, bio };
     const parsedDeptId = parseInt(departmentId);
     if (!isNaN(parsedDeptId)) {
         doctorUpdateData.department = { connect: { id: parsedDeptId } };
     }
 
-    await prisma.doctor.update({
-        where: { id },
-        data: doctorUpdateData
-    });
-
-    // Update Time Slots if provided
+    // 2. Prepare Time Slots if provided
+    let timeSlotRecords: any[] = [];
     if (timeSlots && Array.isArray(timeSlots)) {
-        // Remove old time slots
-        await prisma.timeslots.deleteMany({
-            where: { doctorId: id }
-        });
-
         const allTimeRecords = await prisma.time.findMany();
-
-        const timeSlotRecords = await Promise.all(timeSlots.map(async (slotString: string) => {
+        timeSlotRecords = await Promise.all(timeSlots.map(async (slotString: string) => {
             const existing = allTimeRecords.find(t => t.time === slotString);
             if (existing) return existing;
-            return await prisma.time.create({
-                data: { time: slotString }
-            });
-        }));
-
-        await Promise.all(timeSlotRecords.map(async (timeRecord) => {
-            await prisma.timeslots.create({
-                data: {
-                    doctorId: id,
-                    timeId: timeRecord.id
-                }
-            });
+            return await prisma.time.create({ data: { time: slotString } });
         }));
     }
 
-    return { success: true, message: "Doctor updated successfully" };
+    // 3. Execute Transaction
+    return await prisma.$transaction(async (tx) => {
+        // Update User
+        await tx.user.update({
+            where: { id: doctor.userId },
+            data: userData
+        });
+
+        // Update Doctor Profile
+        await tx.doctor.update({
+            where: { id },
+            data: doctorUpdateData
+        });
+
+        // Update Time Slots if provided
+        if (timeSlots && Array.isArray(timeSlots)) {
+            await tx.timeslots.deleteMany({ where: { doctorId: id } });
+            for (const timeRecord of timeSlotRecords) {
+                await tx.timeslots.create({
+                    data: {
+                        doctorId: id,
+                        timeId: timeRecord.id
+                    }
+                });
+            }
+        }
+        return { success: true, message: "Doctor updated successfully" };
+    });
 }

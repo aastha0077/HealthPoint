@@ -1,6 +1,7 @@
-import { Search, Calendar, Filter, AlignLeft, Trash2 } from "lucide-react";
+import { Search, Calendar, Filter, AlignLeft, Trash2, FileDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Pagination } from "./Pagination";
+import { ConfirmModal } from "./ConfirmModal";
 
 interface AppointmentTableProps {
     appointments: any[];
@@ -12,6 +13,8 @@ interface AppointmentTableProps {
     setDeptFilter: (s: string) => void;
     departments: any[];
     onDelete: (id: number) => void;
+    onExport?: () => void;
+    onDownloadInvoice?: (id: number) => void;
 }
 
 export function AppointmentTable({
@@ -24,9 +27,14 @@ export function AppointmentTable({
     setDeptFilter,
     departments,
     onDelete,
+    onExport,
+    onDownloadInvoice
 }: AppointmentTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
+    const [confirmModal, setConfirmModal] = useState<{
+        show: boolean; title: string; message: string; onConfirm: () => void; type: 'DANGER' | 'WARNING' | 'INFO';
+    }>({ show: false, title: "", message: "", onConfirm: () => { }, type: 'INFO' });
 
     // Reset page on filter changes
     useEffect(() => {
@@ -63,6 +71,15 @@ export function AppointmentTable({
                     />
                 </div>
                 <div className="flex gap-4">
+                    {onExport && (
+                        <button 
+                            onClick={onExport}
+                            className="px-6 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 flex items-center gap-2"
+                        >
+                            <FileDown size={16} className="text-rose-500" />
+                            Export List
+                        </button>
+                    )}
                     <div className="relative group">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-rose-500 transition-colors" size={16} />
                         <select
@@ -141,9 +158,26 @@ export function AppointmentTable({
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <button onClick={() => onDelete(a.id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all border border-transparent hover:border-rose-100" title="Delete Appointment">
-                                            <Trash2 size={14} />
-                                        </button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            {onDownloadInvoice && (
+                                                <button 
+                                                    onClick={() => onDownloadInvoice(a.id)}
+                                                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-all border border-blue-100"
+                                                    title="Generate Invoice"
+                                                >
+                                                    <AlignLeft size={14} />
+                                                </button>
+                                            )}
+                                            <button onClick={() => setConfirmModal({
+                                                show: true,
+                                                title: "Delete Appointment",
+                                                message: `Are you sure you want to delete the appointment for ${a.patient?.firstName} ${a.patient?.lastName}?`,
+                                                type: 'DANGER',
+                                                onConfirm: () => onDelete(a.id)
+                                            })} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all border border-transparent hover:border-rose-100" title="Delete Appointment">
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -169,6 +203,14 @@ export function AppointmentTable({
                     itemsPerPage={itemsPerPage}
                 />
             </div>
+            <ConfirmModal
+                show={confirmModal.show}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+            />
         </div>
     );
 }
