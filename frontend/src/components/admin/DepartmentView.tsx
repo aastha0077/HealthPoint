@@ -1,14 +1,26 @@
 import { useState, useEffect } from "react";
-import { AlignLeft, Plus, Trash2, Edit2, XCircle } from "lucide-react";
+import { AlignLeft, Plus, Trash2, Edit2, XCircle, FileDown } from "lucide-react";
 import { apiClient } from "@/apis/apis";
 import toast from "react-hot-toast";
+import { ConfirmModal } from "./ConfirmModal";
+import { motion, AnimatePresence } from "framer-motion";
 
-export function DepartmentView() {
+interface DepartmentViewProps {
+    onExport?: () => void;
+}
+
+export function DepartmentView({ onExport }: DepartmentViewProps) {
     const [departments, setDepartments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{
+        show: boolean; title: string; message: string; onConfirm: () => void; type: 'DANGER' | 'WARNING' | 'INFO';
+    }>({ show: false, title: "", message: "", onConfirm: () => { }, type: 'INFO' });
+    const [mergeModal, setMergeModal] = useState({ show: false, sourceId: 0, sourceName: "" });
+    const [targetDeptId, setTargetDeptId] = useState<string>("");
+    const [isMerging, setIsMerging] = useState(false);
 
     const fetchDepartments = async () => {
         try {
@@ -43,14 +55,40 @@ export function DepartmentView() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm("Are you sure you want to delete this department? This might affect linked doctors.")) return;
         try {
             await apiClient.delete(`/api/departments/${id}`);
             toast.success("Department removed");
             fetchDepartments();
             if (editingId === id) resetForm();
         } catch (err: any) {
-            toast.error(err.response?.data?.error || "Failed to remove department");
+            const errorMsg = err.response?.data?.error || "Failed to remove department";
+            if (errorMsg.includes("assigned")) {
+                const dept = departments.find(d => d.id === id);
+                setMergeModal({ show: true, sourceId: id, sourceName: dept?.name || "this unit" });
+            } else {
+                toast.error(errorMsg);
+            }
+        }
+    };
+
+    const handleMergeAndDelete = async () => {
+        if (!targetDeptId) return toast.error("Please select a target specialty");
+        setIsMerging(true);
+        try {
+            // 1. Reassign doctors
+            await apiClient.post(`/api/admin/departments/${mergeModal.sourceId}/reassign-doctors`, { 
+                targetId: parseInt(targetDeptId) 
+            });
+            // 2. Delete department
+            await apiClient.delete(`/api/departments/${mergeModal.sourceId}`);
+            toast.success("Specialties merged and unit removed");
+            setMergeModal({ show: false, sourceId: 0, sourceName: "" });
+            setTargetDeptId("");
+            fetchDepartments();
+        } catch (err: any) {
+            toast.error(err.response?.data?.error || "Merge operation failed");
+        } finally {
+            setIsMerging(false);
         }
     };
 
@@ -76,8 +114,19 @@ export function DepartmentView() {
                             <h3 className="text-xl font-black text-slate-900 tracking-tight">Practice Specialities</h3>
                             <p className="text-[10px] text-rose-500 font-bold uppercase tracking-[0.3em] mt-1">Medical Departments</p>
                         </div>
-                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
-                            <AlignLeft size={20} />
+                        <div className="flex items-center gap-4">
+                            {onExport && (
+                                <button 
+                                    onClick={onExport}
+                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm hover:text-rose-500 transition-colors"
+                                    title="Export Specials Registry"
+                                >
+                                    <FileDown size={20} />
+                                </button>
+                            )}
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
+                                <AlignLeft size={20} />
+                            </div>
                         </div>
                     </div>
                     <div className="divide-y divide-slate-50 max-h-[650px] overflow-y-auto custom-scrollbar">
@@ -113,7 +162,13 @@ export function DepartmentView() {
                                         <Edit2 size={16} />
                                     </button>
                                     <button 
-                                        onClick={() => handleDelete(dept.id)}
+                                        onClick={() => setConfirmModal({
+                                            show: true,
+                                            title: "Dismantle Specialty Unit",
+                                            message: `Confirm removal of the ${dept.name} unit. This action will detach all associated personnel and patient record links.`,
+                                            type: 'DANGER',
+                                            onConfirm: () => handleDelete(dept.id)
+                                        })} 
                                         className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-600 hover:text-white transition-all shadow-sm border border-rose-100"
                                         title="Dismantle Unit"
                                     >
@@ -199,6 +254,71 @@ export function DepartmentView() {
                     </ul>
                 </div>
             </div>
+            <ConfirmModal
+                show={confirmModal.show}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+            />
+
+            {/* Merge & Delete Modal */}
+            <AnimatePresence>
+                {mergeModal.show && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div 
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" 
+                            onClick={() => !isMerging && setMergeModal({ show: false, sourceId: 0, sourceName: "" })}
+                        />
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="bg-white rounded-[2.5rem] p-10 shadow-2xl border border-slate-100 max-w-md w-full relative z-10"
+                        >
+                            <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 border border-rose-100 mx-auto">
+                                <Trash2 size={32} />
+                            </div>
+                            <h3 className="text-2xl font-black text-slate-900 text-center mb-3 tracking-tight">Active Unit Detected</h3>
+                            <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed px-4">
+                                You cannot delete <span className="font-black text-slate-900">"{mergeModal.sourceName}"</span> while personnel are assigned to it. Select a new specialty for these professionals to continue:
+                            </p>
+
+                            <div className="space-y-6 mb-10">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Target Specialty</label>
+                                    <select 
+                                        value={targetDeptId}
+                                        onChange={(e) => setTargetDeptId(e.target.value)}
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-rose-500/10 outline-none transition-all appearance-none"
+                                    >
+                                        <option value="">Choose Replacement Specialty...</option>
+                                        {departments.filter(d => d.id !== mergeModal.sourceId).map(d => (
+                                            <option key={d.id} value={d.id}>{d.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                                <button 
+                                    onClick={handleMergeAndDelete}
+                                    disabled={!targetDeptId || isMerging}
+                                    className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-rose-700 transition-all shadow-xl shadow-rose-900/20 disabled:opacity-50 disabled:grayscale"
+                                >
+                                    {isMerging ? "Reassigning & Removing..." : "Reassign & Delete Unit"}
+                                </button>
+                                <button 
+                                    onClick={() => setMergeModal({ show: false, sourceId: 0, sourceName: "" })}
+                                    className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100"
+                                >
+                                    Abort Operation
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

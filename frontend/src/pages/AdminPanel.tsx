@@ -98,8 +98,41 @@ export function AdminPanel() {
         }
     };
 
+    const handleExportPDF = async (title: string, columns: string[], data: any[]) => {
+        try {
+            const res = await apiClient.post("/api/pdf/table-export", 
+                { title, columns, data }, 
+                { responseType: 'blob' }
+            );
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${title.toLowerCase().replace(/\s+/g, "_")}_export.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            toast.success(`${title} exported successfully`);
+        } catch {
+            toast.error("Failed to export PDF");
+        }
+    };
+
+    const downloadInvoice = async (id: number) => {
+        try {
+            const res = await apiClient.get(`/api/pdf/invoice/${id}`, { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `invoice_hp_${id}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch {
+            toast.error("Failed to download invoice");
+        }
+    };
+
     const handleDelete = async (type: string, id: number) => {
-        if (!confirm(`Are you sure you want to delete this ${type.slice(0, -1)}?`)) return;
         try {
             await apiClient.delete(`/api/admin/${type}/${id}`);
             toast.success("Deleted successfully");
@@ -131,7 +164,7 @@ export function AdminPanel() {
                     <Routes>
                         <Route index element={<Navigate to="dashboard" replace />} />
                         <Route path="dashboard" element={
-                            <Dashboard 
+                            <Dashboard
                                 users={users}
                                 patients={patients}
                                 doctors={doctors}
@@ -150,6 +183,14 @@ export function AdminPanel() {
                                 setDeptFilter={setDeptFilter}
                                 departments={departments}
                                 onDelete={(id: number) => handleDelete('appointments', id)}
+                                onExport={() => handleExportPDF("Appointments", ["ID", "Patient", "Doctor", "Date", "Status"], appointments.map(a => ({
+                                    id: a.appointmentNumber,
+                                    patient: `${a.patient.firstName} ${a.patient.lastName}`,
+                                    doctor: `Dr. ${a.doctor.user.firstName} ${a.doctor.user.lastName}`,
+                                    date: new Date(a.dateTime).toLocaleDateString(),
+                                    status: a.status
+                                })))}
+                                onDownloadInvoice={downloadInvoice}
                             />
                         } />
                         <Route path="doctors" element={
@@ -162,6 +203,12 @@ export function AdminPanel() {
                                 departments={departments}
                                 handleDoctorSubmit={handleDoctorSubmit}
                                 onDelete={(id: number) => handleDelete('doctors', id)}
+                                onExport={() => handleExportPDF("Doctor Registry", ["ID", "Name", "Speciality", "Email"], doctors.map(d => ({
+                                    id: d.doctorId,
+                                    name: `${d.firstName} ${d.lastName}`,
+                                    speciality: d.speciality,
+                                    email: d.email
+                                })))}
                             />
                         } />
                         <Route path="users" element={
@@ -172,6 +219,12 @@ export function AdminPanel() {
                                 users={users}
                                 patients={patients}
                                 onDelete={handleDelete}
+                                onExport={() => handleExportPDF("User Directory", ["ID", "Name", "Email", "Role"], users.map(u => ({
+                                    id: u.id,
+                                    name: `${u.firstName} ${u.lastName}`,
+                                    email: u.email,
+                                    role: u.role
+                                })))}
                             />
                         } />
                         <Route path="patients" element={
@@ -182,14 +235,27 @@ export function AdminPanel() {
                                 users={users}
                                 patients={patients}
                                 onDelete={handleDelete}
+                                onExport={() => handleExportPDF("Patient Records", ["ID", "Name", "Gender", "Location"], patients.map(p => ({
+                                    id: p.id,
+                                    name: `${p.firstName} ${p.lastName}`,
+                                    gender: p.gender,
+                                    location: `${p.municipality}, ${p.district}`
+                                })))}
                             />
                         } />
-                        <Route path="departments" element={<DepartmentView />} />
+                        <Route path="departments" element={<DepartmentView onExport={() => handleExportPDF("Medical Departments", ["ID", "Name", "Description"], departments.map(d => ({ id: d.id, name: d.name, description: d.description })))} />} />
                         <Route path="payments" element={
                             <PaymentTable
                                 appointments={appointments}
                                 search={search}
                                 setSearch={setSearch}
+                                onExport={() => handleExportPDF("Payment Ledger", ["Transaction", "Patient", "Method", "Amount", "Status"], appointments.filter(a => a.payment).map(a => ({
+                                    transaction: a.payment.transactionId || 'N/A',
+                                    patient: `${a.patient.firstName} ${a.patient.lastName}`,
+                                    method: a.payment.method,
+                                    amount: `Rs. ${a.doctor.fee || 500}`,
+                                    status: a.payment.status
+                                })))}
                             />
                         } />
                         <Route path="refunds" element={

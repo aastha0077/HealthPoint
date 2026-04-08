@@ -9,7 +9,7 @@ export function AuthPage() {
     const [mode, setMode] = useState<"login" | "signup">("login");
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    
+
     const auth = useAuth();
     const navigate = useNavigate();
     const toast = useToast();
@@ -86,16 +86,16 @@ export function AuthPage() {
                     <div className="absolute inset-0 bg-slate-900" />
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent" />
 
-                    
+
                     <div className="relative z-10 p-8 flex flex-col justify-between h-full">
                         <Link to="/" className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-xl px-4 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-all group self-start">
                             <ChevronLeft className="w-4 h-4 text-white group-hover:-translate-x-1 transition-transform" />
                             <span className="text-white text-xs font-black uppercase tracking-widest">Back to Home</span>
                         </Link>
-                        
+
                         <div className="space-y-6">
                             <div className="flex gap-2">
-                                {[1,2,3].map(i => <div key={i} className="h-1 w-6 bg-white/20 rounded-full overflow-hidden"><div className="h-full bg-rose-500 w-1/3 animate-shimmer" /></div>)}
+                                {[1, 2, 3].map(i => <div key={i} className="h-1 w-6 bg-white/20 rounded-full overflow-hidden"><div className="h-full bg-rose-500 w-1/3 animate-shimmer" /></div>)}
                             </div>
                             <h2 className="text-3xl font-black text-white leading-tight tracking-tight">
                                 Your Trusted <br /> <span className="text-rose-500">Health Partner.</span>
@@ -124,13 +124,13 @@ export function AuthPage() {
                         </div>
 
                         <AnimatePresence mode="wait">
-                            <motion.form 
+                            <motion.form
                                 key={mode}
                                 variants={formVariants}
                                 initial="initial"
                                 animate="animate"
                                 exit="exit"
-                                onSubmit={handleSubmit} 
+                                onSubmit={handleSubmit}
                                 className="space-y-4"
                             >
                                 {mode === "signup" && (
