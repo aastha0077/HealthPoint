@@ -50,14 +50,14 @@ export const ScheduleStep: React.FC<ScheduleStepProps> = ({
     const timeSlots = [...new Set(rawSlots.map(to24Hour))].sort();
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
             <div>
-                <h2 className="text-2xl font-black text-slate-900">Choose Date & Time</h2>
-                <p className="text-slate-400 font-medium mt-1">Select your preferred appointment slot</p>
+                <h2 className="text-xl font-black text-slate-900">Choose Date & Time</h2>
+                <p className="text-xs text-slate-400 font-medium mt-1">Select your preferred appointment slot</p>
             </div>
 
             {selectedDoctor && (
-                <div className="flex items-center gap-4 p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                <div className="flex items-center gap-3 p-3 bg-rose-50 rounded-xl border border-rose-100">
                     <img
                         src={selectedDoctor.user?.profilePicture || selectedDoctor.profilePicture || `https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face`}
                         className="w-12 h-12 rounded-xl object-cover border-2 border-white shadow"
@@ -73,7 +73,7 @@ export const ScheduleStep: React.FC<ScheduleStepProps> = ({
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-3">
                     <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">
                         Appointment Date
@@ -86,7 +86,7 @@ export const ScheduleStep: React.FC<ScheduleStepProps> = ({
                             setSelectedDate(e.target.value);
                             setSelectedTime("");
                         }}
-                        className="w-full border-2 border-slate-100 rounded-2xl px-5 py-4 text-slate-800 focus:outline-none focus:ring-4 focus:ring-rose-100 focus:border-rose-400 transition-all text-base font-bold bg-white shadow-sm"
+                        className="w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-100 focus:border-rose-400 transition-all text-sm font-bold bg-white shadow-sm"
                     />
                     {selectedDate && (
                         <p className="text-xs text-slate-400 font-bold pl-1">
@@ -106,7 +106,7 @@ export const ScheduleStep: React.FC<ScheduleStepProps> = ({
                                 <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-slate-200 inline-block" /> Booked/Past</span>
                             </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
+                        <div className="grid grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1">
                             {isDateUnavailable ? (
                                 <div className="col-span-3 py-10 text-center">
                                     <p className="text-rose-500 font-black uppercase tracking-widest text-xs">Doctor Unavailable</p>
@@ -134,9 +134,9 @@ export const ScheduleStep: React.FC<ScheduleStepProps> = ({
                                                 key={slot}
                                                 disabled={isDisabled}
                                                 onClick={() => setSelectedTime(slot)}
-                                                className={`py-3 px-2 rounded-xl border-2 font-black text-sm transition-all duration-200
+                                                className={`py-2 px-1.5 rounded-lg border-2 font-black text-xs transition-all duration-200
                             ${selectedTime === slot
-                                                        ? "border-rose-500 bg-rose-500 text-white shadow-lg shadow-rose-200 scale-105"
+                                                        ? "border-rose-500 bg-rose-500 text-white shadow scale-105"
                                                         : isBooked
                                                             ? "bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed"
                                                             : isPast
@@ -158,7 +158,7 @@ export const ScheduleStep: React.FC<ScheduleStepProps> = ({
             </div>
 
             {selectedDate && selectedTime && (
-                <div className="flex items-center gap-3 p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                <div className="flex items-center gap-2.5 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
                     <p className="text-sm font-black text-emerald-700">
                         Session locked for <span className="text-emerald-900">{selectedTime}</span> on {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}

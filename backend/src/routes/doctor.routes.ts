@@ -9,7 +9,6 @@ const prisma = new PrismaClient();
 
 doctorRoutes.post('/', createDoctorController);
 
-doctorRoutes.get('/:pageNumber/:pageSize', getDoctorsController);
 doctorRoutes.get('/profile/me', verifyAccessToken, getDoctorByUserIdController as any);
 
 // Get unavailable dates for a doctor (public - for booking UI)
@@ -24,6 +23,7 @@ doctorRoutes.get('/unavailable-dates/:doctorId', async (req: Request, res: Respo
     }
 });
 
+doctorRoutes.get('/:pageNumber/:pageSize', getDoctorsController);
 doctorRoutes.get('/:id', getDoctorByIdController);
 
 doctorRoutes.put('/:id', verifyAccessToken, updateDoctorController as any);

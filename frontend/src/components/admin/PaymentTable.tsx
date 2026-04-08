@@ -1,4 +1,4 @@
-import { Search, FileDown } from "lucide-react";
+import { Search, FileDown, CreditCard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Pagination } from "./Pagination";
 
@@ -30,71 +30,109 @@ export function PaymentTable({ appointments, search, setSearch, onExport }: Paym
         currentPage * itemsPerPage
     );
 
+    const statusColors: Record<string, string> = {
+        COMPLETED: "bg-emerald-50 text-emerald-600 border-emerald-100",
+        PENDING: "bg-amber-50 text-amber-600 border-amber-100",
+        FAILED: "bg-red-50 text-red-500 border-red-100",
+        REFUNDED: "bg-violet-50 text-violet-600 border-violet-100",
+        REFUND_REQUESTED: "bg-orange-50 text-orange-500 border-orange-100",
+    };
+
+    const dotColors: Record<string, string> = {
+        COMPLETED: "bg-emerald-500",
+        PENDING: "bg-amber-500 animate-pulse",
+        FAILED: "bg-red-500",
+        REFUNDED: "bg-violet-500",
+        REFUND_REQUESTED: "bg-orange-500",
+    };
+
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="bg-white p-2 rounded-[1.5rem] shadow-sm border border-slate-200 flex-1">
+            {/* Search & Export Bar */}
+            <div className="flex flex-col md:flex-row gap-3">
+                <div className="bg-white/80 backdrop-blur-xl p-2 rounded-2xl shadow-sm border border-slate-100 flex-1">
                     <div className="relative">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                         <input
                             type="text"
                             placeholder="Search by patient name or transaction ID..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-[1.25rem] text-sm focus:ring-4 focus:ring-rose-500/5 focus:bg-white transition-all font-bold text-slate-700 outline-none"
+                            className="w-full pl-11 pr-6 py-3.5 bg-slate-50/80 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-rose-500/10 focus:bg-white focus:border-rose-200 transition-all font-bold text-slate-700 outline-none"
                         />
                     </div>
                 </div>
                 {onExport && (
                     <button 
                         onClick={onExport}
-                        className="bg-slate-900 text-white px-8 py-4 rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+                        className="bg-slate-900 text-white px-7 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200/50"
                     >
-                        <FileDown size={18} />
+                        <FileDown size={16} className="text-rose-400" />
                         Export Ledger
                     </button>
                 )}
             </div>
 
-            <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
-                <div className="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
+            {/* Table */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="overflow-x-auto">
                     <table className="w-full text-left whitespace-nowrap">
                         <thead>
-                            <tr className="bg-slate-50 border-b border-slate-100 h-8">
-                                <th className="px-4 py-3 text-[10px] uppercase font-black tracking-widest text-slate-400">Transaction ID</th>
-                                <th className="px-4 py-3 text-[10px] uppercase font-black tracking-widest text-slate-400">Patient</th>
-                                <th className="px-4 py-3 text-[10px] uppercase font-black tracking-widest text-slate-400 text-center">Amount & Status</th>
-                                <th className="px-4 py-3 text-[10px] uppercase font-black tracking-widest text-slate-400 text-right">Date/Time</th>
+                            <tr className="bg-gradient-to-r from-slate-50 to-slate-50/50 border-b border-slate-100">
+                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400">Transaction</th>
+                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400">Patient</th>
+                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400">Amount</th>
+                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400 text-center">Status</th>
+                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400 text-right">Date/Time</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {paginatedPayments.length === 0 && (
                                 <tr>
-                                    <td colSpan={4} className="px-4 py-12 text-center text-slate-300 font-black uppercase tracking-widest text-[10px]">
-                                        No transactions recorded
+                                    <td colSpan={5} className="px-4 py-20 text-center">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <CreditCard size={40} className="text-slate-200" />
+                                            <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">No transactions recorded</p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
                             {paginatedPayments.map(a => (
-                                <tr key={a.id} className="hover:bg-slate-50/80 transition-colors group">
-                                    <td className="px-4 py-3">
-                                        <p className="font-bold text-slate-900 text-[13px]">{a.payment?.transactionId || 'PENDING'}</p>
-                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Method: {a.payment?.method}</p>
+                                <tr key={a.id} className="hover:bg-slate-50/70 transition-all group">
+                                    <td className="px-5 py-3.5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                                <CreditCard size={16} />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-slate-900 text-[13px] font-mono">{a.payment?.transactionId || 'PENDING'}</p>
+                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{a.payment?.method}</p>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <p className="font-bold text-slate-700 text-[13px]">{a.patient?.firstName} {a.patient?.lastName}</p>
-                                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">{a.patient?.user?.email}</p>
+                                    <td className="px-5 py-3.5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500 font-black text-[10px] border border-rose-100/50">
+                                                {(a.patient?.firstName || "P")[0]}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-slate-700 text-[13px]">{a.patient?.firstName} {a.patient?.lastName}</p>
+                                                <p className="text-[9px] font-bold text-slate-400 mt-0.5">{a.patient?.user?.email}</p>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td className="px-4 py-3 text-center">
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${a.payment?.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
-                                            a.payment?.status === 'REFUNDED' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-slate-50 text-slate-500 border border-slate-100'
-                                            }`}>
-                                            {a.payment?.status}
+                                    <td className="px-5 py-3.5">
+                                        <p className="font-black text-slate-900 text-sm">Rs. {a.payment?.amount || '—'}</p>
+                                    </td>
+                                    <td className="px-5 py-3.5 text-center">
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${statusColors[a.payment?.status] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full ${dotColors[a.payment?.status] || 'bg-slate-400'}`} />
+                                            {a.payment?.status === 'REFUND_REQUESTED' ? 'REFUND REQ' : a.payment?.status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <p className="font-bold text-slate-700 text-[11px]">{new Date(a.dateTime).toLocaleDateString()}</p>
-                                        <p className="text-[9px] text-slate-300 font-black uppercase tracking-widest mt-0.5">{new Date(a.dateTime).toLocaleTimeString()}</p>
+                                    <td className="px-5 py-3.5 text-right">
+                                        <p className="font-bold text-slate-700 text-[11px]">{new Date(a.dateTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{new Date(a.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                     </td>
                                 </tr>
                             ))}

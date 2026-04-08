@@ -69,7 +69,7 @@ const getAllAppointmentsController: RequestHandler = async (req, res) => {
             total = await prisma.appointment.count({ where: { doctorId: doctor.id } });
             const results = await prisma.appointment.findMany({
                 where: { doctorId: doctor.id },
-                include: { doctor: { include: { user: true } }, patient: true, department: true },
+                include: { doctor: { include: { user: true } }, patient: true, department: true, payment: true },
                 orderBy: { dateTime: 'desc' },
                 skip,
                 take: limit

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Search } from "lucide-react";
+import { Calendar, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -30,6 +30,8 @@ export default function Dashboard() {
     const [selectedApt, setSelectedApt] = useState<any>(null);
     const [apptSubFilter, setApptSubFilter] = useState<"UPCOMING" | "HISTORY" | "CANCELLED" | "MISSED">("UPCOMING");
     const [refundStatuses, setRefundStatuses] = useState<Record<number, any>>({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
 
     useEffect(() => {
         fetchAppointments();
@@ -166,6 +168,17 @@ export default function Dashboard() {
         }
         return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
     });
+
+    // Reset page on filter change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [apptSubFilter]);
+
+    const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
+    const paginatedAppointments = filteredAppointments.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const stats = {
         upcoming: appointments.filter(a => a.status === "BOOKED" || a.status === "PENDING").length,
@@ -307,8 +320,9 @@ export default function Dashboard() {
                                     </button>
                                 </motion.div>
                             ) : (
+                                <>
                                 <div className="grid grid-cols-1 gap-8">
-                                    {filteredAppointments.map(apt => (
+                                    {paginatedAppointments.map(apt => (
                                         <AppointmentCard
                                             key={apt.id}
                                             apt={apt}
@@ -324,6 +338,49 @@ export default function Dashboard() {
                                         />
                                     ))}
                                 </div>
+
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="flex items-center justify-center gap-2 mt-8">
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                            disabled={currentPage === 1}
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 disabled:opacity-25 transition-all border border-transparent hover:border-indigo-100 disabled:hover:bg-transparent disabled:hover:border-transparent"
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
+                                        {[...Array(totalPages)].map((_, i) => {
+                                            const page = i + 1;
+                                            if (totalPages > 7 && page !== 1 && page !== totalPages && Math.abs(page - currentPage) > 1) {
+                                                if (page === 2 || page === totalPages - 1) {
+                                                    return <span key={page} className="w-10 h-10 flex items-center justify-center text-slate-300 text-xs font-bold">{'...'}</span>;
+                                                }
+                                                return null;
+                                            }
+                                            return (
+                                                <button
+                                                    key={page}
+                                                    onClick={() => setCurrentPage(page)}
+                                                    className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${
+                                                        currentPage === page
+                                                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200"
+                                                            : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                                                    }`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            );
+                                        })}
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={currentPage === totalPages}
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 disabled:opacity-25 transition-all border border-transparent hover:border-indigo-100 disabled:hover:bg-transparent disabled:hover:border-transparent"
+                                        >
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    </div>
+                                )}
+                                </>
                             )}
                         </div>
                     </div>

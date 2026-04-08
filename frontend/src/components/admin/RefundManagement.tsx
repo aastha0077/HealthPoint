@@ -3,6 +3,7 @@ import { apiClient } from "@/apis/apis";
 import toast from "react-hot-toast";
 import { Clock, CheckCircle2, XCircle, Loader2, Upload, Eye, AlertTriangle, Banknote, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Pagination } from "./Pagination";
 
 interface RefundManagementProps {
     search: string;
@@ -18,6 +19,8 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
     const [processForm, setProcessForm] = useState({ status: "PROCESSING", proofUrl: "", adminNotes: "" });
     const [isProcessing, setIsProcessing] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
     const fetchRequests = async () => {
         setIsLoading(true);
@@ -73,6 +76,17 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
             r.appointment?.patient?.lastName?.toLowerCase().includes(search.toLowerCase());
         return matchesStatus && matchesSearch;
     });
+
+    const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+    const paginatedRequests = filteredRequests.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Reset page on filter/search change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, statusFilter]);
 
     const statusColors: Record<string, { bg: string; text: string; border: string; icon: any }> = {
         PENDING: { bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100", icon: Clock },
@@ -157,7 +171,7 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {filteredRequests.map(r => {
+                                {paginatedRequests.map(r => {
                                     const sc = statusColors[r.status] || statusColors.PENDING;
                                     const StatusIcon = sc.icon;
                                     return (
@@ -226,6 +240,16 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                         </table>
                     )}
                 </div>
+
+                {filteredRequests.length > 0 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        totalItems={filteredRequests.length}
+                        itemsPerPage={itemsPerPage}
+                    />
+                )}
             </div>
 
             {/* Process Refund Modal */}

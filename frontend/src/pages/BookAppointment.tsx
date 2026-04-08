@@ -154,7 +154,12 @@ export function BookAppointment() {
     }
   };
 
+  const latestSearchRequestRef = useRef(0);
+
   const fetchDoctors = async (pageToFetch: number, isNewSearch = false) => {
+    const requestId = ++latestSearchRequestRef.current;
+    const normalizedSearch = searchQuery.trim();
+
     if (pageToFetch > 1) setIsFetchingMore(true);
     else setLoadingDoctors(true);
 
@@ -163,11 +168,15 @@ export function BookAppointment() {
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
       const res = await apiClient.get(`/api/doctors/${pageToFetch}/${PAGE_SIZE}`, {
-        params: { search: searchQuery }
+        params: { search: normalizedSearch || undefined }
       });
+
+      // Ignore stale responses from older requests (e.g. when typing quickly).
+      if (requestId !== latestSearchRequestRef.current) return;
 
       const newDoctors = res.data.doctors || [];
       const total = res.data.totalDoctors || 0;
+      let combinedCount = newDoctors.length;
 
       if (isNewSearch) {
         setDoctors(newDoctors);
@@ -175,11 +184,16 @@ export function BookAppointment() {
         setDoctors(prev => {
           const existingIds = new Set(prev.map(d => d.id || d.doctorId));
           const uniqueNew = newDoctors.filter((d: any) => !existingIds.has(d.id || d.doctorId));
-          return [...prev, ...uniqueNew];
+          const mergedDoctors = [...prev, ...uniqueNew];
+          combinedCount = mergedDoctors.length;
+          return mergedDoctors;
         });
       }
 
-      setHasMore((isNewSearch ? 0 : doctors.length) + newDoctors.length < total);
+      if (isNewSearch) {
+        setPage(1);
+      }
+      setHasMore(combinedCount < total);
       setPage(pageToFetch);
     } catch {
       toast.error("Failed to load doctors");
@@ -353,22 +367,22 @@ export function BookAppointment() {
   };
 
   return (
-    <div className="min-h-screen bg-rose-50 py-10 px-4">
+    <div className="min-h-screen bg-rose-50 py-6 px-3 sm:px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-rose-800">Book an Appointment</h1>
+        <div className="text-center mb-5">
+          <h1 className="text-2xl md:text-3xl font-bold text-rose-800">Book an Appointment</h1>
           <p className="text-rose-400 mt-1">HealthPoint Medical Center</p>
         </div>
 
         {/* Stepper */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-rose-100">
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-4 border border-rose-100">
           <BookingStepper currentStep={step} />
         </div>
 
         {/* Main Step Container */}
-        <div className="bg-white rounded-[3rem] shadow-2xl shadow-rose-200/50 border border-white overflow-hidden">
-          <div className="p-8 md:p-12 min-h-[500px] flex flex-col">
+        <div className="bg-white rounded-3xl shadow-xl shadow-rose-200/40 border border-white overflow-hidden">
+          <div className="p-5 md:p-7 min-h-[430px] flex flex-col">
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
@@ -442,25 +456,25 @@ export function BookAppointment() {
               </motion.div>
             </AnimatePresence>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-12 pt-8 border-t border-rose-50/50">
-            <button
-              onClick={handleBack}
-              className={`flex items-center gap-2 px-8 py-4 rounded-[1.5rem] border-2 border-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-black transition-all ${step === 1 && !isAddingPatient ? "invisible" : ""}`}
-            >
-              <ChevronLeft size={20} /> Back
-            </button>
-            {step < 5 && (
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-7 pt-5 border-t border-rose-50/50">
               <button
-                onClick={handleNext}
-                disabled={isLoading}
-                className="flex items-center gap-3 px-12 py-4 bg-rose-600 text-white rounded-[1.5rem] font-black transition-all shadow-xl shadow-rose-200 hover:bg-rose-700 hover:-translate-y-1 active:scale-95"
+                onClick={handleBack}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-black transition-all ${step === 1 && !isAddingPatient ? "invisible" : ""}`}
               >
-                {isLoading ? <RefreshCw className="animate-spin" size={20} /> : step === 2 && isAddingPatient ? "Securely Save & Continue" : step === 4 ? "Proceed to Checkout" : "Continue"}
-                <ChevronRight size={20} />
+                <ChevronLeft size={18} /> Back
               </button>
-            )}
-          </div>
+              {step < 5 && (
+                <button
+                  onClick={handleNext}
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-7 py-2.5 bg-rose-600 text-white rounded-xl font-black transition-all shadow-lg shadow-rose-200 hover:bg-rose-700 hover:-translate-y-0.5 active:scale-95"
+                >
+                  {isLoading ? <RefreshCw className="animate-spin" size={18} /> : step === 2 && isAddingPatient ? "Save & Continue" : step === 4 ? "Proceed to Checkout" : "Continue"}
+                  <ChevronRight size={18} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -27,11 +27,11 @@ export const PatientStep: React.FC<PatientStepProps> = ({
     onNewPatientChange
 }) => {
     return (
-        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+        <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-rose-800">Select Patient</h2>
-                    <p className="text-sm text-slate-500">Who is this appointment for?</p>
+                    <h2 className="text-xl font-bold text-rose-800">Select Patient</h2>
+                    <p className="text-xs text-slate-500">Who is this appointment for?</p>
                 </div>
                 {!isAddingPatient && (
                     <div className="flex items-center gap-2">
@@ -44,7 +44,7 @@ export const PatientStep: React.FC<PatientStepProps> = ({
                         </button>
                         <button
                             onClick={() => setIsAddingPatient(true)}
-                            className="flex items-center gap-2 text-rose-600 bg-rose-50 px-4 py-2 rounded-xl text-sm font-bold border border-rose-100 hover:bg-rose-100 transition-all"
+                            className="flex items-center gap-2 text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg text-xs font-bold border border-rose-100 hover:bg-rose-100 transition-all"
                         >
                             <UserPlus size={16} /> Add New
                         </button>
@@ -65,7 +65,7 @@ export const PatientStep: React.FC<PatientStepProps> = ({
                     onCancel={() => setIsAddingPatient(false)}
                 />
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {patients.map((pat) => (
                         <PatientCard
                             key={pat.id}
@@ -76,10 +76,10 @@ export const PatientStep: React.FC<PatientStepProps> = ({
                     ))}
                     <div
                         onClick={() => setIsAddingPatient(true)}
-                        className="p-5 rounded-2xl border-2 border-dashed border-rose-200 hover:border-rose-400 hover:bg-rose-50 cursor-pointer transition-all flex items-center justify-center gap-3 text-rose-400 hover:text-rose-600"
+                        className="p-4 rounded-xl border-2 border-dashed border-rose-200 hover:border-rose-400 hover:bg-rose-50 cursor-pointer transition-all flex items-center justify-center gap-2 text-rose-400 hover:text-rose-600"
                     >
-                        <Plus size={24} />
-                        <span className="font-bold">Add New Patient</span>
+                        <Plus size={20} />
+                        <span className="font-bold text-sm">Add New Patient</span>
                     </div>
                 </div>
             )}

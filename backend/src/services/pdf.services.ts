@@ -76,28 +76,10 @@ export const generateTablePDF = async (title: string, columns: string[], data: a
  * --- FORMAL INVOICE GENERATION ---
  * Generates a professional invoice for an appointment.
  */
-export const generateInvoicePDF = async (appointmentId: number, res: Response) => {
-    const appointment = await prisma.appointment.findUnique({
-        where: { id: appointmentId },
-        include: {
-            doctor: { include: { user: true, department: true } },
-            patient: { include: { user: true } },
-            department: true,
-            payment: true
-        }
-    });
-
-    if (!appointment) throw new Error("Appointment not found");
-    const apt = appointment as any;
-
-    const doc = new PDFDocument({ margin: 50, size: "A4" });
-    const filename = `invoice_${apt.appointmentNumber}.pdf`;
-
-    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
-    res.setHeader("Content-Type", "application/pdf");
-
-    doc.pipe(res);
-
+/**
+ * Internal helper to draw the invoice content onto a PDF document.
+ */
+const drawInvoiceContent = (doc: PDFKit.PDFDocument, apt: any) => {
     // 1. Header & Brand
     doc.fillColor("#e11d48").fontSize(26).font("Helvetica-Bold").text("HealthPoint", 50, 45);
     doc.fillColor("#1e293b").fontSize(10).font("Helvetica").text("MEDICAL SERVICES INVOICE", { align: "right" });
@@ -174,6 +156,65 @@ export const generateInvoicePDF = async (appointmentId: number, res: Response) =
 
     doc.end();
 };
+
+/**
+ * --- FORMAL INVOICE GENERATION ---
+ * Generates a professional invoice for an appointment.
+ */
+export const generateInvoicePDF = async (appointmentId: number, res: Response) => {
+    const appointment = await prisma.appointment.findUnique({
+        where: { id: appointmentId },
+        include: {
+            doctor: { include: { user: true, department: true } },
+            patient: { include: { user: true } },
+            department: true,
+            payment: true
+        }
+    });
+
+    if (!appointment) throw new Error("Appointment not found");
+    const apt = appointment as any;
+
+    const doc = new PDFDocument({ margin: 50, size: "A4" });
+    const filename = `invoice_${apt.appointmentNumber}.pdf`;
+
+    res.setHeader("Content-Disposition", `attachment; filename=${filename}`);
+    res.setHeader("Content-Type", "application/pdf");
+
+    doc.pipe(res);
+    drawInvoiceContent(doc, apt);
+};
+
+/**
+ * Generates an appointment invoice PDF and returns it as a Buffer.
+ * Useful for email attachments.
+ */
+export const getAppointmentPDFBuffer = async (appointmentId: number): Promise<Buffer> => {
+    const appointment = await prisma.appointment.findUnique({
+        where: { id: appointmentId },
+        include: {
+            doctor: { include: { user: true, department: true } },
+            patient: { include: { user: true } },
+            department: true,
+            payment: true
+        }
+    });
+
+    if (!appointment) throw new Error("Appointment not found");
+    const apt = appointment as any;
+
+    return new Promise((resolve, reject) => {
+        const doc = new PDFDocument({ margin: 50, size: "A4" });
+        const buffers: Buffer[] = [];
+        
+        doc.on("data", (chunk) => buffers.push(chunk));
+        doc.on("end", () => resolve(Buffer.concat(buffers)));
+        doc.on("error", (err) => reject(err));
+
+        drawInvoiceContent(doc, apt);
+    });
+};
+
 
 export const generateAppointmentPDF = async (appointmentId: number, res: any) => {
     // Keep internal for backward compatibility or refactor to invoice

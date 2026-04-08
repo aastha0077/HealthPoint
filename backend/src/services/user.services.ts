@@ -163,18 +163,63 @@ export async function getDoctors(pageNumber: number, pageSize: number, searchTer
         where.departmentId = departmentId;
     }
 
-    if (searchTerm) {
-        where.OR = [
-            { speciality: { contains: searchTerm, mode: 'insensitive' } },
-            {
-                user: {
-                    OR: [
-                        { firstName: { contains: searchTerm, mode: 'insensitive' } },
-                        { lastName: { contains: searchTerm, mode: 'insensitive' } }
-                    ]
+    const normalizedSearch = (searchTerm || "")
+        .toLowerCase()
+        .replace(/[^\w\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    const ignoredTokens = new Set(["dr", "doctor", "doc", "mr", "mrs", "ms"]);
+    const cleanedTokens = normalizedSearch
+        .split(/\s+/)
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0 && !ignoredTokens.has(t));
+
+    if (normalizedSearch) {
+        // If only filler tokens were typed, skip search filtering instead of returning wrong/empty results.
+        if (cleanedTokens.length === 0) {
+            const skip = isNaN(pageNumber) || isNaN(pageSize) ? 0 : Math.max(0, (pageNumber - 1) * pageSize);
+            const take = isNaN(pageSize) || pageSize <= 0 ? 10 : pageSize;
+            const baseResult = await prisma.doctor.findMany({
+                where,
+                orderBy: [
+                    { user: { firstName: "asc" } },
+                    { user: { lastName: "asc" } }
+                ],
+                skip,
+                take,
+                select: {
+                    id: true,
+                    user: true,
+                    speciality: true,
+                    bio: true,
+                    available: true,
+                    department: true,
+                    timeSlots: {
+                        select: {
+                            Time: {
+                                select: {
+                                    time: true
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-        ];
+            });
+            const doctors = baseResult.map(doc =>
+                ({ ...doc.user, doctorId: doc.id, speciality: doc.speciality, bio: doc.bio, available: doc.available, department: doc.department, timeSlots: doc.timeSlots.map(ts => ts.Time.time) })
+            );
+            const totalDoctors = await prisma.doctor.count({ where });
+            return { doctors, totalDoctors };
+        }
+
+        // Use broad DB filtering (ANY token), then rank in-memory for best ordering.
+        where.OR = cleanedTokens.flatMap((token) => ([
+            { speciality: { contains: token, mode: 'insensitive' } },
+            { bio: { contains: token, mode: 'insensitive' } },
+            { department: { name: { contains: token, mode: 'insensitive' } } },
+            { user: { firstName: { contains: token, mode: 'insensitive' } } },
+            { user: { lastName: { contains: token, mode: 'insensitive' } } }
+        ]));
     }
 
     const skip = isNaN(pageNumber) || isNaN(pageSize) ? 0 : Math.max(0, (pageNumber - 1) * pageSize);
@@ -182,8 +227,11 @@ export async function getDoctors(pageNumber: number, pageSize: number, searchTer
 
     const result = await prisma.doctor.findMany({
         where,
-        skip,
-        take,
+        // Stable default ordering when there is no search query.
+        orderBy: [
+            { user: { firstName: "asc" } },
+            { user: { lastName: "asc" } }
+        ],
         select: {
             id: true,
             user: true,
@@ -203,11 +251,61 @@ export async function getDoctors(pageNumber: number, pageSize: number, searchTer
         }
     });
 
-    const doctors = result.map(doc =>
+    const mappedDoctors = result.map(doc =>
         ({ ...doc.user, doctorId: doc.id, speciality: doc.speciality, bio: doc.bio, available: doc.available, department: doc.department, timeSlots: doc.timeSlots.map(ts => ts.Time.time) })
     );
 
-    const totalDoctors = await prisma.doctor.count({ where });
+    let doctors = mappedDoctors;
+    if (normalizedSearch) {
+        const tokens = cleanedTokens;
+        const searchValue = tokens.join(" ");
+        if (!searchValue) {
+            const totalDoctors = await prisma.doctor.count({ where });
+            doctors = mappedDoctors.slice(skip, skip + take);
+            return { doctors, totalDoctors };
+        }
+
+        // Rank best matches first so users don't see "technically matched but irrelevant" doctors on top.
+        doctors = [...mappedDoctors].sort((a: any, b: any) => {
+            const score = (doc: any) => {
+                const firstName = (doc?.firstName || "").toLowerCase();
+                const lastName = (doc?.lastName || "").toLowerCase();
+                const fullName = `${firstName} ${lastName}`.trim();
+                const speciality = (doc?.speciality || "").toLowerCase();
+                const bio = (doc?.bio || "").toLowerCase();
+                const department = (doc?.department?.name || "").toLowerCase();
+
+                let total = 0;
+                if (fullName === searchValue) total += 120;
+                if (firstName === searchValue || lastName === searchValue) total += 100;
+                if (fullName.startsWith(searchValue)) total += 80;
+                if (speciality === searchValue) total += 70;
+                if (department === searchValue) total += 65;
+
+                tokens.forEach((token) => {
+                    if (firstName === token || lastName === token) total += 45;
+                    if (firstName.startsWith(token) || lastName.startsWith(token)) total += 30;
+                    if (fullName.includes(token)) total += 20;
+                    if (speciality.includes(token)) total += 18;
+                    if (department.includes(token)) total += 16;
+                    if (bio.includes(token)) total += 8;
+                });
+
+                return total;
+            };
+
+            const scoreDiff = score(b) - score(a);
+            if (scoreDiff !== 0) return scoreDiff;
+
+            // Deterministic tie-breaker.
+            const aName = `${a?.firstName || ""} ${a?.lastName || ""}`.trim().toLowerCase();
+            const bName = `${b?.firstName || ""} ${b?.lastName || ""}`.trim().toLowerCase();
+            return aName.localeCompare(bName);
+        });
+    }
+
+    const totalDoctors = doctors.length;
+    doctors = doctors.slice(skip, skip + take);
 
     return { doctors, totalDoctors };
 }

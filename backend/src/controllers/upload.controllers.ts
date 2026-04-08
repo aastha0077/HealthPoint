@@ -4,13 +4,21 @@ import fs from "fs";
 
 export async function uploadFileController(req: Request, res: Response): Promise<void> {
     try {
-        if (!req.file) {
+        const files = req.files as
+            | { [fieldname: string]: Express.Multer.File[] }
+            | Express.Multer.File[]
+            | undefined;
+
+        const uploadedFile =
+            req.file ||
+            (Array.isArray(files) ? files[0] : files?.file?.[0] || files?.image?.[0]);
+
+        if (!uploadedFile) {
             res.status(400).json({ message: "No file uploaded" });
             return;
         }
 
-        // The file is in req.file (from multer)
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        const result = await cloudinary.uploader.upload(uploadedFile.path, {
             folder: "healthpoint",
             resource_type: "auto"
         });
@@ -18,7 +26,7 @@ export async function uploadFileController(req: Request, res: Response): Promise
         console.log(`[UploadController] Cloudinary Success:`, result.secure_url);
 
         // Delete local temp file
-        fs.unlinkSync(req.file.path);
+        fs.unlinkSync(uploadedFile.path);
 
         res.json({
             success: true,
