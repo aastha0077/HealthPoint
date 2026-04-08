@@ -10,11 +10,9 @@ export async function uploadFileController(req: Request, res: Response): Promise
         }
 
         // The file is in req.file (from multer)
-        const isPdf = req.file.mimetype === "application/pdf" || req.file.originalname.toLowerCase().endsWith(".pdf");
-        
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: "healthpoint",
-            resource_type: isPdf ? "image" : "video"
+            resource_type: "auto"
         });
         
         console.log(`[UploadController] Cloudinary Success:`, result.secure_url);

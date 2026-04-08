@@ -49,15 +49,15 @@ async function updateDepartmentController(req: Request, res: Response) {
     }
 }
 
+import { cascadeDeleteDepartment } from "../services/cascadeDelete.services";
+
 async function deleteDepartmentController(req: Request, res: Response) {
     try {
         const { id } = req.params;
-        await prisma.department.delete({
-            where: { id: parseInt(id) }
-        });
-        res.status(204).send();
+        await cascadeDeleteDepartment(parseInt(id));
+        res.status(200).json({ message: "Department deleted successfully" });
     } catch (error: any) {
-        res.status(400).json({ error: error.message });
+        res.status(error.message.includes("assigned") ? 400 : (error.message === "Department not found" ? 404 : 500)).json({ error: error.message });
     }
 }
 

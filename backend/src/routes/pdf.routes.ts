@@ -1,7 +1,14 @@
 import { Router } from 'express';
-import { downloadAppointmentPDF } from '../controllers/pdf.controllers';
+import { downloadAppointmentPDF, exportTableData, downloadInvoice } from '../controllers/pdf.controllers';
+import { verifyAccessToken } from '../middlewares/auth.middleware';
 
 export const pdfRoutes = Router();
 
-// Endpoint returning PDF file, likely secured by access token
-pdfRoutes.get('/appointment/:id', downloadAppointmentPDF);
+// Appointment Summary
+pdfRoutes.get('/appointment/:id', verifyAccessToken, downloadAppointmentPDF);
+
+// Formal Invoice
+pdfRoutes.get('/invoice/:id', verifyAccessToken, downloadInvoice);
+
+// Generic Table Export (Admin/Doctor)
+pdfRoutes.post('/table-export', verifyAccessToken, exportTableData);
