@@ -21,9 +21,9 @@ export function MyChats() {
         setIsLoading(true);
         try {
             const res = await apiClient.get("/api/appointments/user");
-            // We want both BOOKED (upcoming) and COMPLETED (history)
+            // Include all chat-eligible statuses (exclude only CANCELLED)
             const chatEligible = res.data.filter((a: any) => 
-                a.status === "BOOKED" || a.status === "COMPLETED"
+                a.status !== "CANCELLED"
             );
             setAppointments(chatEligible);
         } catch {
@@ -34,7 +34,8 @@ export function MyChats() {
     };
 
     const isChatActive = (apt: any) => {
-        if (apt.status === "BOOKED") return true;
+        if (["BOOKED", "IN_PROGRESS", "WAITING"].includes(apt.status)) return true;
+        if (apt.status === "NO_SHOW") return true;
         if (apt.status === "COMPLETED" && apt.completedAt) {
             const completed = new Date(apt.completedAt).getTime();
             const now = new Date().getTime();
@@ -50,7 +51,12 @@ export function MyChats() {
 
     const getTimeStatus = (apt: any) => {
         if (apt.status === "BOOKED") return { label: "Session Pending", color: "text-amber-600 bg-amber-50 border-amber-100" };
+        if (apt.status === "IN_PROGRESS") return { label: "In Progress", color: "text-blue-600 bg-blue-50 border-blue-100" };
+        if (apt.status === "WAITING") return { label: "Waiting", color: "text-violet-600 bg-violet-50 border-violet-100" };
+        if (apt.status === "NO_SHOW") return { label: "No Show", color: "text-rose-600 bg-rose-50 border-rose-100" };
         
+        if (!apt.completedAt) return { label: "Archived History", color: "text-slate-400 bg-slate-50 border-slate-100" };
+
         const completed = new Date(apt.completedAt).getTime();
         const now = new Date().getTime();
         const diffMs = (completed + 24 * 60 * 60 * 1000) - now;

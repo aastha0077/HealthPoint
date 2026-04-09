@@ -8,7 +8,7 @@ export async function saveMessage(senderId: number, receiverId: number, content:
     const appointment = await prisma.appointment.findUnique({ where: { id: appointmentId } });
     if (!appointment) throw new Error("Appointment not found");
 
-    const allowedStatuses = ["BOOKED", "IN_PROGRESS", "WAITING"];
+    const allowedStatuses = ["BOOKED", "IN_PROGRESS", "WAITING", "NO_SHOW"];
     if (appointment.status === "CANCELLED") {
         throw new Error("Chat is not available for cancelled appointments");
     }
@@ -204,5 +204,25 @@ export async function editMessage(messageId: number, userId: number, newContent:
             content: newContent,
             isEdited: true // I'll need to add this field to prisma or just skip it if not in schema yet
         }
+    });
+}
+
+export async function clearChatHistory(appointmentId: number, userId: number) {
+    const appointment = await prisma.appointment.findUnique({
+        where: { id: appointmentId },
+        include: { doctor: true, patient: true }
+    });
+
+    if (!appointment) throw new Error("Appointment not found");
+
+    const isPatient = appointment.patient?.userId === userId;
+    const isDoctor = appointment.doctor?.userId === userId;
+
+    if (!isPatient && !isDoctor) {
+        throw new Error("Unauthorized to delete this chat history");
+    }
+
+    return await (prisma as any).chatMessage.deleteMany({
+        where: { appointmentId }
     });
 }

@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { apiClient } from "@/apis/apis";
-import { Send, X, Clock, User as UserIcon, Paperclip, HelpCircle } from "lucide-react";
+import { Send, X, Clock, User as UserIcon, Paperclip, HelpCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { useChat } from "@/hooks/useChat";
 import { ChatMessage } from "@/components/chat/ChatMessage";
+import { ConfirmModal } from "@/components/admin/ConfirmModal";
 
 interface DoctorChatProps {
     appointmentId: number;
@@ -21,6 +22,9 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
     const [input, setInput] = useState("");
     const [timeLeft, setTimeLeft] = useState<string>("");
     const [chatExpired, setChatExpired] = useState(false);
+    const [confirmModal, setConfirmModal] = useState<{ show: boolean; title: string; message: string; action: () => void }>({
+        show: false, title: "", message: "", action: () => {}
+    });
 
     const {
         messages,
@@ -32,6 +36,7 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
         sendMessage,
         deleteMessage,
         editMessage,
+        clearHistory,
         editingMsg,
         setEditingMsg,
         editInput,
@@ -130,6 +135,23 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
                             </span>
                         </div>
                     </div>
+                    {(!chatExpired && messages.length > 0) && (
+                        <button 
+                            onClick={() => setConfirmModal({
+                                show: true,
+                                title: "Clear Clinical Record",
+                                message: "Are you sure you want to permanently delete all messages and media in this consultation?",
+                                action: async () => {
+                                    await clearHistory();
+                                    setConfirmModal(prev => ({ ...prev, show: false }));
+                                }
+                            })}
+                            className="p-3 bg-white/10 hover:bg-rose-500/20 rounded-2xl transition-all text-white border border-white/10 shadow-lg group z-10"
+                            title="Clear Chat History"
+                        >
+                            <Trash2 size={20} className="group-hover:text-rose-200 transition-colors" />
+                        </button>
+                    )}
                     <button 
                         onClick={onClose} 
                         className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all text-white border border-white/10 shadow-lg group z-10"
@@ -229,6 +251,14 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
                          </div>
                     </div>
                 )}
+                
+                <ConfirmModal
+                    show={confirmModal.show}
+                    title={confirmModal.title}
+                    message={confirmModal.message}
+                    onConfirm={confirmModal.action}
+                    onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+                />
             </motion.div>
         </motion.div>
     );

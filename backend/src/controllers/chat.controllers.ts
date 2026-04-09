@@ -104,3 +104,27 @@ export async function getDoctorConversationsController(req: Request, res: Respon
         res.status(500).json({ error: error.message });
     }
 }
+
+export async function clearChatHistoryController(req: Request, res: Response) {
+    try {
+        const appointmentId = parseInt(req.params.appointmentId);
+        const userId = req.user?.id;
+
+        if (isNaN(appointmentId)) {
+            res.status(400).json({ error: "Invalid appointment ID" });
+            return;
+        }
+
+        if (!userId) {
+            res.status(401).json({ error: "Unauthorized" });
+            return;
+        }
+
+        const { clearChatHistory } = require("../services/chat.services");
+        await clearChatHistory(appointmentId, userId);
+
+        res.status(200).json({ message: "Chat history cleared successfully" });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}

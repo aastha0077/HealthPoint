@@ -190,6 +190,17 @@ export function useChat(appointmentId: string | number, user: any) {
         setEditInput("");
     };
 
+    const clearHistory = async () => {
+        try {
+            await apiClient.delete(`/api/chat/appointment/${appointmentId}`);
+            setMessages([]);
+            toast.success("Chat history cleared successfully");
+        } catch (error) {
+            console.error("Failed to clear chat history", error);
+            toast.error("Failed to clear chat history");
+        }
+    };
+
     return {
         messages,
         setMessages,
@@ -204,6 +215,7 @@ export function useChat(appointmentId: string | number, user: any) {
         sendMessage,
         deleteMessage,
         editMessage,
+        clearHistory,
         editingMsg,
         setEditingMsg,
         editInput,
