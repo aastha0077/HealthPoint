@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useSearchParams, Navigate, useNavigate } from "react-router";
 import { apiClient } from "@/apis/apis";
-import { Send, User as UserIcon, ArrowLeft, Paperclip, Clock, HelpCircle, Activity, Mic, Volume2 } from "lucide-react";
+import { Send, User as UserIcon, ArrowLeft, Paperclip, Clock, HelpCircle, Activity, Mic, Volume2, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { useChat } from "@/hooks/useChat";
 import { ChatMessage } from "@/components/chat/ChatMessage";
+import { ConfirmModal } from "@/components/admin/ConfirmModal";
 
 export default function Chat() {
     const { appointmentId } = useParams();
@@ -22,6 +23,9 @@ export default function Chat() {
     const [input, setInput] = useState("");
     const [timeLeft, setTimeLeft] = useState<string>("");
     const [chatExpired, setChatExpired] = useState(false);
+    const [confirmModal, setConfirmModal] = useState<{ show: boolean; title: string; message: string; action: () => void }>({
+        show: false, title: "", message: "", action: () => {}
+    });
 
     // Redirect doctors to professional panel view
     useEffect(() => {
@@ -42,6 +46,7 @@ export default function Chat() {
         completedAt,
         deleteMessage,
         editMessage,
+        clearHistory,
         editingMsg,
         setEditingMsg,
         editInput,
@@ -184,6 +189,23 @@ export default function Chat() {
                             {timeLeft || "Active Consultation"}
                         </p>
                     </div>
+                    {(!chatExpired && (messages.length > 0 || audioRecordingUrl)) && (
+                        <button
+                            onClick={() => setConfirmModal({
+                                show: true,
+                                title: "Clear Chat History",
+                                message: "Are you sure you want to permanently delete all messages and media in this consultation? This action cannot be undone.",
+                                action: async () => {
+                                    await clearHistory();
+                                    setConfirmModal(prev => ({ ...prev, show: false }));
+                                }
+                            })}
+                            className={`p-3 rounded-2xl transition-all border border-transparent ${isDoctor ? 'hover:bg-rose-50 text-slate-400 hover:text-rose-600 hover:border-rose-100' : 'hover:bg-rose-50 text-slate-400 hover:text-rose-600 hover:border-rose-100'}`}
+                            title="Clear Chat History"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    )}
                 </div>
                 
                 {/* Live Consultation Banner */}
@@ -355,6 +377,14 @@ export default function Chat() {
                          </div>
                     </div>
                 )}
+                
+                <ConfirmModal
+                    show={confirmModal.show}
+                    title={confirmModal.title}
+                    message={confirmModal.message}
+                    onConfirm={confirmModal.action}
+                    onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+                />
             </motion.div>
         </div>
     );

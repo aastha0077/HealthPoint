@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getConversationController, askGeminiController, getAppointmentChatController, getDoctorConversationsController } from "../controllers/chat.controllers";
+import { getConversationController, askGeminiController, getAppointmentChatController, getDoctorConversationsController, clearChatHistoryController } from "../controllers/chat.controllers";
 import { verifyAccessToken } from "../middlewares/auth.middleware";
 
 const chatRoutes = Router();
@@ -9,6 +9,7 @@ chatRoutes.get('/conversation/:otherUserId', verifyAccessToken, getConversationC
 
 // Chat for a specific appointment
 chatRoutes.get('/appointment/:appointmentId', verifyAccessToken, getAppointmentChatController as any);
+chatRoutes.delete('/appointment/:appointmentId', verifyAccessToken, clearChatHistoryController as any);
 
 // Get list of conversations for a doctor
 chatRoutes.get('/conversations', verifyAccessToken, getDoctorConversationsController);

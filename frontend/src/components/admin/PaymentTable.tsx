@@ -63,7 +63,7 @@ export function PaymentTable({ appointments, search, setSearch, onExport }: Paym
                     </div>
                 </div>
                 {onExport && (
-                    <button 
+                    <button
                         onClick={onExport}
                         className="bg-slate-900 text-white px-7 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200/50"
                     >
