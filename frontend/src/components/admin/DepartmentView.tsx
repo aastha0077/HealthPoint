@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlignLeft, Plus, Trash2, Edit2, XCircle, FileDown } from "lucide-react";
+import { AlignLeft, Plus, Trash2, Edit2, XCircle, FileDown, Activity, Building2, Stethoscope, ChevronDown } from "lucide-react";
 import { apiClient } from "@/apis/apis";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "./ConfirmModal";
@@ -15,6 +15,7 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [editingId, setEditingId] = useState<number | null>(null);
+    const [selectedDept, setSelectedDept] = useState<any>(null);
     const [confirmModal, setConfirmModal] = useState<{
         show: boolean; title: string; message: string; onConfirm: () => void; type: 'DANGER' | 'WARNING' | 'INFO';
     }>({ show: false, title: "", message: "", onConfirm: () => { }, type: 'INFO' });
@@ -26,6 +27,7 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
         try {
             const res = await apiClient.get("/api/departments");
             setDepartments(res.data || []);
+            if (res.data?.length > 0 && !selectedDept) setSelectedDept(res.data[0]);
         } catch {
             toast.error("Failed to load departments");
         } finally {
@@ -75,11 +77,9 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
         if (!targetDeptId) return toast.error("Please select a target specialty");
         setIsMerging(true);
         try {
-            // 1. Reassign doctors
             await apiClient.post(`/api/admin/departments/${mergeModal.sourceId}/reassign-doctors`, { 
                 targetId: parseInt(targetDeptId) 
             });
-            // 2. Delete department
             await apiClient.delete(`/api/departments/${mergeModal.sourceId}`);
             toast.success("Specialties merged and unit removed");
             setMergeModal({ show: false, sourceId: 0, sourceName: "" });
@@ -96,7 +96,6 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
         setEditingId(dept.id);
         setName(dept.name);
         setDescription(dept.description);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const resetForm = () => {
@@ -106,154 +105,183 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-                <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-                        <div>
-                            <h3 className="text-xl font-black text-slate-900 tracking-tight">Practice Specialities</h3>
-                            <p className="text-[10px] text-rose-500 font-bold uppercase tracking-[0.3em] mt-1">Medical Departments</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            {/* List Section */}
+            <div className="space-y-6">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg">
+                            <Activity size={20} />
                         </div>
-                        <div className="flex items-center gap-4">
-                            {onExport && (
-                                <button 
-                                    onClick={onExport}
-                                    className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm hover:text-rose-500 transition-colors"
-                                    title="Export Specials Registry"
-                                >
-                                    <FileDown size={20} />
-                                </button>
-                            )}
-                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
-                                <AlignLeft size={20} />
-                            </div>
+                        <div>
+                            <h3 className="text-xl font-black text-slate-900 tracking-tight">Practice Units</h3>
+                            <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-0.5">Management Registry</p>
                         </div>
                     </div>
-                    <div className="divide-y divide-slate-50 max-h-[650px] overflow-y-auto custom-scrollbar">
-                        {loading ? (
-                            <div className="p-20 text-center">
-                                <div className="w-10 h-10 border-4 border-rose-500/10 border-t-rose-500 rounded-full animate-spin mx-auto mb-4" />
-                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Compiling Units...</p>
-                            </div>
-                        ) : departments.map((dept, idx) => (
-                            <div key={dept.id} className="px-8 py-5 flex items-center justify-between group hover:bg-slate-50/50 transition-all border-l-4 border-transparent hover:border-rose-500">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 font-black text-lg group-hover:scale-110 transition-transform shadow-sm border border-rose-100">
-                                        {dept.name[0]}
+                    {onExport && (
+                        <button onClick={onExport} className="p-2.5 bg-white rounded-xl border border-slate-100 shadow-sm text-slate-400 hover:text-rose-500 transition-all">
+                            <FileDown size={18} />
+                        </button>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                    {loading ? (
+                        <div className="p-12 text-center text-slate-300 font-bold">Compiling Units...</div>
+                    ) : departments.map((dept) => (
+                        <motion.div
+                            layout
+                            key={dept.id}
+                            className={`group p-4 rounded-2xl border transition-all cursor-pointer ${
+                                selectedDept?.id === dept.id 
+                                ? 'bg-slate-900 border-slate-900 shadow-xl shadow-slate-200' 
+                                : 'bg-white border-slate-100 hover:border-rose-100'
+                            }`}
+                            onClick={() => setSelectedDept(dept)}
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                                        selectedDept?.id === dept.id ? 'bg-white/10 text-white' : 'bg-rose-50 text-rose-500'
+                                    }`}>
+                                        <Building2 size={20} />
                                     </div>
-                                    <div className="min-w-0">
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <h4 className="text-base font-black text-slate-900 truncate tracking-tight">{dept.name}</h4>
-                                            <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[8px] font-black uppercase tracking-widest">#{idx + 1}</span>
-                                        </div>
-                                        <p className="text-sm text-slate-500 font-medium leading-relaxed truncate max-w-md italic">"{dept.description}"</p>
-                                        <div className="flex items-center gap-4 mt-2">
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{dept.doctorCount || 0} Professional{dept.doctorCount !== 1 ? 's' : ''}</span>
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded border border-slate-100">{dept.appointmentCount || 0} Procedure{dept.appointmentCount !== 1 ? 's' : ''}</span>
-                                        </div>
+                                    <div>
+                                        <h4 className={`text-sm font-black transition-colors ${
+                                            selectedDept?.id === dept.id ? 'text-white' : 'text-slate-900'
+                                        }`}>{dept.name}</h4>
+                                        <p className={`text-[9px] font-black uppercase tracking-widest mt-0.5 ${
+                                            selectedDept?.id === dept.id ? 'text-slate-400' : 'text-slate-400'
+                                        }`}>
+                                            {dept.doctors?.length || 0} Specialised Personnel
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
                                     <button 
-                                        onClick={() => startEdit(dept)}
-                                        className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm border border-indigo-100"
-                                        title="Configure Unit"
+                                        onClick={(e) => { e.stopPropagation(); startEdit(dept); }}
+                                        className={`p-2 rounded-lg transition-all ${
+                                            selectedDept?.id === dept.id ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white'
+                                        }`}
                                     >
-                                        <Edit2 size={16} />
+                                        <Edit2 size={12} />
                                     </button>
                                     <button 
-                                        onClick={() => setConfirmModal({
+                                        onClick={(e) => { e.stopPropagation(); setConfirmModal({
                                             show: true,
-                                            title: "Dismantle Specialty Unit",
-                                            message: `Confirm removal of the ${dept.name} unit. This action will detach all associated personnel and patient record links.`,
+                                            title: "Disband Department",
+                                            message: `Are you sure you want to remove the ${dept.name} department? This will affect personnel access.`,
                                             type: 'DANGER',
                                             onConfirm: () => handleDelete(dept.id)
-                                        })} 
-                                        className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-600 hover:text-white transition-all shadow-sm border border-rose-100"
-                                        title="Dismantle Unit"
+                                        }); }}
+                                        className={`p-2 rounded-lg transition-all ${
+                                            selectedDept?.id === dept.id ? 'bg-rose-500/20 text-rose-300 hover:bg-rose-500/30' : 'bg-slate-50 text-slate-400 hover:bg-rose-600 hover:text-white'
+                                        }`}
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={12} />
                                     </button>
                                 </div>
                             </div>
-                        ))}
-                        {!loading && departments.length === 0 && (
-                            <div className="p-20 text-center opacity-30">
-                                <AlignLeft size={48} className="mx-auto mb-4" />
-                                <p className="text-xs font-black uppercase tracking-[0.3em]">No Units Established</p>
-                            </div>
-                        )}
-                    </div>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
 
-            <div className="space-y-8">
-                <div className={`${editingId ? 'bg-indigo-900 ring-4 ring-indigo-500/20' : 'bg-slate-900'} rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden transition-all duration-500`}>
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl" />
-                    <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-xl font-black flex items-center gap-3">
-                                <div className={`${editingId ? 'bg-indigo-500' : 'bg-rose-600'} w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg shadow-black/20`}>
-                                    {editingId ? <Edit2 size={20} /> : <Plus size={20} />}
-                                </div>
-                                {editingId ? "Update Unit" : "New Speciality"}
-                            </h3>
-                            {editingId && (
-                                <button onClick={resetForm} className="text-indigo-300 hover:text-white transition-colors">
-                                    <XCircle size={24} />
-                                </button>
-                            )}
+            {/* Form & Personnel Section */}
+            <div className="space-y-6">
+                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+                    
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/5">
+                            <Plus size={20} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-black text-slate-900">{editingId ? 'Configure Unit' : 'Establish Unit'}</h3>
+                            <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">Registry Module</p>
+                        </div>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="space-y-2">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Nomenclature</label>
+                            <input 
+                                type="text" 
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="e.g. Cardiological Institute"
+                                className="w-full bg-slate-50 border-2 border-transparent rounded-xl p-3 text-xs font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none transition-all text-slate-700" 
+                                required
+                            />
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Speciality Title</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Neurosurgery"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className={`${editingId ? 'bg-indigo-800/50' : 'bg-slate-800/50'} w-full border border-white/5 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-rose-500/20 outline-none transition-all placeholder:text-slate-500`}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Practice Description</label>
-                                <textarea
-                                    placeholder="Brief overview of clinical focus..."
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    className={`${editingId ? 'bg-indigo-800/50' : 'bg-slate-800/50'} w-full border border-white/5 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-rose-500/20 outline-none min-h-[150px] transition-all resize-none placeholder:text-slate-500`}
-                                    required
-                                />
-                            </div>
-                            <button 
-                                type="submit" 
-                                className={`w-full py-4 ${editingId ? 'bg-white text-indigo-900' : 'bg-rose-600 text-white'} rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-black/20 mt-4`}
-                            >
-                                {editingId ? "Commit Changes" : "Establish Department"}
+                        <div className="space-y-2">
+                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Directive / Bio</label>
+                            <textarea 
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Describe clinical scope..."
+                                className="w-full bg-slate-50 border-2 border-transparent rounded-2xl p-4 text-xs font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none min-h-[100px] transition-all text-slate-700 leading-relaxed resize-none"
+                                required
+                            />
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                            {editingId && (
+                                <button type="button" onClick={resetForm} className="flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 hover:bg-slate-100 transition-all border border-slate-100 shadow-sm">Reset</button>
+                            )}
+                            <button type="submit" disabled={loading} className={`py-3 rounded-xl text-[9px] font-black uppercase tracking-widest text-white transition-all shadow-xl active:scale-95 disabled:opacity-50 ${editingId ? 'bg-slate-900 hover:bg-slate-800 shadow-slate-200 flex-1' : 'bg-rose-500 hover:bg-rose-600 shadow-rose-200 w-full'}`}>
+                                {loading ? 'Processing...' : editingId ? 'Synchronize Unit' : 'Affirm Department'}
                             </button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
 
-                <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 px-1">Unit Protocol</h4>
-                    <ul className="space-y-4">
-                        {[
-                            "All titles must be professional",
-                            "Description informs patient triage",
-                            "Deleting removes only the entity",
-                            "Linked records remain archived"
-                        ].map((t, i) => (
-                            <li key={i} className="flex items-center gap-3 text-xs font-bold text-slate-600">
-                                <div className="w-1.5 h-1.5 bg-rose-500 rounded-full" />
-                                {t}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                {selectedDept && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-slate-900 p-6 rounded-[2rem] text-white shadow-2xl relative overflow-hidden"
+                    >
+                        <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full -mb-24 -mr-24 blur-2xl" />
+                        <div className="flex items-center justify-between mb-6 relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+                                    <Stethoscope size={20} className="text-rose-400" />
+                                </div>
+                                <h4 className="text-lg font-black">{selectedDept.name} Personnel</h4>
+                            </div>
+                            <div className="px-3 py-1.5 bg-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest border border-white/5">
+                                {selectedDept.doctors?.length || 0} Staff
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 relative z-10">
+                            {selectedDept.doctors?.length > 0 ? selectedDept.doctors.map((doc: any) => (
+                                <div key={doc.id} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-xl transition-all hover:bg-white/10">
+                                    <div className="flex items-center gap-3">
+                                        {doc.user?.profilePicture ? (
+                                            <img src={doc.user.profilePicture} className="w-8 h-8 rounded-lg object-cover ring-2 ring-white/10" alt={doc.user.firstName} />
+                                        ) : (
+                                            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center text-white/30"><Stethoscope size={16} /></div>
+                                        )}
+                                        <div>
+                                            <p className="font-bold text-xs">Dr. {doc.user?.firstName} {doc.user?.lastName}</p>
+                                            <p className="text-[9px] text-slate-400 font-medium">{doc.speciality}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )) : (
+                                <div className="py-10 flex flex-col items-center justify-center gap-3 text-white/20 border-2 border-dashed border-white/10 rounded-2xl">
+                                    <Activity size={24} />
+                                    <p className="text-[9px] uppercase font-black">No personnel assigned</p>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
             </div>
+
             <ConfirmModal
                 show={confirmModal.show}
                 title={confirmModal.title}
@@ -267,53 +295,23 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
             <AnimatePresence>
                 {mergeModal.show && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div 
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" 
-                            onClick={() => !isMerging && setMergeModal({ show: false, sourceId: 0, sourceName: "" })}
-                        />
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="bg-white rounded-[2.5rem] p-10 shadow-2xl border border-slate-100 max-w-md w-full relative z-10"
-                        >
-                            <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 border border-rose-100 mx-auto">
-                                <Trash2 size={32} />
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => !isMerging && setMergeModal({ show: false, sourceId: 0, sourceName: "" })} />
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-[2rem] p-8 shadow-2xl border border-slate-100 max-w-sm w-full relative z-10 text-center">
+                            <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center mx-auto mb-4 border border-rose-100"><Trash2 size={24} /></div>
+                            <h3 className="text-xl font-black text-slate-900 mb-2">Active Unit Context</h3>
+                            <p className="text-slate-500 text-xs font-medium mb-6 leading-relaxed">Select a destination for personnel assigned to <span className="font-black text-rose-500">"{mergeModal.sourceName}"</span> before removal:</p>
+                            <div className="relative mb-6">
+                                <select value={targetDeptId} onChange={(e) => setTargetDeptId(e.target.value)} className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-black focus:ring-4 focus:ring-rose-500/10 outline-none transition-all appearance-none cursor-pointer">
+                                    <option value="">Select Target...</option>
+                                    {departments.filter(d => d.id !== mergeModal.sourceId).map(d => (
+                                        <option key={d.id} value={d.id}>{d.name}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-900 text-center mb-3 tracking-tight">Active Unit Detected</h3>
-                            <p className="text-slate-500 text-center text-sm font-medium mb-8 leading-relaxed px-4">
-                                You cannot delete <span className="font-black text-slate-900">"{mergeModal.sourceName}"</span> while personnel are assigned to it. Select a new specialty for these professionals to continue:
-                            </p>
-
-                            <div className="space-y-6 mb-10">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Target Specialty</label>
-                                    <select 
-                                        value={targetDeptId}
-                                        onChange={(e) => setTargetDeptId(e.target.value)}
-                                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-bold focus:ring-4 focus:ring-rose-500/10 outline-none transition-all appearance-none"
-                                    >
-                                        <option value="">Choose Replacement Specialty...</option>
-                                        {departments.filter(d => d.id !== mergeModal.sourceId).map(d => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-3">
-                                <button 
-                                    onClick={handleMergeAndDelete}
-                                    disabled={!targetDeptId || isMerging}
-                                    className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-rose-700 transition-all shadow-xl shadow-rose-900/20 disabled:opacity-50 disabled:grayscale"
-                                >
-                                    {isMerging ? "Reassigning & Removing..." : "Reassign & Delete Unit"}
-                                </button>
-                                <button 
-                                    onClick={() => setMergeModal({ show: false, sourceId: 0, sourceName: "" })}
-                                    className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100"
-                                >
-                                    Abort Operation
-                                </button>
+                            <div className="flex flex-col gap-2">
+                                <button onClick={handleMergeAndDelete} disabled={!targetDeptId || isMerging} className="w-full py-3 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest disabled:opacity-50"> Affirm Reassignment </button>
+                                <button onClick={() => setMergeModal({ show: false, sourceId: 0, sourceName: "" })} className="w-full py-3 text-slate-400 font-black uppercase text-[10px] tracking-widest"> Abort </button>
                             </div>
                         </motion.div>
                     </div>

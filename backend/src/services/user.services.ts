@@ -460,16 +460,41 @@ export async function updateDoctor(id: number, data: any) {
     const { firstName, lastName, email, speciality, bio, departmentId, profilePicture, timeSlots, password } = data;
 
     // 1. Pre-fetch Data
-    const doctor = await prisma.doctor.findUnique({ where: { id } });
+    const doctor = await prisma.doctor.findUnique({ 
+        where: { id },
+        include: { user: true }
+    });
     if (!doctor) throw new Error("Doctor not found");
 
-    const userData: any = { firstName, lastName, email, profilePicture };
-    if (password) {
+    // 2. Prepare Data
+    const userData: any = {};
+    const trimmedEmail = email?.trim();
+    if (firstName) userData.firstName = firstName;
+    if (lastName) userData.lastName = lastName;
+    
+    if (trimmedEmail && trimmedEmail.toLowerCase() !== doctor.user.email.toLowerCase()) {
+        // Check if email is already taken by another user
+        const existingUser = await prisma.user.findFirst({
+            where: { 
+                email: { equals: trimmedEmail, mode: 'insensitive' },
+                NOT: { id: doctor.userId }
+            }
+        });
+        if (existingUser) throw new Error("Email is already registered by another account");
+        userData.email = trimmedEmail;
+    }
+    
+    if (profilePicture) userData.profilePicture = profilePicture;
+    
+    if (password && password.trim() !== "") {
         const salt = await bcrypt.genSalt(10);
         userData.password = await bcrypt.hash(password, salt);
     }
 
-    const doctorUpdateData: any = { speciality, bio };
+    const doctorUpdateData: any = {};
+    if (speciality) doctorUpdateData.speciality = speciality;
+    if (bio !== undefined) doctorUpdateData.bio = bio;
+
     const parsedDeptId = parseInt(departmentId);
     if (!isNaN(parsedDeptId)) {
         doctorUpdateData.department = { connect: { id: parsedDeptId } };

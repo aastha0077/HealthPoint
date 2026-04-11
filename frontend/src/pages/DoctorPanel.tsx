@@ -373,7 +373,7 @@ export function DoctorPanel() {
             <AnimatePresence>
                 {showProfileEdit && fullProfile && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-6">
-                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl overflow-hidden">
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-white rounded-3xl w-full max-w-xl shadow-xl overflow-hidden">
                             <form onSubmit={async (e) => {
                                 e.preventDefault();
                                 setIsUpdatingProfile(true);
@@ -385,26 +385,26 @@ export function DoctorPanel() {
                                     fetchProfile();
                                     setShowProfileEdit(false);
                                 } catch { toast.error("Update failed"); } finally { setIsUpdatingProfile(false); }
-                            }} className="p-10 space-y-8">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-2xl font-black text-slate-900">Edit Practice Profile</h3>
-                                    <button type="button" onClick={() => setShowProfileEdit(false)} className="text-slate-400 hover:text-slate-900"><X size={24}/></button>
+                            }} className="p-6 space-y-6">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-xl font-bold text-slate-900">Edit Practice Profile</h3>
+                                    <button type="button" onClick={() => setShowProfileEdit(false)} className="text-slate-400 hover:text-slate-900"><X size={20}/></button>
                                 </div>
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Department</label>
-                                        <input name="department" defaultValue={fullProfile.department} className="w-full px-5 py-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-4 focus:ring-rose-500/5 font-bold" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Department</label>
+                                        <input name="department" defaultValue={typeof fullProfile.department === 'object' ? fullProfile.department?.name : fullProfile.department} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-rose-500/20 font-semibold" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Speciality</label>
-                                        <input name="expertise" defaultValue={fullProfile.expertise} className="w-full px-5 py-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-4 focus:ring-rose-500/5 font-bold" />
+                                    <div className="space-y-1.5">
+                                        <label className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Speciality</label>
+                                        <input name="expertise" defaultValue={fullProfile.expertise} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-rose-500/20 font-semibold" />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Bio & Experience</label>
-                                    <textarea name="bio" defaultValue={fullProfile.bio} rows={4} className="w-full px-5 py-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-4 focus:ring-rose-500/5 font-bold resize-none" />
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-bold uppercase tracking-wider text-slate-500">Bio & Experience</label>
+                                    <textarea name="bio" defaultValue={fullProfile.bio} rows={3} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-rose-500/20 font-semibold resize-none" />
                                 </div>
-                                <button type="submit" disabled={isUpdatingProfile} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase tracking-[0.3em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
+                                <button type="submit" disabled={isUpdatingProfile} className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-slate-800 transition-all shadow-md">
                                     {isUpdatingProfile ? "Syncing..." : "Save Changes"}
                                 </button>
                             </form>
@@ -413,17 +413,17 @@ export function DoctorPanel() {
                 )}
             </AnimatePresence>
 
-            <main className="flex-1 p-8 md:p-12 overflow-y-auto max-h-screen custom-scrollbar">
-                <header className="flex justify-between items-center mb-10">
+            <main className="flex-1 p-6 md:p-8 overflow-y-auto max-h-screen custom-scrollbar">
+                <header className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                             Healthcare <span className="text-rose-600">Portal</span>
                         </h1>
-                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.4em] mt-3">{auth.user?.firstName}'s Dashboard</p>
+                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">{auth.user?.firstName}'s Dashboard</p>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
                         <NotificationBell />
-                        <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-2xl shadow-slate-200 cursor-pointer hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm cursor-pointer hover:scale-105 transition-transform">
                             {auth.user?.firstName?.[0]}
                         </div>
                     </div>
@@ -507,38 +507,38 @@ export function DoctorPanel() {
                     <Route path="/profile" element={
                         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="max-w-4xl mx-auto">
                             {fullProfile && (
-                                <div className="bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden">
-                                     <div className="h-48 bg-slate-900 relative">
-                                        <div className="absolute -bottom-12 left-12 w-32 h-32 bg-white rounded-3xl p-1 shadow-2xl">
-                                            <div className="w-full h-full bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 font-bold text-4xl">
+                                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                                     <div className="h-32 bg-slate-900 relative">
+                                        <div className="absolute -bottom-10 left-8 w-24 h-24 bg-white rounded-2xl p-0.5 shadow-lg">
+                                            <div className="w-full h-full bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 font-bold text-3xl">
                                                 {auth.user?.firstName?.[0]}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="pt-20 p-12">
-                                        <div className="flex justify-between items-start mb-10">
+                                    <div className="pt-14 p-8">
+                                        <div className="flex justify-between items-start mb-8">
                                             <div>
-                                                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Dr. {auth.user?.firstName} {auth.user?.lastName}</h2>
-                                                <p className="text-rose-500 font-black uppercase tracking-[0.3em] text-[10px] mt-2">{fullProfile.department} Specialist</p>
+                                                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Dr. {auth.user?.firstName} {auth.user?.lastName}</h2>
+                                                <p className="text-rose-600 font-bold uppercase tracking-wider text-[10px] mt-1">{typeof fullProfile.department === 'object' ? fullProfile.department?.name : fullProfile.department} Specialist</p>
                                             </div>
-                                            <button onClick={() => setShowProfileEdit(true)} className="px-8 py-3 bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all">
+                                            <button onClick={() => setShowProfileEdit(true)} className="px-5 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-900 rounded-xl border border-slate-200 font-bold text-[10px] uppercase tracking-wider transition-all">
                                                 Edit Profile
                                             </button>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                                            <div className="p-6 bg-slate-50 rounded-3xl">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Practice Experience</p>
-                                                <p className="text-xl font-black text-slate-900">{fullProfile.experienceYears || '10+'} Years</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Experience</p>
+                                                <p className="text-lg font-bold text-slate-900">{fullProfile.experienceYears || '10+'} Years</p>
                                             </div>
-                                            <div className="p-6 bg-slate-50 rounded-3xl">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Consultation Fee</p>
-                                                <p className="text-xl font-black text-slate-900">Rs. {fullProfile.consultationFee || '1000'}</p>
+                                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fee</p>
+                                                <p className="text-lg font-bold text-slate-900">Rs. {fullProfile.consultationFee || '1000'}</p>
                                             </div>
-                                            <div className="p-6 bg-slate-50 rounded-3xl">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Availability</p>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                                                    <p className="text-xl font-black text-slate-900">Online</p>
+                                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Status</p>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                    <p className="text-lg font-bold text-slate-900">Online</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -552,28 +552,28 @@ export function DoctorPanel() {
                         </motion.div>
                     } />
                     <Route path="/reviews" element={
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                            <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm">
-                                <h3 className="text-2xl font-black text-slate-900 mb-2">Patient Feedback</h3>
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-10">Last 50 practice ratings</p>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                                <h3 className="text-xl font-bold text-slate-900 mb-1">Patient Feedback</h3>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-6">Last 50 practice ratings</p>
                                 {reviews.length === 0 ? (
-                                    <div className="py-20 text-center opacity-20"><Activity size={48} className="mx-auto" /></div>
+                                    <div className="py-12 text-center opacity-20"><Activity size={32} className="mx-auto" /></div>
                                 ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {reviews.map((r) => (
-                                            <div key={r.id} className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
-                                                <div className="flex justify-between items-start mb-4">
+                                            <div key={r.id} className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                                                <div className="flex justify-between items-start mb-2">
                                                     <div>
-                                                        <div className="flex gap-1 mb-2">
+                                                        <div className="flex gap-1 mb-1.5">
                                                             {[...Array(5)].map((_, i) => (
-                                                                <span key={i} className={`w-3 h-3 rounded-full ${i < r.rating ? 'bg-amber-400' : 'bg-slate-200'}`} />
+                                                                <span key={i} className={`w-2 h-2 rounded-full ${i < r.rating ? 'bg-amber-400' : 'bg-slate-200'}`} />
                                                             ))}
                                                         </div>
-                                                        <p className="font-black text-slate-900">{r.patient?.firstName}</p>
+                                                        <p className="font-bold text-sm text-slate-900">{r.patient?.firstName}</p>
                                                     </div>
-                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{new Date(r.createdAt).toLocaleDateString()}</span>
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.createdAt).toLocaleDateString()}</span>
                                                 </div>
-                                                <p className="text-sm text-slate-600 font-bold leading-relaxed italic">"{r.comment}"</p>
+                                                <p className="text-xs text-slate-600 font-semibold leading-relaxed italic">"{r.comment}"</p>
                                             </div>
                                         ))}
                                     </div>
@@ -639,44 +639,44 @@ export function DoctorPanel() {
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden relative"
+                            className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden relative"
                         >
-                            <div className="p-10 text-center space-y-8">
+                            <div className="p-6 text-center space-y-6">
                                 <button 
                                     onClick={() => setActiveRecordingApt(null)}
-                                    className="absolute top-6 right-6 p-2 bg-slate-50 rounded-full text-slate-400 hover:text-rose-500 transition-colors"
+                                    className="absolute top-4 right-4 p-1.5 bg-slate-50 rounded-full text-slate-400 hover:text-rose-500 transition-colors"
                                 >
-                                    <X size={20} />
+                                    <X size={18} />
                                 </button>
 
-                                <div className="w-24 h-24 bg-rose-50 rounded-[2.5rem] flex items-center justify-center text-rose-500 mx-auto shadow-inner">
-                                    <Activity size={40} className="animate-pulse" />
+                                <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 mx-auto shadow-inner">
+                                    <Activity size={28} className="animate-pulse" />
                                 </div>
 
                                 <div>
-                                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">
                                         Session Recording
                                     </h3>
-                                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] mt-3">
-                                        Consultation with {activeRecordingApt.patient?.firstName}
+                                    <p className="text-[9px] font-bold uppercase text-slate-500 tracking-widest mt-1">
+                                        Consultation: {activeRecordingApt.patient?.firstName}
                                     </p>
                                 </div>
 
-                                <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 italic text-slate-500 text-sm font-bold">
-                                    "This audio remains part of the secure clinical audit trail for medical compliance."
+                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 italic text-slate-500 text-xs font-semibold">
+                                    "This audio is part of the secure clinical audit trail."
                                 </div>
 
                                 <audio 
                                     src={activeRecordingApt.audioRecordingUrl} 
                                     controls 
                                     autoPlay
-                                    className="w-full h-12 custom-audio-player"
+                                    className="w-full h-10 custom-audio-player"
                                 />
 
-                                <div className="pt-4 flex justify-center">
+                                <div className="pt-2 flex justify-center">
                                     <button 
                                         onClick={() => setActiveRecordingApt(null)}
-                                        className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+                                        className="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm"
                                     >
                                         Dismiss Player
                                     </button>

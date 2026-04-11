@@ -53,9 +53,9 @@ const updateDoctorController: RequestHandler = async (req, res) => {
         const { id } = req.params;
         const result = await updateDoctor(parseInt(id), req.body);
         res.status(200).json(result);
-    } catch (error) {
-        console.log(error);
-        res.status(400).json({ message: "Internal error occurred" });
+    } catch (error: any) {
+        console.error("[UpdateDoctorController] Error:", error.message);
+        res.status(400).json({ message: error.message || "Internal error occurred" });
     }
 }
 

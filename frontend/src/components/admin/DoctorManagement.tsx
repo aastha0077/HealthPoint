@@ -128,7 +128,7 @@ export function DoctorManagement({
     const startEdit = (doc: any) => {
         const slots = doc.timeSlots || [];
         setIsEditing(true);
-        setEditingId(doc.id);
+        setEditingId(doc.doctorId);
         setSelectedSlots(slots);
         setDoctorForm({
             firstName: doc.user?.firstName || doc.firstName,
@@ -255,33 +255,33 @@ export function DoctorManagement({
     return (
         <div className="space-y-8">
             {/* Header & Search */}
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6">
-                <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-slate-200 flex-1 w-full max-w-xl">
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+                <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 flex-1 w-full max-w-lg">
                     <div className="relative">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                         <input
                             type="text" placeholder="Search by name, email or speciality..."
                             value={search} onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-[1.5rem] text-sm focus:ring-4 focus:ring-rose-500/5 focus:bg-white transition-all font-bold text-slate-700 outline-none"
+                            className="w-full pl-12 pr-4 py-2 bg-slate-50 border-none rounded-xl text-xs focus:ring-4 focus:ring-rose-500/5 focus:bg-white transition-all font-bold text-slate-700 outline-none"
                         />
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 w-full xl:w-auto">
+                <div className="flex items-center gap-3 w-full xl:w-auto">
                     {/* View Switcher */}
-                    <div className="bg-slate-100 p-1.5 rounded-[1.25rem] flex items-center gap-1">
+                    <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1">
                         <button
                             onClick={() => setViewMode('GRID')}
-                            className={`p-2.5 rounded-xl transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${viewMode === 'GRID' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`p-2 rounded-lg transition-all flex items-center gap-2 text-[9px] font-black uppercase tracking-widest ${viewMode === 'GRID' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
-                            <LayoutGrid size={16} />
+                            <LayoutGrid size={14} />
                             <span className="hidden sm:inline">Grid</span>
                         </button>
                         <button
                             onClick={() => setViewMode('TABLE')}
-                            className={`p-2.5 rounded-xl transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${viewMode === 'TABLE' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`p-2 rounded-lg transition-all flex items-center gap-2 text-[9px] font-black uppercase tracking-widest ${viewMode === 'TABLE' ? 'bg-white text-rose-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                         >
-                            <List size={16} />
+                            <List size={14} />
                             <span className="hidden sm:inline">Table</span>
                         </button>
                     </div>
@@ -289,26 +289,26 @@ export function DoctorManagement({
                     {onExport && (
                         <button
                             onClick={onExport}
-                            className="flex items-center justify-center gap-2 px-6 py-4.5 bg-slate-100 text-slate-600 rounded-[1.25rem] font-black text-[11px] uppercase tracking-widest hover:bg-slate-200 transition-all border border-slate-200 whitespace-nowrap"
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all border border-slate-200 whitespace-nowrap"
                         >
-                            <FileDown size={16} />
+                            <FileDown size={14} />
                             Export
                         </button>
                     )}
 
                     <button
                         onClick={() => setShowMassEmailModal(true)}
-                        className="flex items-center justify-center gap-2 px-6 py-4.5 bg-rose-50 text-rose-600 rounded-[1.25rem] font-black text-[11px] uppercase tracking-widest hover:bg-rose-100 transition-all border border-rose-100 whitespace-nowrap"
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-100 transition-all border border-rose-100 whitespace-nowrap"
                     >
-                        <Mail size={16} />
-                        Mass Broadcast
+                        <Mail size={14} />
+                        Broadcast
                     </button>
                     <button
                         onClick={() => { cancelEdit(); setShowModal(true); }}
-                        className="flex items-center justify-center gap-3 px-8 py-4.5 bg-slate-900 text-white rounded-[1.25rem] font-black text-[11px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-xl shadow-slate-200 active:scale-95 whitespace-nowrap flex-1 xl:flex-none"
+                        className="flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-xl shadow-slate-200 active:scale-95 whitespace-nowrap flex-1 xl:flex-none"
                     >
-                        <Plus size={18} />
-                        Hire Personnel
+                        <Plus size={16} />
+                        Hire
                     </button>
                 </div>
             </div>
@@ -322,7 +322,7 @@ export function DoctorManagement({
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.98 }}
                         transition={{ duration: 0.2 }}
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                     >
                         {paginatedDoctors.length === 0 && (
                             <div className="col-span-full py-24 text-center text-slate-400 bg-white rounded-[4rem] border-2 border-dashed border-slate-100 shadow-sm">
@@ -335,48 +335,48 @@ export function DoctorManagement({
                             const lastName = doc.user?.lastName || doc.lastName;
                             const profPic = doc.user?.profilePicture || doc.profilePicture;
                             return (
-                                <div key={doc.id} className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 hover:border-rose-200 hover:shadow-2xl hover:shadow-rose-500/10 transition-all group flex flex-col relative overflow-hidden">
-                                    <div className="flex items-start justify-between mb-8 relative z-10">
+                                <div key={doc.doctorId} className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:border-rose-200 hover:shadow-2xl hover:shadow-rose-500/10 transition-all group flex flex-col relative overflow-hidden">
+                                    <div className="flex items-start justify-between mb-6 relative z-10">
                                         <div className="relative">
                                             {profPic ? (
-                                                <img src={profPic} className="w-20 h-20 rounded-2xl object-cover ring-4 ring-white shadow-xl" alt={firstName} />
+                                                <img src={profPic} className="w-14 h-14 rounded-xl object-cover ring-4 ring-white shadow-xl" alt={firstName} />
                                             ) : (
-                                                <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-300 ring-4 ring-white shadow-lg">
-                                                    <Stethoscope size={32} />
+                                                <div className="w-14 h-14 bg-slate-100 rounded-xl flex items-center justify-center text-slate-300 ring-4 ring-white shadow-lg">
+                                                    <Stethoscope size={24} />
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <button onClick={() => { setSelectedDoctor(doc); setShowEmailModal(true); }} className="p-2.5 rounded-xl bg-white text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100" title="Email Personnel"><Mail size={16} /></button>
-                                            <button onClick={() => startEdit(doc)} className="p-2.5 rounded-xl bg-white text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100"><Edit3 size={16} /></button>
+                                        <div className="flex flex-col gap-1.5">
+                                            <button onClick={() => { setSelectedDoctor(doc); setShowEmailModal(true); }} className="p-2 rounded-lg bg-white text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100" title="Email Personnel"><Mail size={12} /></button>
+                                            <button onClick={() => startEdit(doc)} className="p-2 rounded-lg bg-white text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm border border-slate-100"><Edit3 size={12} /></button>
                                             <button
                                                 onClick={() => setConfirmModal({
                                                     show: true,
                                                     title: "Terminate Personnel",
                                                     message: `Are you sure you want to remove Dr. ${firstName} ${lastName} from the registry? This action is irreversible.`,
                                                     type: 'DANGER',
-                                                    onConfirm: () => onDelete(doc.id)
+                                                    onConfirm: () => onDelete(doc.doctorId)
                                                 })}
-                                                className="p-2.5 rounded-xl bg-white text-slate-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm border border-slate-100"
+                                                className="p-2 rounded-lg bg-white text-slate-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm border border-slate-100"
                                             >
-                                                <Trash2 size={16} />
+                                                <Trash2 size={12} />
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex-1 mb-8">
-                                        <h4 className="text-xl font-black text-slate-900">Dr. {firstName} {lastName}</h4>
-                                        <p className="text-[10px] font-black uppercase text-rose-500 tracking-widest mt-1">{doc.speciality}</p>
-                                        <p className="text-sm text-slate-400 font-medium mt-4 line-clamp-2 leading-relaxed">{doc.bio}</p>
+                                    <div className="flex-1 mb-6">
+                                        <h4 className="text-lg font-black text-slate-900">Dr. {firstName} {lastName}</h4>
+                                        <p className="text-[9px] font-black uppercase text-rose-500 tracking-widest mt-0.5">{doc.speciality}</p>
+                                        <p className="text-xs text-slate-400 font-medium mt-3 line-clamp-2 leading-relaxed">{doc.bio}</p>
                                     </div>
-                                    <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-                                        <div className="flex -space-x-2">
+                                    <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
+                                        <div className="flex -space-x-1.5">
                                             {doc.timeSlots?.slice(0, 3).map((slot: string, i: number) => (
-                                                <div key={slot} className={`w-8 h-8 rounded-xl border-2 border-white flex items-center justify-center text-[8px] font-black text-white shadow-sm ${['bg-rose-500', 'bg-slate-900', 'bg-indigo-500'][i % 3]}`}>
+                                                <div key={slot} className={`w-7 h-7 rounded-lg border-2 border-white flex items-center justify-center text-[7px] font-black text-white shadow-sm ${['bg-rose-500', 'bg-slate-900', 'bg-indigo-500'][i % 3]}`}>
                                                     {slot.split(':')[0]}
                                                 </div>
                                             ))}
                                         </div>
-                                        <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${doc.available !== false ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
+                                        <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${doc.available !== false ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
                                             {doc.available !== false ? 'Active' : 'Offline'}
                                         </span>
                                     </div>
@@ -391,7 +391,7 @@ export function DoctorManagement({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.2 }}
-                        className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden"
+                        className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden"
                     >
                         <div className="overflow-x-auto max-h-[650px] overflow-y-auto custom-scrollbar">
                             <table className="w-full text-left whitespace-nowrap">
@@ -411,7 +411,7 @@ export function DoctorManagement({
                                         const fn = doc.user?.firstName || doc.firstName;
                                         const ln = doc.user?.lastName || doc.lastName;
                                         return (
-                                            <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
+                                            <tr key={doc.doctorId} className="hover:bg-slate-50/80 transition-colors">
                                                 <td className="px-4 py-3 flex items-center gap-3">
                                                     <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
                                                         <Stethoscope size={16} />
@@ -443,7 +443,7 @@ export function DoctorManagement({
                                                                 title: "Terminate Personnel",
                                                                 message: `Are you sure you want to remove Dr. ${fn} ${ln} from the registry?`,
                                                                 type: 'DANGER',
-                                                                onConfirm: () => onDelete(doc.id)
+                                                                onConfirm: () => onDelete(doc.doctorId)
                                                             })}
                                                             className="p-1.5 rounded-md bg-white border border-slate-200 text-slate-400 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                                                         >
@@ -478,206 +478,173 @@ export function DoctorManagement({
                             initial={{ opacity: 0, scale: 0.9, y: 40 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 40 }}
-                            className="bg-white rounded-[4rem] shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]"
+                            className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]"
                         >
                             {/* Modal Header */}
-                            <div className="px-12 py-10 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
-                                <div className="relative z-10 flex items-center gap-6">
-                                    <div className="w-16 h-16 bg-slate-900 rounded-[1.75rem] flex items-center justify-center text-white shadow-2xl shadow-slate-900/40">
-                                        {isEditing ? <Edit3 size={32} /> : <Plus size={32} />}
+                            <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-48 h-48 bg-rose-500/5 rounded-full -mr-24 -mt-24 blur-3xl opacity-50" />
+                                <div className="relative z-10 flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-xl shadow-slate-900/40">
+                                        {isEditing ? <Edit3 size={24} /> : <Plus size={24} />}
                                     </div>
                                     <div>
-                                        <h3 className="text-3xl font-black text-slate-900 tracking-tight">
+                                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">
                                             {isEditing ? "Personnel Update" : "Clinical Registration"}
                                         </h3>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">Hospital Staff Integrity Module</p>
+                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mt-0.5">Hospital Staff Integrity Module</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={cancelEdit}
-                                    className="w-14 h-14 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-3xl transition-all shadow-md border border-slate-100 flex items-center justify-center group relative z-10"
+                                    className="w-10 h-10 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-xl transition-all shadow-md border border-slate-100 flex items-center justify-center group relative z-10"
                                 >
-                                    <X size={28} className="group-hover:rotate-90 transition-transform duration-300" />
+                                    <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
                                 </button>
                             </div>
 
                             {/* Modal Content */}
-                            <div className="flex-1 overflow-y-auto px-12 py-10 space-y-12">
-                                <form id="doctor-form" onSubmit={onFormSubmit} className="space-y-12">
+                            <div className="flex-1 overflow-y-auto px-8 py-6 space-y-8">
+                                <form id="doctor-form" onSubmit={onFormSubmit} className="space-y-8">
                                     {/* Personal Info Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Personal Identity</label>
-                                            <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Personal Identity</label>
+                                            <div className="grid grid-cols-2 gap-3">
                                                 <input type="text" placeholder="First Name" value={doctorForm.firstName}
                                                     onChange={(e) => setDoctorForm({ ...doctorForm, firstName: e.target.value })}
-                                                    required className="bg-slate-50 border-2 border-transparent rounded-[1.5rem] p-5 text-sm font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none w-full transition-all text-slate-700" />
+                                                    required className="bg-slate-50 border-2 border-transparent rounded-xl p-3.5 text-xs font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none w-full transition-all text-slate-700" />
                                                 <input type="text" placeholder="Last Name" value={doctorForm.lastName}
                                                     onChange={(e) => setDoctorForm({ ...doctorForm, lastName: e.target.value })}
-                                                    required className="bg-slate-50 border-2 border-transparent rounded-[1.5rem] p-5 text-sm font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none w-full transition-all text-slate-700" />
+                                                    required className="bg-slate-50 border-2 border-transparent rounded-xl p-3.5 text-xs font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none w-full transition-all text-slate-700" />
                                             </div>
                                         </div>
 
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Secure Credential</label>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Secure Credential</label>
                                             <input type="password"
-                                                placeholder={isEditing ? "Modify Password (Leave blank to keep)" : "Assign Access Password"}
+                                                placeholder={isEditing ? "Modify Password" : "Assign Password"}
                                                 value={doctorForm.password}
                                                 onChange={(e) => setDoctorForm({ ...doctorForm, password: e.target.value })}
                                                 required={!isEditing}
-                                                className="w-full bg-slate-50 border-2 border-transparent rounded-[1.5rem] p-5 text-sm font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none transition-all text-slate-700" />
+                                                className="w-full bg-slate-50 border-2 border-transparent rounded-xl p-3.5 text-xs font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none transition-all text-slate-700" />
                                         </div>
 
-                                        <div className="space-y-3 md:col-span-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">System Communication Path</label>
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">System Communication Path</label>
                                             <div className="relative">
-                                                <ImageIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={20} />
+                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" size={16} />
                                                 <input type="email" placeholder="official.access@healthpoint.com" value={doctorForm.email}
                                                     onChange={(e) => setDoctorForm({ ...doctorForm, email: e.target.value })}
-                                                    required className="w-full pl-14 pr-6 bg-slate-50 border-2 border-transparent rounded-[1.5rem] p-5 text-sm font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none transition-all text-slate-700" />
+                                                    required className="w-full pl-12 pr-4 bg-slate-50 border-2 border-transparent rounded-xl p-3.5 text-xs font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none transition-all text-slate-700" />
                                             </div>
                                         </div>
 
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Field of Expertise</label>
-                                            <input type="text" placeholder="Cardiological Sciences, etc." value={doctorForm.speciality}
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Field of Expertise</label>
+                                            <input type="text" placeholder="Speciality" value={doctorForm.speciality}
                                                 onChange={(e) => setDoctorForm({ ...doctorForm, speciality: e.target.value })}
-                                                required className="w-full bg-slate-50 border-2 border-transparent rounded-[1.5rem] p-5 text-sm font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none transition-all text-slate-700" />
+                                                required className="w-full bg-slate-50 border-2 border-transparent rounded-xl p-3.5 text-xs font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none transition-all text-slate-700" />
                                         </div>
 
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Allocated Department</label>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Allocated Department</label>
                                             <div className="relative">
                                                 <select value={doctorForm.departmentId}
                                                     onChange={(e) => setDoctorForm({ ...doctorForm, departmentId: parseInt(e.target.value) })}
-                                                    className="w-full bg-slate-50 border-2 border-transparent rounded-[1.5rem] p-5 pr-14 text-sm font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none appearance-none cursor-pointer transition-all text-slate-700 font-black">
+                                                    className="w-full bg-slate-50 border-2 border-transparent rounded-xl p-3.5 pr-12 text-xs font-black focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none appearance-none cursor-pointer transition-all text-slate-700">
                                                     {departments.map((dep) => (
                                                         <option key={dep.id} value={dep.id}>{dep.name}</option>
                                                     ))}
                                                 </select>
-                                                <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={24} />
+                                                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
                                             </div>
                                         </div>
 
-                                        <div className="space-y-3 md:col-span-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Medical Profile Narrative</label>
-                                            <textarea placeholder="Outline professional background, specialized training and patient care philosophy..." value={doctorForm.bio}
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Medical Profile Narrative</label>
+                                            <textarea placeholder="Outline professional background..." value={doctorForm.bio}
                                                 onChange={(e) => setDoctorForm({ ...doctorForm, bio: e.target.value })}
-                                                required className="w-full bg-slate-50 border-2 border-transparent rounded-[2.5rem] p-8 text-sm font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none min-h-[160px] transition-all text-slate-700 leading-relaxed" />
+                                                required className="w-full bg-slate-50 border-2 border-transparent rounded-2xl p-5 text-xs font-bold focus:ring-4 focus:ring-rose-500/5 focus:border-rose-500/20 focus:bg-white outline-none min-h-[120px] transition-all text-slate-700 leading-relaxed" />
                                         </div>
                                     </div>
 
                                     {/* Availability Configuration */}
-                                    <div className="p-10 bg-slate-50 rounded-[3.5rem] space-y-8 border-2 border-white shadow-sm ring-1 ring-slate-100">
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-rose-500 shadow-sm">
-                                                    <Clock size={24} />
+                                    <div className="p-6 bg-slate-50 rounded-3xl space-y-6 border-2 border-white shadow-sm ring-1 ring-slate-100">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm">
+                                                    <Clock size={20} />
                                                 </div>
                                                 <div>
-                                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Consultation Chronology</label>
-                                                    <p className="text-sm font-black text-slate-900">Define Daily Duty Window</p>
+                                                    <label className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Consultation Chronology</label>
+                                                    <p className="text-xs font-black text-slate-900">Define Daily Duty Window</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2 px-4 py-2 bg-slate-900 rounded-xl">
-                                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                                <span className="text-[9px] font-black text-white uppercase tracking-widest">{selectedSlots.length} ACTIVE SLOTS</span>
+                                            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 rounded-lg">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                <span className="text-[8px] font-black text-white uppercase tracking-widest">{selectedSlots.length} ACTIVE</span>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                            <div className="space-y-4">
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2">Available Time Registry</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                                            <div className="space-y-3">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Clinical Registry</p>
                                                 <div className="relative">
                                                     <select
                                                         onChange={(e) => { addSlot(e.target.value); e.target.value = ""; }}
                                                         defaultValue=""
-                                                        className="w-full bg-white border-2 border-transparent rounded-[1.5rem] p-5 pr-14 text-sm font-black focus:border-rose-500 outline-none appearance-none cursor-pointer text-slate-400 shadow-sm hover:shadow-md transition-all"
+                                                        className="w-full bg-white border-2 border-transparent rounded-xl p-3.5 pr-12 text-xs font-black focus:border-rose-500 outline-none appearance-none cursor-pointer text-slate-400 shadow-sm transition-all"
                                                     >
-                                                        <option value="" disabled>Select from clinical registry...</option>
+                                                        <option value="" disabled>Select time...</option>
                                                         {availableToAdd.map(t => (
                                                             <option key={t} value={t} className="font-black py-2">{t}</option>
                                                         ))}
                                                     </select>
-                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center text-rose-500 pointer-events-none">
-                                                        <Plus size={20} />
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 bg-slate-50 rounded-lg flex items-center justify-center text-rose-500 pointer-events-none">
+                                                        <Plus size={16} />
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-4">
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2">Assigned Slots</p>
-                                                <div className="flex flex-wrap gap-3">
+                                            <div className="space-y-3">
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Assigned Slots</p>
+                                                <div className="flex flex-wrap gap-2">
                                                     {selectedSlots.length > 0 ? selectedSlots.map(slot => (
                                                         <motion.span
                                                             layout
                                                             initial={{ scale: 0.8, opacity: 0 }}
                                                             animate={{ scale: 1, opacity: 1 }}
                                                             key={slot}
-                                                            className="flex items-center gap-3 bg-white border-2 border-white shadow-sm text-slate-900 text-xs font-black px-5 py-3 rounded-[1.25rem] group hover:border-rose-100 hover:shadow-rose-500/5 transition-all"
+                                                            className="flex items-center gap-2 bg-white border border-slate-100 shadow-sm text-slate-900 text-[10px] font-black px-3 py-2 rounded-xl group hover:border-rose-100 transition-all"
                                                         >
-                                                            <div className="w-2 h-2 rounded-full bg-rose-500" />
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                                                             {slot}
                                                             <button type="button" onClick={() => removeSlot(slot)}
-                                                                className="ml-2 text-slate-200 hover:text-rose-500 transition-colors">
-                                                                <X size={16} />
+                                                                className="ml-1 text-slate-200 hover:text-rose-500 transition-colors">
+                                                                <X size={12} />
                                                             </button>
                                                         </motion.span>
                                                     )) : (
-                                                        <div className="w-full py-6 flex flex-col items-center justify-center gap-2 text-slate-300 border-2 border-dashed border-slate-200 rounded-[2rem]">
-                                                            <Clock size={20} className="opacity-50" />
-                                                            <p className="text-[10px] font-black uppercase tracking-widest">Registry empty</p>
-                                                        </div>
+                                                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-300 p-2">No slots assigned</p>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Signature Portrait */}
-                                    <div className="space-y-4">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Clinical Staff Portrait</label>
-                                        <label className={`flex flex-col items-center justify-center w-full h-80 border-4 border-dashed rounded-[4rem] cursor-pointer transition-all overflow-hidden relative group
+                                    {/* Portrait Upload */}
+                                    <div className="space-y-3">
+                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Clinical Staff Portrait</label>
+                                        <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-3xl cursor-pointer transition-all overflow-hidden relative group
                                             ${doctorForm.profilePicture ? "border-rose-100 bg-rose-50/20" : "border-slate-100 bg-slate-50 hover:border-rose-200 hover:bg-rose-50/30"}`}>
                                             {uploading ? (
-                                                <div className="flex flex-col items-center gap-4">
-                                                    <div className="relative">
-                                                        <div className="w-20 h-20 border-4 border-rose-100 rounded-full animate-pulse" />
-                                                        <Loader2 className="w-10 h-10 text-rose-500 animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                                                    </div>
-                                                    <p className="text-xs font-black text-rose-500 uppercase tracking-[0.3em]">
-                                                        {uploadProgress > 0 ? `Optimizing... ${uploadProgress}%` : "Processing Visual Context"}
-                                                    </p>
-                                                    {uploadProgress > 0 && (
-                                                        <div className="w-48 h-1 bg-rose-100 rounded-full mt-4 overflow-hidden">
-                                                            <motion.div
-                                                                className="h-full bg-rose-500"
-                                                                initial={{ width: 0 }}
-                                                                animate={{ width: `${uploadProgress}%` }}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <Loader2 className="w-8 h-8 text-rose-500 animate-spin" />
                                             ) : doctorForm.profilePicture ? (
-                                                <div className="relative w-full h-full">
-                                                    <img src={doctorForm.profilePicture} className="w-full h-full object-cover" alt="Identicon" />
-                                                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-all duration-500">
-                                                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                                                            <Camera className="text-white w-8 h-8" />
-                                                        </div>
-                                                        <p className="text-white text-xs font-black uppercase tracking-[0.3em]">Update Portraiture</p>
-                                                    </div>
-                                                </div>
+                                                <img src={doctorForm.profilePicture} className="w-full h-full object-cover" alt="Profile" />
                                             ) : (
-                                                <div className="flex flex-col items-center justify-center gap-6">
-                                                    <div className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-slate-200 text-slate-200 group-hover:text-rose-200 group-hover:scale-110 transition-all duration-500">
-                                                        <ImageIcon size={48} />
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <p className="text-sm text-slate-900 font-black uppercase tracking-[0.1em]">Upload Official Portrait</p>
-                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Accepts high-res medical imagery</p>
-                                                    </div>
+                                                <div className="flex flex-col items-center gap-2">
+                                                    <ImageIcon size={32} className="text-slate-200" />
+                                                    <p className="text-[10px] text-slate-400 font-black uppercase">Upload Image</p>
                                                 </div>
                                             )}
                                             <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
@@ -687,21 +654,21 @@ export function DoctorManagement({
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="px-12 py-10 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row gap-6 items-center">
+                            <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex gap-4">
                                 <button
                                     type="button"
                                     onClick={cancelEdit}
-                                    className="w-full sm:flex-1 py-5 px-8 rounded-[2rem] text-slate-400 font-black text-xs uppercase tracking-[0.3em] hover:bg-white hover:text-rose-500 transition-all border-2 border-transparent hover:border-rose-100"
+                                    className="flex-1 py-3.5 rounded-xl text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-rose-500 transition-all border border-transparent hover:border-rose-100"
                                 >
-                                    Dismiss Profile
+                                    Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     form="doctor-form"
                                     disabled={uploading}
-                                    className="w-full sm:flex-[2] py-5 px-12 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-900/30 hover:bg-rose-600 hover:-translate-y-2 transition-all active:scale-95 disabled:opacity-50"
+                                    className="flex-[2] py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-rose-600 transition-all active:scale-95 disabled:opacity-50"
                                 >
-                                    {uploading ? "Contextualizing Data..." : isEditing ? "Synchronize Staff Record" : "Finalize Registration"}
+                                    {uploading ? "Uploading..." : isEditing ? "Save Changes" : "Register Personnel"}
                                 </button>
                             </div>
                         </motion.div>

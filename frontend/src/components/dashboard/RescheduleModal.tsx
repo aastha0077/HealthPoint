@@ -100,22 +100,22 @@ export function RescheduleModal({ appointment, onClose, onSubmit }: RescheduleMo
     };
 
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-6">
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto">
-                <div className="p-10">
-                    <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Reschedule</h3>
-                        <button onClick={onClose} className="text-slate-300 hover:text-rose-500 transition-colors"><XCircle size={28} /></button>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-1">
+                        <h3 className="text-xl font-bold text-slate-900 tracking-tight">Reschedule</h3>
+                        <button onClick={onClose} className="text-slate-400 hover:text-rose-500 transition-colors"><XCircle size={24} /></button>
                     </div>
-                    <p className="text-slate-400 font-bold text-sm mb-8">
+                    <p className="text-slate-500 font-semibold text-xs mb-6">
                         Pick a new time with Dr. {appointment?.doctor?.user?.firstName || appointment?.doctor?.firstName} {appointment?.doctor?.user?.lastName || ""}
                     </p>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                         {/* Date Picker */}
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <Calendar size={14} /> Select Date
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                <Calendar size={12} /> Select Date
                             </label>
                             <input
                                 type="date"
@@ -125,27 +125,27 @@ export function RescheduleModal({ appointment, onClose, onSubmit }: RescheduleMo
                                     if (isDateUnavailable(e.target.value)) return;
                                     setSelectedDate(e.target.value);
                                 }}
-                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 font-black text-slate-700 outline-none focus:ring-2 focus:ring-rose-500"
+                                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-sm text-slate-700 outline-none focus:ring-2 focus:ring-rose-500"
                             />
                             {selectedDate && isDateUnavailable(selectedDate) && (
-                                <p className="text-red-500 text-xs font-bold mt-2">This date is unavailable for the doctor.</p>
+                                <p className="text-red-500 text-[10px] font-bold mt-1.5">This date is unavailable.</p>
                             )}
                         </div>
 
                         {/* Time Slots */}
                         {selectedDate && (
                             <div>
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                    <Clock size={14} /> Available Slots
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                    <Clock size={12} /> Available Slots
                                 </label>
                                 {isLoadingSlots ? (
-                                    <div className="flex justify-center py-8">
-                                        <Loader2 size={24} className="animate-spin text-slate-300" />
+                                    <div className="flex justify-center py-6">
+                                        <Loader2 size={20} className="animate-spin text-slate-400" />
                                     </div>
                                 ) : doctorTimeSlots.length === 0 ? (
-                                    <p className="text-slate-400 font-bold text-sm text-center py-6">No time slots configured for this doctor.</p>
+                                    <p className="text-slate-500 font-semibold text-xs text-center py-4">No time slots configured.</p>
                                 ) : (
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-3 gap-2">
                                         {doctorTimeSlots.map((slot: string) => {
                                             const booked = isSlotBookedOrPast(slot);
                                             const isSelected = selectedTime === slot;
@@ -154,12 +154,12 @@ export function RescheduleModal({ appointment, onClose, onSubmit }: RescheduleMo
                                                     key={slot}
                                                     disabled={booked}
                                                     onClick={() => setSelectedTime(slot)}
-                                                    className={`py-3 px-2 rounded-xl text-sm font-black transition-all border ${
+                                                    className={`py-2 px-1 rounded-lg text-xs font-bold transition-all border ${
                                                         booked
-                                                            ? "bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed line-through"
+                                                            ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed line-through"
                                                             : isSelected
-                                                            ? "bg-rose-500 text-white border-rose-500 shadow-lg shadow-rose-200 scale-105"
-                                                            : "bg-white text-slate-700 border-slate-100 hover:border-rose-200 hover:bg-rose-50"
+                                                            ? "bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-200 scale-105"
+                                                            : "bg-white text-slate-700 border-slate-200 hover:border-rose-300 hover:bg-rose-50"
                                                     }`}
                                                 >
                                                     {slot}
@@ -172,12 +172,12 @@ export function RescheduleModal({ appointment, onClose, onSubmit }: RescheduleMo
                         )}
 
                         {/* Actions */}
-                        <div className="flex gap-4 pt-4">
-                            <button onClick={onClose} className="flex-1 py-4 font-black uppercase tracking-widest text-[10px] text-slate-400 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all">Cancel</button>
+                        <div className="flex gap-3 pt-2">
+                            <button onClick={onClose} className="flex-1 py-3 font-bold uppercase tracking-wider text-[10px] text-slate-500 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all">Cancel</button>
                             <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting || !selectedDate || !selectedTime}
-                                className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-slate-200 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-wider text-[10px] shadow-sm active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting ? "Rescheduling..." : "Confirm"}
                             </button>

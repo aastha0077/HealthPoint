@@ -26,13 +26,13 @@ export function AdminSidebar({ setSearch }: AdminSidebarProps) {
     };
 
     return (
-        <aside className="w-64 bg-slate-900 border-r border-slate-800 hidden md:flex flex-col shrink-0 h-screen sticky top-0 overflow-hidden">
-            <div className="p-8 pb-4">
-                <div className="flex items-center gap-3 bg-slate-800/50 p-4 rounded-2xl border border-slate-700/50">
-                    <div className="w-10 h-10 bg-rose-600 rounded-xl flex justify-center items-center text-white font-bold text-xl shadow-lg shadow-rose-900/40">A</div>
+        <aside className="w-60 bg-slate-900 border-r border-slate-800 hidden md:flex flex-col shrink-0 h-screen sticky top-0 overflow-hidden">
+            <div className="p-6 pb-2">
+                <div className="flex items-center gap-3 bg-slate-800/50 p-2.5 rounded-xl border border-slate-700/50">
+                    <div className="w-8 h-8 bg-rose-600 rounded-lg flex justify-center items-center text-white font-bold text-lg shadow-lg">A</div>
                     <div>
-                        <h2 className="text-sm font-black text-white tracking-widest uppercase">Admin</h2>
-                        <p className="text-[10px] font-bold text-rose-500 uppercase tracking-tighter">Control Center</p>
+                        <h2 className="text-[11px] font-bold text-white tracking-widest uppercase">Admin</h2>
+                        <p className="text-[9px] font-bold text-rose-500 uppercase tracking-tighter">Directorate</p>
                     </div>
                 </div>
             </div>
@@ -43,12 +43,12 @@ export function AdminSidebar({ setSearch }: AdminSidebarProps) {
                         key={id}
                         to={`/admin/${id.toLowerCase()}`}
                         onClick={() => setSearch("")}
-                        className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold rounded-2xl transition-all duration-300 ${isActive
-                            ? 'bg-rose-600 text-white shadow-xl shadow-rose-900/20 translate-x-1'
+                        className={({ isActive }) => `w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold rounded-xl transition-all duration-300 ${isActive
+                            ? 'bg-rose-600 text-white shadow-lg shadow-rose-900/10'
                             : 'text-slate-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <Icon size={18} />
+                        <Icon size={16} />
                         <span>{label}</span>
                     </NavLink>
                 ))}
@@ -58,9 +58,9 @@ export function AdminSidebar({ setSearch }: AdminSidebarProps) {
                 <div className="h-px bg-slate-800 mx-2" />
                 <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold rounded-2xl text-slate-400 hover:text-white hover:bg-rose-500/10 hover:text-rose-400 transition-all border border-transparent hover:border-rose-500/20 duration-300"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold rounded-xl text-slate-400 hover:text-white hover:bg-rose-500/10 hover:text-rose-400 transition-all border border-transparent hover:border-rose-500/20"
                 >
-                    <LogOut size={18} />
+                    <LogOut size={16} />
                     <span>Sign Out</span>
                 </button>
 
