@@ -26,7 +26,7 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; title: string; message: string; action: () => void }>({
         show: false, title: "", message: "", action: () => {}
     });
-    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string } | null>(null);
+    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string, type?: 'image' | 'pdf' } | null>(null);
 
     const {
         messages,
@@ -207,7 +207,7 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
                                 setEditInput={setEditInput}
                                 onEdit={() => editMessage(m.id, editInput)}
                                 onDelete={deleteMessage}
-                                onPreviewFile={(url, title) => setPreviewAsset({ url, title })}
+                                onPreviewFile={(url, title, type) => setPreviewAsset({ url, title, type })}
                                 colorScheme="indigo"
                             />
                         ))}
@@ -266,6 +266,7 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
                 <AssetPreviewModal 
                     url={previewAsset?.url || null} 
                     title={previewAsset?.title || "Clinical Preview"} 
+                    type={previewAsset?.type}
                     onClose={() => setPreviewAsset(null)} 
                 />
             </motion.div>

@@ -14,7 +14,7 @@ interface ChatMessageProps {
     setEditInput?: (s: string) => void;
     onEdit?: () => void;
     onDelete?: (id: number) => void;
-    onPreviewFile?: (url: string, title: string) => void;
+    onPreviewFile?: (url: string, title: string, type?: 'image' | 'pdf') => void;
     colorScheme: 'blue' | 'indigo' | 'rose' | 'emerald';
 }
 
@@ -202,7 +202,7 @@ export function ChatMessage({
                                                     <img src={m.fileUrl} alt="attachment" className="rounded-xl max-w-full h-auto max-h-64 object-cover border border-white/10" />
                                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/attach:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
                                                         <button 
-                                                            onClick={() => onPreviewFile?.(m.fileUrl!, "Clinical Image")}
+                                                            onClick={() => onPreviewFile?.(m.fileUrl!, "Clinical Image", 'image')}
                                                             className="p-2.5 bg-white/20 backdrop-blur-xl rounded-2xl text-white hover:bg-white/40 transition-all border border-white/20"
                                                         >
                                                             <ImageIcon size={20} />
@@ -225,7 +225,7 @@ export function ChatMessage({
                                                             <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-0.5">{isPdf ? 'Medical PDF' : 'Laboratory Report'}</p>
                                                             <div className="flex gap-3">
                                                                 <button 
-                                                                    onClick={() => onPreviewFile?.(m.fileUrl!, isPdf ? "Medical Document" : "Laboratory Result")}
+                                                                    onClick={() => onPreviewFile?.(m.fileUrl!, isPdf ? "Medical Document" : "Laboratory Result", isPdf ? 'pdf' : undefined)}
                                                                     className="text-[9px] font-bold uppercase tracking-widest hover:underline hover:opacity-100 opacity-80 transition-all text-left"
                                                                 >
                                                                     Preview Record

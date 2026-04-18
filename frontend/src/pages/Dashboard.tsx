@@ -27,7 +27,7 @@ export default function Dashboard() {
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
     const [refundModalOpen, setRefundModalOpen] = useState(false);
-    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string } | null>(null);
+    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string, type?: 'image' | 'pdf' } | null>(null);
 
     const [selectedApt, setSelectedApt] = useState<any>(null);
     const [apptSubFilter, setApptSubFilter] = useState<"UPCOMING" | "HISTORY" | "CANCELLED" | "MISSED">("UPCOMING");
@@ -79,11 +79,12 @@ export default function Dashboard() {
 
     const handleDownloadInvoice = async (id: number) => {
         try {
-            const res = await apiClient.get(`/api/appointments/${id}/invoice`, { responseType: 'blob' });
+            const res = await apiClient.get(`/api/pdf/invoice/${id}`, { responseType: 'blob' });
             const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
             setPreviewAsset({
                 url,
-                title: `Invoice #${id}`
+                title: `Invoice #${id}`,
+                type: 'pdf'
             });
         } catch {
             toast.error("Failed to download invoice");
@@ -335,7 +336,7 @@ export default function Dashboard() {
                                             onDownloadInvoice={handleDownloadInvoice}
                                             onReview={a => { setSelectedApt(a); setReviewModalOpen(true); }}
                                             onRefundRequest={a => { setSelectedApt(a); setRefundModalOpen(true); }}
-                                            onPreviewProof={url => setPreviewAsset({ url, title: "Refund Proof" })}
+                                            onPreviewProof={url => setPreviewAsset({ url, title: "Refund Proof", type: 'image' })}
                                         />
                                     ))}
                                 </div>
@@ -471,6 +472,7 @@ export default function Dashboard() {
             <AssetPreviewModal
                 url={previewAsset?.url || null}
                 title={previewAsset?.title || "Document Preview"}
+                type={previewAsset?.type}
                 onClose={() => setPreviewAsset(null)}
             />
         </div>

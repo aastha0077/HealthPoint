@@ -4,14 +4,15 @@ import { X, Download, FileText, ImageIcon } from "lucide-react";
 interface AssetPreviewModalProps {
     url: string | null;
     title: string;
+    type?: 'image' | 'pdf';
     onClose: () => void;
 }
 
-export function AssetPreviewModal({ url, title, onClose }: AssetPreviewModalProps) {
+export function AssetPreviewModal({ url, title, type, onClose }: AssetPreviewModalProps) {
     if (!url) return null;
 
-    const isImage = url.match(/\.(jpg|jpeg|png|gif|webp)$/i) || url.includes('image/');
-    const isPdf = url.match(/\.pdf$/i) || url.includes('pdf');
+    const isImage = type === 'image' || url.startsWith('data:image') || url.match(/\.(jpg|jpeg|png|gif|webp)$/i) || url.includes('image/');
+    const isPdf = type === 'pdf' || url.startsWith('blob:') || url.match(/\.pdf$/i) || url.includes('pdf');
 
     const handleDownload = () => {
         const link = document.createElement('a');

@@ -12,7 +12,7 @@ import { ConfirmModal } from "@/components/admin/ConfirmModal";
 
 export default function Chat() {
     const { appointmentId } = useParams();
-    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string } | null>(null);
+    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string, type?: 'image' | 'pdf' } | null>(null);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const completedAtParam = searchParams.get("completedAt") || "";
@@ -302,7 +302,7 @@ export default function Chat() {
                                     setEditInput={setEditInput}
                                     onEdit={() => editMessage(m.id, editInput)}
                                     onDelete={deleteMessage}
-                                    onPreviewFile={(url, title) => setPreviewAsset({ url, title })}
+                                    onPreviewFile={(url, title, type) => setPreviewAsset({ url, title, type })}
                                     colorScheme={isDoctor ? "indigo" : "blue"}
                                 />
                             ))

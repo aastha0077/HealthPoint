@@ -376,6 +376,7 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
             <AssetPreviewModal 
                 url={previewUrl} 
                 title="Refund Proof" 
+                type="image"
                 onClose={() => setPreviewUrl(null)} 
             />
         </div>

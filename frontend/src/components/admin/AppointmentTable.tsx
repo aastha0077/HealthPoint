@@ -304,6 +304,7 @@ export function AppointmentTable({
             <AssetPreviewModal 
                 url={previewUrl} 
                 title="Refund Proof" 
+                type="image"
                 onClose={() => setPreviewUrl(null)} 
             />
         </div>
