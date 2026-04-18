@@ -204,38 +204,38 @@ export default function Dashboard() {
     const missedCount = appointments.filter(a => a.status === "MISSED" || a.status === "NO_SHOW").length;
 
     return (
-        <div className="min-h-screen bg-[#FDFDFF] lg:pl-32 lg:pr-12 py-12 relative">
+        <div className="min-h-screen bg-[#FDFDFF] lg:pl-28 lg:pr-8 py-8 relative">
             <div className="fixed inset-0 pointer-events-none opacity-40 bg-gradient-to-br from-indigo-50 via-white to-violet-50 -z-10" />
             <div className="fixed top-0 right-0 w-[800px] h-[800px] bg-indigo-100/40 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
             
-            <div className="max-w-7xl mx-auto pb-32">
-                <div className="sticky top-0 z-[40] mb-12">
-                    <div className="bg-white/70 backdrop-blur-3xl border border-white/60 rounded-[3rem] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-between">
-                        <div className="flex items-center gap-6">
+            <div className="max-w-7xl mx-auto pb-16">
+                <div className="sticky top-0 z-[40] mb-8">
+                    <div className="bg-white/80 backdrop-blur-3xl border border-white/60 rounded-3xl p-4 shadow-sm flex items-center justify-between">
+                        <div className="flex items-center gap-4">
                             <motion.div 
                                 onClick={() => setProfileModalOpen(true)}
                                 whileHover={{ scale: 1.05 }}
-                                className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center text-white font-black text-xl shadow-xl cursor-pointer overflow-hidden border-2 border-white ring-4 ring-slate-50"
+                                className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-lg cursor-pointer overflow-hidden border-2 border-white ring-2 ring-slate-50"
                             >
                                 {auth?.user?.profilePicture ? <img src={auth.user.profilePicture} className="w-full h-full object-cover" /> : (auth?.user?.firstName || "U")[0]}
                             </motion.div>
                             <div>
-                                <h1 className="text-2xl font-black text-slate-900 tracking-tighter">
+                                <h1 className="text-xl font-bold text-slate-900 tracking-tight">
                                     Greetings, {auth?.user?.firstName}.
                                 </h1>
-                                <p className="text-[10px] font-black text-indigo-500/60 uppercase tracking-[0.4em] leading-none mt-2">Health Management Console</p>
+                                <p className="text-[9px] font-bold text-indigo-500/80 uppercase tracking-widest mt-0.5">Health Management</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className="hidden md:flex items-center gap-3 px-8 py-3 bg-slate-50 rounded-[2rem] border border-slate-100">
-                                <div className="flex flex-col items-center px-4 border-r border-slate-200">
-                                    <span className="text-sm font-black text-slate-900 leading-none">{stats.upcoming}</span>
-                                    <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest mt-1">Active</span>
+                        <div className="flex items-center gap-3">
+                            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-[1rem] border border-slate-100">
+                                <div className="flex flex-col items-center px-3 border-r border-slate-200">
+                                    <span className="text-sm font-bold text-slate-900 leading-none">{stats.upcoming}</span>
+                                    <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider mt-1">Active</span>
                                 </div>
-                                <div className="flex flex-col items-center px-4">
-                                    <span className="text-sm font-black text-indigo-600 leading-none">{stats.completed}</span>
-                                    <span className="text-[7px] font-black text-slate-400 uppercase tracking-widest mt-1">History</span>
+                                <div className="flex flex-col items-center px-3">
+                                    <span className="text-sm font-bold text-indigo-600 leading-none">{stats.completed}</span>
+                                    <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider mt-1">History</span>
                                 </div>
                             </div>
                             
@@ -243,28 +243,28 @@ export default function Dashboard() {
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => navigate("/my-chats")}
-                                className="px-8 py-4 bg-slate-900 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-600 transition-all flex items-center gap-4"
+                                className="px-5 py-2.5 bg-slate-900 text-white rounded-[1rem] font-bold text-[10px] uppercase tracking-wider shadow-sm hover:bg-indigo-600 transition-all flex items-center gap-2"
                             >
-                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" /> Conversations
+                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" /> Conversations
                             </motion.button>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-                    <div className="lg:col-span-12 space-y-16">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-                            <div className="flex items-center gap-5">
-                                <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-[2.2rem] flex items-center justify-center text-white shadow-2xl shadow-indigo-200 rotate-6">
-                                    <Calendar size={24} />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div className="lg:col-span-12 space-y-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center text-white shadow-md rotate-3">
+                                    <Calendar size={18} />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Your Clinical Registry</h2>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{filteredAppointments.length} sessions documented in this segment</p>
+                                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">Your Registry</h2>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{filteredAppointments.length} sessions</p>
                                 </div>
                             </div>
 
-                            <div className="inline-flex p-2 bg-white/60 backdrop-blur-xl rounded-[2rem] border border-white shadow-xl shadow-indigo-500/5 flex-wrap gap-2">
+                            <div className="inline-flex p-1.5 bg-white/70 backdrop-blur-xl rounded-[1rem] border border-white shadow-sm flex-wrap gap-1">
                                 {[
                                     { key: "UPCOMING", label: "Appointments" },
                                     { key: "HISTORY", label: "Past Visits" },
@@ -274,16 +274,16 @@ export default function Dashboard() {
                                     <button
                                         key={f.key}
                                         onClick={() => setApptSubFilter(f.key as any)}
-                                        className={`relative px-8 py-3.5 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                                        className={`relative px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${
                                             apptSubFilter === f.key 
-                                                ? "text-white shadow-lg shadow-indigo-500/20" 
-                                                : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
+                                                ? "text-white shadow-sm shadow-indigo-500/10" 
+                                                : "text-slate-500 hover:text-slate-800 hover:bg-white/50"
                                         }`}
                                     >
                                         {apptSubFilter === f.key && (
                                             <motion.div
                                                 layoutId="activeTabIndicator"
-                                                className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-[1.5rem] -z-10"
+                                                className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl -z-10"
                                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                             />
                                         )}
@@ -296,32 +296,32 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                             {isLoading ? (
-                                <div className="grid grid-cols-1 gap-8">
-                                    {[1, 2, 3].map(i => <div key={i} className="h-44 bg-white rounded-[3rem] border border-slate-100 shadow-sm animate-pulse" />)}
+                                <div className="grid grid-cols-1 gap-4">
+                                    {[1, 2, 3].map(i => <div key={i} className="h-28 bg-white rounded-2xl border border-slate-100 shadow-sm animate-pulse" />)}
                                 </div>
                             ) : filteredAppointments.length === 0 ? (
                                 <motion.div 
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    className="py-32 flex flex-col items-center justify-center text-center bg-white rounded-[4rem] border border-slate-100/60 border-dashed"
+                                    className="py-16 flex flex-col items-center justify-center text-center bg-white rounded-3xl border border-slate-100/60 border-dashed"
                                 >
-                                    <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-8 font-black">
+                                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-4 font-bold text-sm">
                                         Empty
                                     </div>
-                                    <h3 className="text-2xl font-black text-slate-900">Vacuum State</h3>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">No clinical records match this filter</p>
+                                    <h3 className="text-lg font-bold text-slate-900">No Records Found</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Try a different filter</p>
                                     <button 
                                         onClick={() => navigate("/appointment")}
-                                        className="mt-10 px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
+                                        className="mt-6 px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-indigo-700 transition-all shadow-sm"
                                     >
-                                        Schedule New Consultation
+                                        Schedule
                                     </button>
                                 </motion.div>
                             ) : (
                                 <>
-                                <div className="grid grid-cols-1 gap-8">
+                                <div className="grid grid-cols-1 gap-4">
                                     {paginatedAppointments.map(apt => (
                                         <AppointmentCard
                                             key={apt.id}
@@ -387,50 +387,50 @@ export default function Dashboard() {
                 </div>
 
                 {/* Sub CTA Section */}
-                <div className="mt-32">
-                    <div className="flex items-center gap-12 text-slate-300 mb-12">
+                <div className="mt-12">
+                    <div className="flex items-center gap-6 text-slate-300 mb-6">
                         <div className="h-px flex-1 bg-slate-100" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em]">Resource Expansion</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Resources</span>
                         <div className="h-px flex-1 bg-slate-100" />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* New Subtle Search Card */}
                         <motion.div 
-                            whileHover={{ y: -5 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => navigate("/appointment")}
-                            className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-xl shadow-indigo-100/20 group cursor-pointer flex items-center justify-between"
+                            className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm group cursor-pointer flex items-center justify-between hover:border-indigo-100 transition-all"
                         >
-                            <div className="flex items-center gap-6">
-                                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all">
-                                    <Search size={24} />
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                                    <Search size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Browse Clinicians</h3>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Manual specialist lookup</p>
+                                    <h3 className="text-sm font-bold text-slate-900 tracking-tight">Browse Clinicians</h3>
+                                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">Find specialists</p>
                                 </div>
                             </div>
-                            <div className="w-10 h-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            <div className="w-8 h-8 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-all">
                                 →
                             </div>
                         </motion.div>
 
                         {/* Subtle Link to Services */}
                         <motion.div 
-                            whileHover={{ y: -5 }}
+                            whileHover={{ y: -2 }}
                             onClick={() => navigate("/our-services")}
-                            className="bg-indigo-600 rounded-[3rem] p-10 shadow-xl shadow-indigo-200/40 group cursor-pointer flex items-center justify-between text-white"
+                            className="bg-indigo-50 rounded-3xl p-6 border border-indigo-100 shadow-sm group cursor-pointer flex items-center justify-between"
                         >
-                            <div className="flex items-center gap-6">
-                                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-white backdrop-blur-sm">
-                                    <Calendar size={24} />
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+                                    <Calendar size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black tracking-tight">Explore Wellness</h3>
-                                    <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest mt-1">View our clinical offerings</p>
+                                    <h3 className="text-sm font-bold text-indigo-900 tracking-tight">Explore Services</h3>
+                                    <p className="text-[10px] font-semibold text-indigo-600/80 uppercase tracking-wider mt-0.5">View offerings</p>
                                 </div>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white group-hover:bg-white group-hover:text-indigo-600 transition-all">
+                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
                                 →
                             </div>
                         </motion.div>

@@ -57,7 +57,7 @@ export const AppointmentSection = ({
             MISSED: "bg-red-50 text-red-600 border-red-100",
         };
         return (
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${map[status] || "bg-slate-50 text-slate-600 border-slate-100"}`}>
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider border ${map[status] || "bg-slate-50 text-slate-600 border-slate-100"}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${status === 'BOOKED' ? 'bg-blue-500' :
                         status === 'IN_PROGRESS' ? 'bg-violet-500 animate-pulse' :
                             status === 'COMPLETED' ? 'bg-emerald-500' :
@@ -82,15 +82,15 @@ export const AppointmentSection = ({
         };
         return (
             <div className="flex flex-col gap-1">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${colors[status] || "bg-slate-50 text-slate-500 border-slate-100"}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${status === 'COMPLETED' ? 'bg-emerald-500' :
+                <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-wider border ${colors[status] || "bg-slate-50 text-slate-500 border-slate-100"}`}>
+                    <span className={`w-1 h-1 rounded-full ${status === 'COMPLETED' ? 'bg-emerald-500' :
                             status === 'PENDING' ? 'bg-amber-500 animate-pulse' :
                                 status === 'REFUNDED' ? 'bg-violet-500' :
                                     'bg-slate-400'
                         }`} />
                     {status === 'REFUND_REQUESTED' ? 'REFUND REQ' : status}
                 </span>
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider pl-1">{method}</span>
+                <span className="text-[7px] font-bold text-slate-400 uppercase tracking-widest pl-1">{method}</span>
             </div>
         );
     };
@@ -98,24 +98,24 @@ export const AppointmentSection = ({
     return (
         <div className="space-y-6">
             {/* Search & Filters Bar */}
-            <div className="bg-white/80 backdrop-blur-xl p-3 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap gap-3 items-center">
-                <div className="relative flex-1 min-w-[280px]">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+            <div className="bg-white/80 backdrop-blur-xl p-2.5 rounded-xl shadow-sm border border-slate-100 flex flex-wrap gap-2.5 items-center">
+                <div className="relative flex-1 min-w-[240px]">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
                     <input
                         type="text"
-                        placeholder="Search by name or number..."
+                        placeholder="Search..."
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50/80 border border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-rose-500/10 focus:bg-white focus:border-rose-200 transition-all font-bold text-slate-700 outline-none"
+                        className="w-full pl-10 pr-4 py-2 bg-slate-50/80 border border-slate-100 rounded-lg text-xs focus:ring-2 focus:ring-rose-500/10 focus:bg-white focus:border-rose-200 transition-all font-semibold text-slate-700 outline-none"
                     />
                 </div>
                 {showFilter && (
                     <div className="relative group">
-                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-rose-500 transition-colors" size={14} />
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-rose-500 transition-colors" size={12} />
                         <select
                             value={statusFilter}
                             onChange={(e) => onFilterChange(e.target.value)}
-                            className="pl-9 pr-8 py-3 bg-slate-50/80 border border-slate-100 rounded-xl text-xs font-black text-slate-700 focus:ring-2 focus:ring-rose-500/10 focus:border-rose-200 outline-none cursor-pointer appearance-none transition-all uppercase tracking-widest"
+                            className="pl-8 pr-7 py-2 bg-slate-50/80 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-700 focus:ring-2 focus:ring-rose-500/10 focus:border-rose-200 outline-none cursor-pointer appearance-none transition-all uppercase tracking-wider"
                         >
                             <option value="ALL">All Status</option>
                             <option value="UPCOMING">Upcoming</option>
@@ -127,9 +127,9 @@ export const AppointmentSection = ({
                 {onExport && (
                     <button
                         onClick={onExport}
-                        className="px-5 py-3 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg shadow-slate-200/50 flex items-center gap-2"
+                        className="px-4 py-2 bg-slate-900 text-white rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm flex items-center gap-1.5"
                     >
-                        <FileDown size={14} className="text-rose-400" />
+                        <FileDown size={12} className="text-rose-400" />
                         Export
                     </button>
                 )}
@@ -140,57 +140,57 @@ export const AppointmentSection = ({
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-gradient-to-r from-slate-50 to-slate-50/50 border-b border-slate-100">
-                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400">#</th>
-                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400">Patient</th>
-                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400">Schedule</th>
-                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400">Status</th>
-                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400">Payment</th>
-                                <th className="px-5 py-4 text-[10px] uppercase font-black tracking-widest text-slate-400 text-right">Actions</th>
+                            <tr className="bg-slate-50/50 border-b border-slate-100">
+                                <th className="px-3 py-2.5 text-[8px] uppercase font-bold tracking-wider text-slate-450 text-center">#</th>
+                                <th className="px-3 py-2.5 text-[8px] uppercase font-bold tracking-wider text-slate-450">Patient</th>
+                                <th className="px-3 py-2.5 text-[8px] uppercase font-bold tracking-wider text-slate-450">Schedule</th>
+                                <th className="px-3 py-2.5 text-[8px] uppercase font-bold tracking-wider text-slate-450">Status</th>
+                                <th className="px-3 py-2.5 text-[8px] uppercase font-bold tracking-wider text-slate-450">Payment</th>
+                                <th className="px-3 py-2.5 text-[8px] uppercase font-bold tracking-wider text-slate-450 text-right pr-5">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {paginatedAppointments.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="py-20 text-center">
-                                        <div className="flex flex-col items-center gap-3">
-                                            <Calendar size={40} className="text-slate-200" />
-                                            <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">No records found</p>
+                                    <td colSpan={6} className="py-12 text-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <Calendar size={30} className="text-slate-200" />
+                                            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">No records found</p>
                                         </div>
                                     </td>
                                 </tr>
                             ) : paginatedAppointments.map((apt, idx) => (
-                                <tr key={apt.id} className="hover:bg-slate-50/70 transition-all group">
-                                    <td className="px-5 py-4">
-                                        <div className="w-8 h-8 bg-rose-50 rounded-lg flex items-center justify-center font-black text-rose-500 text-[10px] border border-rose-100/50">
+                                <tr key={apt.id} className="hover:bg-slate-50/50 transition-all group">
+                                    <td className="px-3 py-2">
+                                        <div className="w-6 h-6 bg-rose-50 rounded-md flex items-center justify-center font-bold text-rose-500 text-[9px] border border-rose-100/50">
                                             {(currentPage - 1) * itemsPerPage + idx + 1}
                                         </div>
                                     </td>
-                                    <td className="px-5 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-slate-500 font-black text-xs border border-slate-100">
+                                    <td className="px-3 py-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-7 h-7 rounded-md bg-slate-50 flex items-center justify-center text-slate-500 font-bold text-[9px] border border-slate-100">
                                                 {(apt.patient?.firstName || "P")[0]}
                                             </div>
                                             <div>
-                                                <p className="font-black text-slate-900 text-sm leading-tight">{apt.patient?.firstName} {apt.patient?.lastName}</p>
-                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{apt.appointmentNumber}</p>
+                                                <p className="font-bold text-slate-900 text-[10px] leading-tight">{apt.patient?.firstName} {apt.patient?.lastName}</p>
+                                                <p className="text-[7px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{apt.appointmentNumber}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-5 py-4">
-                                        <div className="flex items-center gap-1.5 text-slate-700 font-bold text-xs">
-                                            <Calendar size={11} className="text-rose-400" />
+                                    <td className="px-3 py-2">
+                                        <div className="flex items-center gap-1 text-slate-700 font-semibold text-[10px]">
+                                            <Calendar size={9} className="text-rose-400" />
                                             {new Date(apt.dateTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] mt-1">
-                                            <Clock size={10} className="text-slate-300" />
+                                        <div className="flex items-center gap-1 text-slate-400 font-semibold text-[8px] mt-0.5">
+                                            <Clock size={8} className="text-slate-300" />
                                             {new Date(apt.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </td>
-                                    <td className="px-5 py-4">{statusBadge(apt.status)}</td>
-                                    <td className="px-5 py-4">{paymentBadge(apt)}</td>
-                                    <td className="px-5 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                    <td className="px-3 py-2">{statusBadge(apt.status)}</td>
+                                    <td className="px-3 py-2">{paymentBadge(apt)}</td>
+                                    <td className="px-3 py-2 text-right">
+                                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
                                             {apt.status === "COMPLETED" && (
                                                 <>
                                                     {apt.audioRecordingUrl && (
@@ -199,9 +199,8 @@ export const AppointmentSection = ({
                                                                 e.stopPropagation();
                                                                 onOpenRecording?.(apt);
                                                             }}
-                                                            className="px-3 py-2 bg-rose-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-sm flex items-center gap-1.5"
                                                         >
-                                                            <Volume2 size={12} className="animate-pulse" /> Listen
+                                                            <Volume2 size={10} className="animate-pulse" /> Listen
                                                         </button>
                                                     )}
                                                     {onDownloadInvoice && (
@@ -210,10 +209,10 @@ export const AppointmentSection = ({
                                                                 e.stopPropagation();
                                                                 onDownloadInvoice(apt.id);
                                                             }}
-                                                            className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
+                                                            className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all border border-blue-100"
                                                             title="Download Invoice"
                                                         >
-                                                            <AlignLeft size={13} />
+                                                            <AlignLeft size={12} />
                                                         </button>
                                                     )}
                                                     <button
@@ -221,18 +220,18 @@ export const AppointmentSection = ({
                                                             e.stopPropagation();
                                                             onOpenChat(apt);
                                                         }}
-                                                        className="px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-100"
+                                                        className="px-2.5 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-indigo-100 transition-all border border-indigo-100"
                                                     >
                                                         Chat
                                                     </button>
                                                 </>
                                             )}
                                             {apt.status === "IN_PROGRESS" ? (
-                                                <button onClick={() => onComplete(apt.id)} className="px-3 py-2 bg-rose-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-sm">
+                                                <button onClick={() => onComplete(apt.id)} className="px-2.5 py-1.5 bg-rose-600 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-rose-700 transition-all shadow-sm">
                                                     End
                                                 </button>
                                             ) : (apt.status === "BOOKED" || apt.status === "PENDING") && (
-                                                <button onClick={() => onStart(apt.id)} className="px-3 py-2 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm">
+                                                <button onClick={() => onStart(apt.id)} className="px-2.5 py-1.5 bg-slate-900 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider hover:bg-slate-800 transition-all shadow-sm">
                                                     Start
                                                 </button>
                                             )}
@@ -273,11 +272,11 @@ export const AppointmentSection = ({
                                 if (isDots) return null;
 
                                 return (
-                                    <button
+                                <button
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
-                                        className={`min-w-[36px] h-9 rounded-lg text-xs font-black transition-all ${currentPage === page
-                                                ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
+                                        className={`min-w-[32px] h-8 rounded-lg text-[10px] font-bold transition-all ${currentPage === page
+                                                ? "bg-slate-900 text-white shadow-md"
                                                 : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
                                             }`}
                                     >

@@ -51,6 +51,15 @@ app.use(cors({
 // Middleware to parse JSON body
 app.use(json());
 
+// Handle JSON parsing errors
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof SyntaxError && 'status' in err && err.status === 400 && 'body' in err) {
+        res.status(400).json({ success: false, message: 'Invalid JSON payload' });
+        return;
+    }
+    next(err);
+});
+
 // Welcome route
 app.get('/welcome', (req: Request, res: Response) => {
     res.send("Welcome to Public United Lumbini Hospital");

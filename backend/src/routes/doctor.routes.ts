@@ -1,13 +1,15 @@
 import { Router, Request, Response } from "express";
 import { createDoctorController, getDoctorsController, getDoctorByIdController, updateDoctorController, getDoctorByUserIdController } from "../controllers/doctor.controllers";
 import { verifyAccessToken, authorizeRoles } from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validate.middleware";
+import { createDoctorSchema, updateDoctorSchema } from "../validators/doctor.validator";
 import { markDoctorUnavailableForDate, getDoctorUnavailableDates } from "../services/doctorUnavailability.services";
 import { PrismaClient } from "@prisma/client";
 
 const doctorRoutes = Router();
 const prisma = new PrismaClient();
 
-doctorRoutes.post('/', createDoctorController);
+doctorRoutes.post('/', validate(createDoctorSchema), createDoctorController);
 
 doctorRoutes.get('/profile/me', verifyAccessToken, getDoctorByUserIdController as any);
 
@@ -26,7 +28,7 @@ doctorRoutes.get('/unavailable-dates/:doctorId', async (req: Request, res: Respo
 doctorRoutes.get('/:pageNumber/:pageSize', getDoctorsController);
 doctorRoutes.get('/:id', getDoctorByIdController);
 
-doctorRoutes.put('/:id', verifyAccessToken, updateDoctorController as any);
+doctorRoutes.put('/:id', verifyAccessToken, validate(updateDoctorSchema), updateDoctorController as any);
 
 // Mark doctor unavailable for specific date + auto-reschedule
 doctorRoutes.post('/mark-unavailable', verifyAccessToken, authorizeRoles("DOCTOR"), async (req: Request, res: Response): Promise<void> => {

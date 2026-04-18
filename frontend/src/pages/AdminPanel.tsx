@@ -149,14 +149,14 @@ export function AdminPanel() {
             />
 
             <main className="flex-1 overflow-auto">
-                <div className="p-8 max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div className="p-4 max-w-6xl mx-auto">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                         <div>
-                            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-4">
+                            <h1 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-3">
                                 {currentTab === 'DASHBOARD' ? "Executive Overview" : `${currentTab.charAt(0) + currentTab.slice(1).toLowerCase()} Management`}
                             </h1>
-                            <p className="text-slate-400 mt-2 text-sm font-bold uppercase tracking-widest">
-                                {currentTab === 'DASHBOARD' ? "System performance and healthcare metrics" : `Hospital control center for managing ${currentTab.toLowerCase()}.`}
+                            <p className="text-slate-400 mt-0.5 text-[10px] font-bold uppercase tracking-widest">
+                                {currentTab === 'DASHBOARD' ? "System and healthcare metrics" : `Control center for managing ${currentTab.toLowerCase()}.`}
                             </p>
                         </div>
                     </div>

@@ -112,9 +112,9 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                     { label: "Completed", count: stats.completed, color: "text-emerald-500", bg: "bg-emerald-50", border: "border-emerald-100" },
                     { label: "Total", count: stats.total, color: "text-slate-500", bg: "bg-slate-50", border: "border-slate-100" },
                 ].map(s => (
-                    <div key={s.label} className={`${s.bg} ${s.border} border rounded-2xl p-5`}>
-                        <p className={`text-3xl font-black ${s.color}`}>{s.count}</p>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">{s.label}</p>
+                    <div key={s.label} className={`${s.bg} ${s.border} border rounded-xl p-4`}>
+                        <p className={`text-2xl font-black ${s.color}`}>{s.count}</p>
+                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5">{s.label}</p>
                     </div>
                 ))}
             </div>
@@ -122,12 +122,12 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
             {/* Filters */}
             <div className="flex items-center gap-3 flex-wrap">
                 <div className="relative flex-1 max-w-sm">
-                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
                     <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        placeholder="Search by appointment # or patient..."
-                        className="w-full pl-11 pr-4 py-3 bg-white border border-slate-100 rounded-xl text-sm font-bold focus:ring-2 focus:ring-rose-500 outline-none"
+                        placeholder="Search appointment # or patient..."
+                        className="w-full pl-11 pr-4 py-2 bg-white border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-rose-500 outline-none"
                     />
                 </div>
                 <div className="flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-100">
@@ -146,8 +146,8 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/30 overflow-hidden">
-                <div className="max-h-[65vh] overflow-y-auto">
+            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="max-h-[60vh] overflow-y-auto">
                     {isLoading ? (
                         <div className="p-12 flex justify-center">
                             <Loader2 size={32} className="animate-spin text-slate-200" />
@@ -159,15 +159,15 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                         </div>
                     ) : (
                         <table className="w-full">
-                            <thead className="bg-slate-50 sticky top-0 z-10">
+                            <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-100">
                                 <tr>
-                                    <th className="text-left px-6 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Appointment</th>
-                                    <th className="text-left px-6 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Patient</th>
-                                    <th className="text-left px-6 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Doctor</th>
-                                    <th className="text-left px-6 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Reason</th>
-                                    <th className="text-left px-6 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Bank Info</th>
-                                    <th className="text-left px-6 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Status</th>
-                                    <th className="text-left px-6 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Actions</th>
+                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Appointment</th>
+                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Patient</th>
+                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Doctor</th>
+                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Reason</th>
+                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Bank Info</th>
+                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Status</th>
+                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
@@ -176,44 +176,44 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                     const StatusIcon = sc.icon;
                                     return (
                                         <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <p className="font-black text-slate-900 text-sm">#{r.appointment?.appointmentNumber}</p>
-                                                <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                                            <td className="px-4 py-2.5">
+                                                <p className="font-black text-slate-900 text-xs">#{r.appointment?.appointmentNumber}</p>
+                                                <p className="text-[9px] text-slate-400 font-bold mt-0.5">
                                                     {r.appointment?.dateTime ? new Date(r.appointment.dateTime).toLocaleDateString() : "—"}
                                                 </p>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <p className="font-bold text-slate-700 text-sm">
+                                            <td className="px-4 py-2.5">
+                                                <p className="font-bold text-slate-700 text-xs">
                                                     {r.appointment?.patient?.firstName} {r.appointment?.patient?.lastName}
                                                 </p>
-                                                <p className="text-[10px] text-slate-400">{r.appointment?.patient?.user?.email}</p>
+                                                <p className="text-[9px] text-slate-400">{r.appointment?.patient?.user?.email}</p>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <p className="font-bold text-slate-700 text-sm">
-                                                    Dr. {r.appointment?.doctor?.user?.firstName} {r.appointment?.doctor?.user?.lastName}
+                                            <td className="px-4 py-2.5">
+                                                <p className="font-bold text-slate-700 text-xs">
+                                                    Dr. {r.appointment?.doctor?.user?.firstName || r.appointment?.doctor?.firstName} {r.appointment?.doctor?.user?.lastName || r.appointment?.doctor?.lastName}
                                                 </p>
                                             </td>
-                                            <td className="px-6 py-4 max-w-[200px]">
-                                                <p className="text-xs text-slate-500 truncate" title={r.reason}>{r.reason}</p>
+                                            <td className="px-4 py-2.5 max-w-[150px]">
+                                                <p className="text-[11px] text-slate-500 truncate" title={r.reason}>{r.reason}</p>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-4 py-2.5">
                                                 {r.bankName ? (
                                                     <div>
-                                                        <p className="text-xs font-bold text-slate-700">{r.bankName}</p>
-                                                        <p className="text-[10px] text-slate-400">{r.accountNumber} • {r.accountHolderName}</p>
+                                                        <p className="text-[11px] font-bold text-slate-700">{r.bankName}</p>
+                                                        <p className="text-[9px] text-slate-400">{r.accountNumber} • {r.accountHolderName}</p>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-[10px] text-slate-300 font-bold uppercase">Not provided</span>
+                                                    <span className="text-[9px] text-slate-300 font-bold uppercase">Not provided</span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${sc.bg} ${sc.text} ${sc.border} border text-[9px] font-black uppercase tracking-widest`}>
-                                                    <StatusIcon size={12} className={r.status === "PROCESSING" ? "animate-spin" : ""} />
+                                            <td className="px-4 py-2.5">
+                                                <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${sc.bg} ${sc.text} ${sc.border} border text-[8px] font-black uppercase tracking-widest`}>
+                                                    <StatusIcon size={10} className={r.status === "PROCESSING" ? "animate-spin" : ""} />
                                                     {r.status}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
+                                            <td className="px-4 py-2.5 text-right">
+                                                <div className="flex items-center justify-end gap-1.5">
                                                     {r.proofUrl && (
                                                         <a href={r.proofUrl} target="_blank" rel="noreferrer" className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="View Proof">
                                                             <Eye size={14} />
@@ -226,7 +226,7 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                                                 setProcessForm({ status: "PROCESSING", proofUrl: r.proofUrl || "", adminNotes: r.adminNotes || "" });
                                                                 setProcessModalOpen(true);
                                                             }}
-                                                            className="px-4 py-2 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-rose-500 transition-all"
+                                                            className="px-3 py-1.5 bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest rounded transition-all hover:bg-rose-500"
                                                         >
                                                             Process
                                                         </button>
@@ -261,27 +261,27 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-                            className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden"
+                            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
                         >
-                            <div className="p-10">
+                            <div className="p-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <div>
-                                        <h3 className="text-2xl font-black text-slate-900">Process Refund</h3>
-                                        <p className="text-slate-400 text-sm font-bold mt-1">
+                                        <h3 className="text-xl font-black text-slate-900">Process Refund</h3>
+                                        <p className="text-slate-400 text-xs font-bold mt-0.5 line-clamp-1">
                                             #{selectedRequest.appointment?.appointmentNumber} — {selectedRequest.appointment?.patient?.firstName} {selectedRequest.appointment?.patient?.lastName}
                                         </p>
                                     </div>
-                                    <button onClick={() => setProcessModalOpen(false)} className="text-slate-300 hover:text-rose-500"><XCircle size={28} /></button>
+                                    <button onClick={() => setProcessModalOpen(false)} className="text-slate-300 hover:text-rose-500"><XCircle size={24} /></button>
                                 </div>
 
                                 {/* Patient's reason */}
-                                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-6">
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-amber-400 mb-2 flex items-center gap-2"><AlertTriangle size={12} /> Patient's Reason</p>
-                                    <p className="text-sm text-amber-800 font-bold leading-relaxed">{selectedRequest.reason}</p>
+                                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-5">
+                                    <p className="text-[8px] font-black uppercase tracking-widest text-amber-400 mb-1.5 flex items-center gap-1.5"><AlertTriangle size={10} /> Patient's Reason</p>
+                                    <p className="text-xs text-amber-800 font-bold leading-relaxed">{selectedRequest.reason}</p>
                                     {selectedRequest.bankName && (
-                                        <div className="mt-3 pt-3 border-t border-amber-200/50">
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-amber-400 mb-1">Bank Details</p>
-                                            <p className="text-sm text-amber-800 font-bold">{selectedRequest.bankName} • {selectedRequest.accountNumber} • {selectedRequest.accountHolderName}</p>
+                                        <div className="mt-2.5 pt-2.5 border-t border-amber-200/50">
+                                            <p className="text-[8px] font-black uppercase tracking-widest text-amber-400 mb-0.5">Bank Details</p>
+                                            <p className="text-xs text-amber-800 font-bold">{selectedRequest.bankName} • {selectedRequest.accountNumber} • {selectedRequest.accountHolderName}</p>
                                         </div>
                                     )}
                                     {selectedRequest.qrCodeUrl && (
