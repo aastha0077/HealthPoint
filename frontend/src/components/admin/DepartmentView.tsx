@@ -4,6 +4,7 @@ import { apiClient } from "@/apis/apis";
 import toast from "react-hot-toast";
 import { ConfirmModal } from "./ConfirmModal";
 import { motion, AnimatePresence } from "framer-motion";
+import { Pagination } from "./Pagination";
 
 interface DepartmentViewProps {
     onExport?: () => void;
@@ -16,6 +17,8 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
     const [description, setDescription] = useState("");
     const [editingId, setEditingId] = useState<number | null>(null);
     const [selectedDept, setSelectedDept] = useState<any>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
     const [confirmModal, setConfirmModal] = useState<{
         show: boolean; title: string; message: string; onConfirm: () => void; type: 'DANGER' | 'WARNING' | 'INFO';
     }>({ show: false, title: "", message: "", onConfirm: () => { }, type: 'INFO' });
@@ -38,6 +41,12 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
     useEffect(() => {
         fetchDepartments();
     }, []);
+
+    const totalPages = Math.ceil((departments?.length || 0) / itemsPerPage);
+    const paginatedDepts = (departments || []).slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -94,8 +103,8 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
 
     const startEdit = (dept: any) => {
         setEditingId(dept.id);
-        setName(dept.name);
-        setDescription(dept.description);
+        setName(dept.name || "");
+        setDescription(dept.description || "");
     };
 
     const resetForm = () => {
@@ -128,7 +137,7 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
                 <div className="grid grid-cols-1 gap-3">
                     {loading ? (
                         <div className="p-12 text-center text-slate-300 font-bold">Compiling Units...</div>
-                    ) : departments.map((dept) => (
+                    ) : paginatedDepts.map((dept) => (
                         <motion.div
                             layout
                             key={dept.id}
@@ -185,6 +194,18 @@ export function DepartmentView({ onExport }: DepartmentViewProps) {
                         </motion.div>
                     ))}
                 </div>
+
+                {totalPages > 1 && (
+                    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mt-3">
+                        <Pagination 
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
+                            totalItems={departments.length}
+                            itemsPerPage={itemsPerPage}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Form & Personnel Section */}

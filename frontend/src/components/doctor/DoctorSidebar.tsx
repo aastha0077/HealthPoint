@@ -1,10 +1,16 @@
-import { Calendar, Clock, MessageSquare, LogOut, UserCircle, LayoutDashboard, Award } from "lucide-react";
+import { Calendar, Clock, MessageSquare, LogOut, UserCircle, LayoutDashboard, Award, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useNavigate, NavLink } from "react-router";
+import { useNotifications } from "../NotificationProvider";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function DoctorSidebar() {
     const auth = useAuth();
     const navigate = useNavigate();
+    const { notifications } = useNotifications();
+
+    const messageCount = notifications.filter(n => !n.read && n.type === 'MESSAGE').length;
+    const otherNotifCount = notifications.filter(n => !n.read && n.type !== 'MESSAGE').length;
 
     const tabs = [
         { path: "/doctor-panel", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -13,6 +19,7 @@ export function DoctorSidebar() {
         { path: "/doctor-panel/messages", label: "Messages", icon: MessageSquare },
         { path: "/doctor-panel/profile", label: "My Profile", icon: UserCircle },
         { path: "/doctor-panel/reviews", label: "Practice Ratings", icon: Award },
+        { path: "/doctor-panel/network", label: "Staff & Admin Chat", icon: Users },
     ];
 
     const handleLogout = () => {
@@ -33,20 +40,39 @@ export function DoctorSidebar() {
             </div>
 
             <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
-                {tabs.map(({ path, label, icon: Icon, end }) => (
-                    <NavLink
-                        key={path}
-                        to={path}
-                        end={end}
-                        className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3.5 text-sm font-bold rounded-2xl transition-all duration-300 ${isActive
-                            ? 'bg-rose-600 text-white shadow-xl shadow-rose-900/20 translate-x-1'
-                            : 'text-slate-400 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        <Icon size={18} />
-                        <span>{label}</span>
-                    </NavLink>
-                ))}
+                {tabs.map(({ path, label, icon: Icon, end }) => {
+                    const count = label === "Messages" ? messageCount : label === "Dashboard" ? otherNotifCount : 0;
+                    
+                    return (
+                        <NavLink
+                            key={path}
+                            to={path}
+                            end={end}
+                            className={({ isActive }) => `w-full flex items-center justify-between px-4 py-3.5 text-sm font-bold rounded-2xl transition-all duration-300 ${isActive
+                                ? 'bg-rose-600 text-white shadow-xl shadow-rose-900/20 translate-x-1'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <Icon size={18} />
+                                <span>{label}</span>
+                            </div>
+                            
+                            <AnimatePresence>
+                                {count > 0 && (
+                                    <motion.span
+                                        initial={{ scale: 0, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        exit={{ scale: 0, opacity: 0 }}
+                                        className="min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[9px] font-black rounded-lg flex items-center justify-center border border-rose-400/50 shadow-lg shadow-rose-500/40"
+                                    >
+                                        {count}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </NavLink>
+                    );
+                })}
             </nav>
 
             <div className="p-4 mt-auto space-y-4">

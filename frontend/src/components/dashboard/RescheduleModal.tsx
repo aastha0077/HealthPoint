@@ -30,8 +30,22 @@ export function RescheduleModal({ appointment, onClose, onSubmit }: RescheduleMo
     const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
     const doctorId = appointment?.doctor?.id || appointment?.doctorId;
-    const doctorTimeSlots: string[] = appointment?.doctor?.timeSlots || [];
+    const [doctorTimeSlots, setDoctorTimeSlots] = useState<string[]>([]);
+    const [isLoadingDoctor, setIsLoadingDoctor] = useState(false);
     const today = new Date().toISOString().split("T")[0];
+
+    // Fetch doctor's actual time slots from API
+    useEffect(() => {
+        if (!doctorId) return;
+        setIsLoadingDoctor(true);
+        apiClient.get(`/api/doctors/${doctorId}`)
+            .then(res => {
+                const slots = res.data?.timeSlots || [];
+                setDoctorTimeSlots(slots);
+            })
+            .catch(() => setDoctorTimeSlots([]))
+            .finally(() => setIsLoadingDoctor(false));
+    }, [doctorId]);
 
     // Fetch unavailable dates
     useEffect(() => {
@@ -138,12 +152,12 @@ export function RescheduleModal({ appointment, onClose, onSubmit }: RescheduleMo
                                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                                     <Clock size={12} /> Available Slots
                                 </label>
-                                {isLoadingSlots ? (
+                                {(isLoadingSlots || isLoadingDoctor) ? (
                                     <div className="flex justify-center py-6">
                                         <Loader2 size={20} className="animate-spin text-slate-400" />
                                     </div>
                                 ) : doctorTimeSlots.length === 0 ? (
-                                    <p className="text-slate-500 font-semibold text-xs text-center py-4">No time slots configured.</p>
+                                    <p className="text-slate-500 font-semibold text-xs text-center py-4">No time slots available for this doctor.</p>
                                 ) : (
                                     <div className="grid grid-cols-3 gap-2">
                                         {doctorTimeSlots.map((slot: string) => {

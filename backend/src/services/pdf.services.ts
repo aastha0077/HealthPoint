@@ -30,22 +30,26 @@ export const generateTablePDF = async (title: string, columns: string[], data: a
     const startX = 40;
     const colWidth = (doc.page.width - 80) / columns.length;
 
-    // Headers
-    doc.rect(startX, startY, doc.page.width - 80, 25).fill("#f1f5f9");
-    doc.fillColor("#475569").fontSize(10).font("Helvetica-Bold");
-
-    columns.forEach((col, i) => {
-        doc.text(col.toUpperCase(), startX + (i * colWidth) + 10, startY + 7, { width: colWidth - 10 });
-    });
+    const drawHeaders = (y: number) => {
+        doc.rect(startX, y, doc.page.width - 80, 25).fill("#f1f5f9");
+        doc.fillColor("#475569").fontSize(10).font("Helvetica-Bold");
+        columns.forEach((col, i) => {
+            doc.text(col.toUpperCase(), startX + (i * colWidth) + 10, y + 7, { width: colWidth - 20, lineBreak: false });
+        });
+        return y + 25;
+    };
 
     // Rows
-    let currentY = startY + 25;
+    let currentY = drawHeaders(startY);
+
     doc.font("Helvetica").fillColor("#334155");
 
     data.forEach((row, rowIndex) => {
-        if (currentY > doc.page.height - 60) {
+        if (currentY > doc.page.height - 85) {
             doc.addPage({ layout: "landscape" });
             currentY = 40;
+            currentY = drawHeaders(currentY);
+            doc.font("Helvetica").fillColor("#334155");
         }
 
         if (rowIndex % 2 === 0) {
@@ -61,13 +65,17 @@ export const generateTablePDF = async (title: string, columns: string[], data: a
             if (typeof value === "object") value = value.name || value.id || "-";
             if (value instanceof Date) value = value.toLocaleDateString();
 
-            doc.text(String(value), startX + (colIndex * colWidth) + 10, currentY + 6, { width: colWidth - 10 });
+            doc.text(String(value), startX + (colIndex * colWidth) + 10, currentY + 6, { 
+                width: colWidth - 20, 
+                height: 15,
+                lineBreak: false 
+            });
         });
         currentY += 22;
     });
 
     // Footer
-    doc.fontSize(8).fillColor("#94a3b8").text(`Exported on ${new Date().toLocaleString()} | Page 1`, 40, doc.page.height - 30, { align: "center" });
+    doc.fontSize(8).fillColor("#94a3b8").text(`Exported on ${new Date().toLocaleString()}`, 40, doc.page.height - 30, { align: "center" });
 
     doc.end();
 };

@@ -9,10 +9,12 @@ import { DoctorSidebar } from "@/components/doctor/DoctorSidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConsultationModal } from "@/components/doctor/ConsultationModal";
 import { DoctorChat } from "@/components/doctor/DoctorChat";
+import { PdfPreviewModal } from "@/components/PdfPreviewModal";
 
 // Extracted Components
 import { DoctorDashboardTab } from "@/components/doctor/dashboard/DoctorDashboardTab";
 import { SchedulingHub } from "@/components/doctor/dashboard/SchedulingHub";
+import { StaffChatHub } from "@/components/chat/StaffChatHub";
 import { RescheduleReportModal } from "@/components/doctor/dashboard/RescheduleReportModal";
 import { MessageSection } from "@/components/doctor/dashboard/MessageSection";
 import { AppointmentSection } from "@/components/doctor/dashboard/AppointmentSection";
@@ -44,6 +46,7 @@ export function DoctorPanel() {
     const [isMarkingUnavailable, setIsMarkingUnavailable] = useState(false);
     const [unavailableResult, setUnavailableResult] = useState<any>(null);
     const [showUnavailableResult, setShowUnavailableResult] = useState(false);
+    const [previewPdf, setPreviewPdf] = useState<{ url: string, title: string, filename: string } | null>(null);
 
     const fetchAppointments = useCallback(async (reset = false) => {
         const targetPage = reset ? 1 : page;
@@ -202,14 +205,13 @@ export function DoctorPanel() {
                 { title, columns, data }, 
                 { responseType: 'blob' }
             );
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `${title.toLowerCase().replace(/\s+/g, "_")}_export.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            toast.success(`${title} exported successfully`);
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+            setPreviewPdf({
+                url,
+                title: `${title} Report`,
+                filename: `${title.toLowerCase().replace(/\s+/g, "_")}_export.pdf`
+            });
+            toast.success(`${title} ready for preview`);
         } catch {
             toast.error("Failed to export PDF");
         }
@@ -218,13 +220,12 @@ export function DoctorPanel() {
     const downloadInvoice = async (id: number) => {
         try {
             const res = await apiClient.get(`/api/pdf/invoice/${id}`, { responseType: 'blob' });
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `invoice_hp_${id}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+            setPreviewPdf({
+                url,
+                title: `Invoice #${id}`,
+                filename: `invoice_hp_${id}.pdf`
+            });
         } catch {
             toast.error("Failed to download invoice");
         }
@@ -337,7 +338,7 @@ export function DoctorPanel() {
             
             if (search.trim() !== "" && !matchesSearch) return false;
             
-            if (type === 'QUEUE') return (a.status === "BOOKED" || a.status === "PENDING" || a.status === "IN_PROGRESS");
+            if (type === 'QUEUE') return (a.status === "BOOKED" || a.status === "PENDING" || a.status === "IN_PROGRESS" || a.status === "WAITING");
             if (type === 'HISTORY') {
                 if (statusFilter === "ALL") return true;
                 if (statusFilter === "UPCOMING") return (a.status === "BOOKED" || a.status === "PENDING" || a.status === "IN_PROGRESS");
@@ -471,12 +472,7 @@ export function DoctorPanel() {
                                 onComplete={handleComplete}
                                 onOpenChat={setActiveChatAppointment}
                                 onOpenRecording={setActiveRecordingApt}
-                                onExport={() => handleExportPDF("My Active Queue", ["ID", "Patient", "Date", "Status"], getFilteredAppointments('QUEUE').map(a => ({
-                                    id: a.appointmentNumber,
-                                    patient: `${a.patient.firstName} ${a.patient.lastName}`,
-                                    date: new Date(a.dateTime).toLocaleDateString(),
-                                    status: a.status
-                                })))}
+                                onExport={handleExportPDF}
                                 onDownloadInvoice={downloadInvoice}
                             />
                         </motion.div>
@@ -494,12 +490,7 @@ export function DoctorPanel() {
                                 onComplete={handleComplete}
                                 onOpenChat={setActiveChatAppointment}
                                 onOpenRecording={setActiveRecordingApt}
-                                onExport={() => handleExportPDF("Clinical History", ["ID", "Patient", "Date", "Status"], getFilteredAppointments('HISTORY').map(a => ({
-                                    id: a.appointmentNumber,
-                                    patient: `${a.patient.firstName} ${a.patient.lastName}`,
-                                    date: new Date(a.dateTime).toLocaleDateString(),
-                                    status: a.status
-                                })))}
+                                onExport={handleExportPDF}
                                 onDownloadInvoice={downloadInvoice}
                             />
                         </motion.div>
@@ -581,6 +572,7 @@ export function DoctorPanel() {
                             </div>
                         </motion.div>
                     } />
+                    <Route path="/network" element={<div className="max-w-4xl mx-auto"><StaffChatHub /></div>} />
                 </Routes>
 
                 <footer className="mt-20 pt-10 border-t border-slate-100 flex flex-wrap justify-between items-center gap-6">
@@ -686,6 +678,23 @@ export function DoctorPanel() {
                     </div>
                 )}
             </AnimatePresence>
+
+            {previewPdf && (
+                <PdfPreviewModal
+                    url={previewPdf.url}
+                    title={previewPdf.title}
+                    onClose={() => setPreviewPdf(null)}
+                    onDownload={() => {
+                        const link = document.createElement('a');
+                        link.href = previewPdf.url;
+                        link.setAttribute('download', previewPdf.filename);
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        toast.success('File saved successfully');
+                    }}
+                />
+            )}
         </div>
     );
 }

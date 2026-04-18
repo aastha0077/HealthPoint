@@ -19,7 +19,9 @@ export function FavoriteProvider({ children }: { children: ReactNode }) {
         if (!auth?.isAuthenticated) return;
         try {
             const res = await apiClient.get('/api/favorites');
-            setFavorites(res.data.map((fav: any) => fav.doctorId));
+            // Ensure uniqueness
+            const ids = res.data.map((fav: any) => fav.doctorId);
+            setFavorites([...new Set<number>(ids)]);
         } catch (e) {
             console.error("Failed to fetch favorites", e);
         }
@@ -34,9 +36,9 @@ export function FavoriteProvider({ children }: { children: ReactNode }) {
         try {
             const res = await apiClient.post(`/api/favorites/toggle/${doctorId}`);
             if (res.data.isFavorite) {
-                setFavorites([...favorites, doctorId]);
+                setFavorites(prev => [...new Set([...prev, doctorId])]);
             } else {
-                setFavorites(favorites.filter(id => id !== doctorId));
+                setFavorites(prev => prev.filter(id => id !== doctorId));
             }
             return res.data.isFavorite;
         } catch (e) {

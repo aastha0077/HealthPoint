@@ -13,6 +13,7 @@ import { DetailsModal } from "@/components/dashboard/DetailsModal";
 import { ReviewModal } from "@/components/dashboard/ReviewModal";
 import { RescheduleModal } from "@/components/dashboard/RescheduleModal";
 import { RefundRequestModal } from "@/components/dashboard/RefundRequestModal";
+import { AssetPreviewModal } from "@/components/common/AssetPreviewModal";
 
 export default function Dashboard() {
     const auth = useAuth();
@@ -26,6 +27,7 @@ export default function Dashboard() {
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [rescheduleModalOpen, setRescheduleModalOpen] = useState(false);
     const [refundModalOpen, setRefundModalOpen] = useState(false);
+    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string } | null>(null);
 
     const [selectedApt, setSelectedApt] = useState<any>(null);
     const [apptSubFilter, setApptSubFilter] = useState<"UPCOMING" | "HISTORY" | "CANCELLED" | "MISSED">("UPCOMING");
@@ -78,13 +80,11 @@ export default function Dashboard() {
     const handleDownloadInvoice = async (id: number) => {
         try {
             const res = await apiClient.get(`/api/appointments/${id}/invoice`, { responseType: 'blob' });
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `invoice-${id}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+            setPreviewAsset({
+                url,
+                title: `Invoice #${id}`
+            });
         } catch {
             toast.error("Failed to download invoice");
         }
@@ -124,7 +124,7 @@ export default function Dashboard() {
                 comment,
                 appointmentId: selectedApt.id
             });
-            toast.success("Review submitted!");
+            toast.success(selectedApt.review ? "Review updated successfully!" : "Feedback submitted successfully!");
             setReviewModalOpen(false);
             fetchAppointments();
         } catch (err: any) {
@@ -156,16 +156,16 @@ export default function Dashboard() {
         if (apptSubFilter === "MISSED") return a.status === "MISSED" || a.status === "NO_SHOW";
         return a.status === "CANCELLED";
     }).sort((a, b) => {
-        if (apptSubFilter === "MISSED") {
-            const refundA = refundStatuses[a.id];
-            const refundB = refundStatuses[b.id];
-            
-            const isCompletedA = refundA?.status === "COMPLETED";
-            const isCompletedB = refundB?.status === "COMPLETED";
-            
-            if (isCompletedA && !isCompletedB) return 1;
-            if (!isCompletedA && isCompletedB) return -1;
-        }
+        // Prioritize Refund-related statuses at the top for visibility
+        const refundA = refundStatuses[a.id];
+        const refundB = refundStatuses[b.id];
+        
+        const isPriorityA = refundA?.status === "COMPLETED" || refundA?.status === "PENDING" || refundA?.status === "PROCESSING";
+        const isPriorityB = refundB?.status === "COMPLETED" || refundB?.status === "PENDING" || refundB?.status === "PROCESSING";
+
+        if (isPriorityA && !isPriorityB) return -1;
+        if (!isPriorityA && isPriorityB) return 1;
+
         return new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime();
     });
 
@@ -335,6 +335,7 @@ export default function Dashboard() {
                                             onDownloadInvoice={handleDownloadInvoice}
                                             onReview={a => { setSelectedApt(a); setReviewModalOpen(true); }}
                                             onRefundRequest={a => { setSelectedApt(a); setRefundModalOpen(true); }}
+                                            onPreviewProof={url => setPreviewAsset({ url, title: "Refund Proof" })}
                                         />
                                     ))}
                                 </div>
@@ -452,7 +453,12 @@ export default function Dashboard() {
                     <DetailsModal appointment={selectedApt} onClose={() => setDetailsModalOpen(false)} />
                 )}
                 {reviewModalOpen && selectedApt && (
-                    <ReviewModal appointment={selectedApt} onClose={() => setReviewModalOpen(false)} onSubmit={handleReviewSubmit} />
+                    <ReviewModal 
+                        appointment={selectedApt} 
+                        initialData={selectedApt.review ? { rating: selectedApt.review.rating, comment: selectedApt.review.comment } : null}
+                        onClose={() => setReviewModalOpen(false)} 
+                        onSubmit={handleReviewSubmit} 
+                    />
                 )}
                 {rescheduleModalOpen && selectedApt && (
                     <RescheduleModal appointment={selectedApt} onClose={() => setRescheduleModalOpen(false)} onSubmit={handleRescheduleSubmit} />
@@ -461,6 +467,12 @@ export default function Dashboard() {
                     <RefundRequestModal appointment={selectedApt} onClose={() => setRefundModalOpen(false)} onSuccess={handleRefundSuccess} />
                 )}
             </AnimatePresence>
+
+            <AssetPreviewModal
+                url={previewAsset?.url || null}
+                title={previewAsset?.title || "Document Preview"}
+                onClose={() => setPreviewAsset(null)}
+            />
         </div>
     );
 }

@@ -3,6 +3,7 @@ import { LogOut, User, ChevronDown } from "lucide-react";
 import { Link, useNavigate, Outlet } from "react-router";
 import { useState } from "react";
 import { ProfileEditModal } from "@/components/profile/ProfileEditModal";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export default function AdminLayout() {
     const auth = useAuth();
@@ -27,9 +28,11 @@ export default function AdminLayout() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Link to="/" className="text-xs font-bold text-slate-400 hover:text-white transition-colors">Public Site</Link>
+                    <Link to="/" className="hidden md:inline text-xs font-bold text-slate-400 hover:text-white transition-colors mr-2">Public Site</Link>
 
-                    <div className="relative">
+                    <div className="flex items-center gap-4">
+                        <NotificationBell />
+                        <div className="relative">
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="flex items-center gap-3 bg-slate-800 hover:bg-slate-750 px-4 py-2 rounded-xl transition-all border border-slate-700"

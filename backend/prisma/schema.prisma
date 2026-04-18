@@ -24,6 +24,9 @@ model User {
     reviews          Review[]
     favorites        Favorite[]
     notifications    Notification[]
+    createdGroups    ChatGroup[]       @relation("GroupCreator")
+    groupMembers     ChatGroupMember[]
+    groupMessages    GroupMessage[]
 }
 
 model Patient {
@@ -263,3 +266,38 @@ model Symptom {
     organs  Organ[]  @relation("OrganSymptoms")
     doctors Doctor[] @relation("DoctorSymptoms")
 }
+
+model ChatGroup {
+    id          Int               @id @default(autoincrement())
+    name        String
+    description String?
+    creator     User              @relation("GroupCreator", fields: [creatorId], references: [id])
+    creatorId   Int
+    createdAt   DateTime          @default(now())
+    members     ChatGroupMember[]
+    messages    GroupMessage[]
+}
+
+model ChatGroupMember {
+    id       Int       @id @default(autoincrement())
+    group    ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    groupId  Int
+    user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId   Int
+    joinedAt DateTime  @default(now())
+
+    @@unique([groupId, userId])
+}
+
+model GroupMessage {
+    id        Int       @id @default(autoincrement())
+    group     ChatGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    groupId   Int
+    sender    User      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+    senderId  Int
+    content   String
+    fileUrl   String?
+    fileType  String?
+    createdAt DateTime  @default(now())
+}
+
