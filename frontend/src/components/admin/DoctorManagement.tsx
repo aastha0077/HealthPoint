@@ -1,4 +1,4 @@
-import { Search, Stethoscope, Plus, Camera, Image as ImageIcon, Loader2, Edit3, X, Clock, ChevronDown, Trash2, LayoutGrid, List, Mail, Send, Sparkles, AlignLeft, FileText, FileDown } from "lucide-react";
+import { Search, Stethoscope, Plus, Camera, Image as ImageIcon, Loader2, Edit3, X, Clock, ChevronDown, Trash2, LayoutGrid, List, Mail, Send, Sparkles, AlignLeft, FileText, FileDown, MessageSquare, Users, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { apiClient } from "@/apis/apis";
 import toast from "react-hot-toast";
@@ -317,7 +317,7 @@ export function DoctorManagement({
                         <div className="flex-none">
                             <ExportDropdown 
                                 className=""
-                                onExportAll={() => onExport("Complete Doctor Registry", ["ID", "Name", "Speciality", "Email", "Degree"], filteredDoctors.map(d => ({
+                                onExportAll={() => onExport("Complete Doctor Registry", ["ID", "Name", "Speciality", "Email", "Degree"], doctorsList.map(d => ({
                                     id: d.doctorId || d.id,
                                     name: `Dr. ${d.firstName} ${d.lastName}`,
                                     speciality: d.speciality || 'N/A',
@@ -380,7 +380,7 @@ export function DoctorManagement({
                                 </div>
                             </div>
                             <div className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
-                                {filteredDoctors.map(doc => {
+                                {doctorsList.map(doc => {
                                     const fn = doc.user?.firstName || doc.firstName;
                                     const ln = doc.user?.lastName || doc.lastName;
                                     const active = activeMsgDoc?.doctorId === doc.doctorId;

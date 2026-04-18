@@ -36,6 +36,7 @@ export function StaffChatHub() {
     const [isCreating, setIsCreating] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+    const [memberSearchQuery, setMemberSearchQuery] = useState("");
     const [activeChat, setActiveChat] = useState<{ targetId?: number; groupId?: number; title: string } | null>(null);
 
     const fetchData = async () => {
@@ -70,6 +71,11 @@ export function StaffChatHub() {
         g.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const filteredModalDoctors = doctors.filter(doc => 
+        (doc.firstName + " " + doc.lastName).toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        doc.role.toLowerCase().includes(memberSearchQuery.toLowerCase())
+    );
+
     const handleCreateGroup = async () => {
         if (!newGroupName || selectedDoctorIds.length === 0) {
             toast.error("Group name and at least one member required");
@@ -86,6 +92,7 @@ export function StaffChatHub() {
             toast.success("Staff group created successfully");
             setNewGroupName("");
             setNewGroupDesc("");
+            setMemberSearchQuery("");
             setSelectedDoctorIds([]);
             setShowCreateGroup(false);
             fetchData();
@@ -110,10 +117,7 @@ export function StaffChatHub() {
                     <h2 className="text-xl font-black tracking-tight">Internal Staff Hub</h2>
                     <p className="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em] mt-1">Exclusive Network for Doctors & Administrators Only</p>
                 </div>
-                <div className="relative z-10 flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md">
-                    <ShieldCheck size={14} className="text-emerald-400" />
-                    <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Secured Internal Channel</span>
-                </div>
+
             </div>
 
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -297,45 +301,67 @@ export function StaffChatHub() {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1 flex justify-between">
-                                        Select Members <span>{selectedDoctorIds.length} added</span>
-                                    </label>
-                                    <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                        {doctors.map(doc => (
-                                            <div 
-                                                key={doc.id}
-                                                onClick={() => toggleDoctorSelection(doc.id)}
-                                                className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between group ${
-                                                    selectedDoctorIds.includes(doc.id) 
-                                                        ? 'bg-rose-50 border-rose-200' 
-                                                        : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'
-                                                }`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all ${
-                                                        selectedDoctorIds.includes(doc.id) ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' : 'bg-white border border-slate-100 text-slate-400'
-                                                    }`}>
-                                                        {doc.firstName[0]}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[11px] font-bold text-slate-900">Dr. {doc.firstName} {doc.lastName}</p>
-                                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{doc.role}</p>
-                                                    </div>
-                                                </div>
-                                                {selectedDoctorIds.includes(doc.id) && (
-                                                    <div className="w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-rose-200">
-                                                        <Check size={14} />
-                                                    </div>
-                                                )}
+                                    <div className="flex items-center justify-between ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                                            Select Members
+                                        </label>
+                                        <span className="text-[10px] font-black text-rose-500">{selectedDoctorIds.length} added</span>
+                                    </div>
+                                    
+                                    <div className="relative">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                        <input 
+                                            type="text" 
+                                            placeholder="Search staff to add..."
+                                            value={memberSearchQuery}
+                                            onChange={(e) => setMemberSearchQuery(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-bold outline-none focus:ring-4 focus:ring-rose-500/5 focus:bg-white transition-all"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-2 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {filteredModalDoctors.length === 0 ? (
+                                            <div className="py-10 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                                                <Search size={20} className="mx-auto mb-2 text-slate-300" />
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No matching staff</p>
                                             </div>
-                                        ))}
+                                        ) : (
+                                            filteredModalDoctors.map(doc => (
+                                                <div 
+                                                    key={doc.id}
+                                                    onClick={() => toggleDoctorSelection(doc.id)}
+                                                    className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between group ${
+                                                        selectedDoctorIds.includes(doc.id) 
+                                                            ? 'bg-rose-50 border-rose-200' 
+                                                            : 'bg-slate-50/50 border-slate-100 hover:border-slate-200'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all ${
+                                                            selectedDoctorIds.includes(doc.id) ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' : 'bg-white border border-slate-100 text-slate-400'
+                                                        }`}>
+                                                            {doc.firstName[0]}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[11px] font-bold text-slate-900">Dr. {doc.firstName} {doc.lastName}</p>
+                                                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{doc.role}</p>
+                                                        </div>
+                                                    </div>
+                                                    {selectedDoctorIds.includes(doc.id) && (
+                                                        <div className="w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-rose-200">
+                                                            <Check size={14} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
                             <div className="p-8 bg-slate-50 flex gap-3 border-t border-slate-100 shrink-0">
                                 <button 
-                                    onClick={() => setShowCreateGroup(false)}
+                                    onClick={() => { setShowCreateGroup(false); setMemberSearchQuery(""); }}
                                     className="flex-1 py-3 bg-white border border-slate-200 text-slate-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all"
                                 >
                                     Cancel
