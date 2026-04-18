@@ -1,4 +1,4 @@
-import { Search, Trash2, Filter, UserCheck, Edit3, X, Loader2, FileDown } from "lucide-react";
+import { Search, Trash2, Filter, UserCheck, Edit3, X, Loader2, FileDown, Mail, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Pagination } from "./Pagination";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -6,6 +6,9 @@ import { apiClient } from "@/apis/apis";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { ConfirmModal } from "./ConfirmModal";
+import { TableStatsRow, type StatItem } from "./TableStatsRow";
+import { ExportDropdown } from "@/components/common/ExportDropdown";
+
 
 interface UserPatientManagementProps {
     tab: string;
@@ -14,7 +17,7 @@ interface UserPatientManagementProps {
     users: any[];
     patients: any[];
     onDelete: (type: string, id: number) => void;
-    onExport?: () => void;
+    onExport?: (title: string, columns: string[], data: any[]) => void;
 }
 
 export function UserPatientManagement({
@@ -60,6 +63,58 @@ export function UserPatientManagement({
         }
     };
 
+    const [showEmailModal, setShowEmailModal] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [emailSubject, setEmailSubject] = useState("");
+    const [emailMessage, setEmailMessage] = useState("");
+    const [isSending, setIsSending] = useState(false);
+
+    const EMAIL_TEMPLATES = [
+        { label: "System Maintenance", subject: "HealthPoint: System Maintenance Notification", message: "Dear User,\n\nPlease be advised that HealthPoint will be undergoing scheduled maintenance. Some services might be temporarily unavailable. We apologize for any inconvenience.\n\nRegards,\nHealthPoint Administration" },
+        { label: "Account Update", subject: "HealthPoint: Account Security Update", message: "Dear User,\n\nWe require you to review your account settings as part of our routine security audit. Please log in to your profile to ensure your information is up to date.\n\nRegards,\nHealthPoint Administration" }
+    ];
+
+    const applyTemplate = (tpl: any) => {
+        setEmailSubject(tpl.subject);
+        setEmailMessage(tpl.message);
+    };
+
+    const getRecipientEmail = () => {
+        if (!selectedUser) return "";
+        return tab === 'USERS' ? selectedUser.email : selectedUser.user?.email;
+    };
+
+    const getRecipientName = () => {
+        if (!selectedUser) return "";
+        return tab === 'USERS' ? `${selectedUser.firstName} ${selectedUser.lastName}` : `${selectedUser.user?.firstName || selectedUser.firstName} ${selectedUser.user?.lastName || selectedUser.lastName}`;
+    };
+
+    const handleSendEmail = async () => {
+        if (!emailSubject || !emailMessage || !selectedUser) return;
+        setIsSending(true);
+        try {
+            const toEmail = getRecipientEmail();
+            if (!toEmail) {
+                toast.error("No valid email address found for this user");
+                setIsSending(false);
+                return;
+            }
+            await apiClient.post("/api/admin/send-email", {
+                to: toEmail,
+                subject: emailSubject,
+                message: emailMessage
+            });
+            toast.success("Dispatch Sent Effectively");
+            setShowEmailModal(false);
+            setEmailSubject("");
+            setEmailMessage("");
+        } catch {
+            toast.error("Dispatch Failed");
+        } finally {
+            setIsSending(false);
+        }
+    };
+
     // Reset pagination on search or filter change
     useEffect(() => {
         setCurrentPage(1);
@@ -84,8 +139,21 @@ export function UserPatientManagement({
         currentPage * itemsPerPage
     );
 
+    const stats: StatItem[] = tab === 'USERS' ? [
+        { label: "Total Staff", value: users.length, color: "slate" },
+        { label: "Administrators", value: users.filter(u => u.role === 'ADMIN').length, color: "blue" },
+        { label: "Clinical Doctors", value: users.filter(u => u.role === 'DOCTOR').length, color: "emerald" },
+        { label: "General Staff", value: users.filter(u => u.role === 'USER').length, color: "amber" }
+    ] : [
+        { label: "Total Registry", value: patients.length, color: "slate" },
+        { label: "Male Patients", value: patients.filter(p => p.gender === 'Male').length, color: "blue" },
+        { label: "Female Patients", value: patients.filter(p => p.gender === 'Female').length, color: "rose" },
+        { label: "Other", value: patients.filter(p => p.gender === 'Other').length, color: "violet" }
+    ];
+
     return (
         <div className="space-y-6">
+            <TableStatsRow stats={stats} />
             <div className="flex flex-col md:flex-row gap-3">
                 <div className="bg-white p-1.5 rounded-xl shadow-sm border border-slate-200 flex-1">
                     <div className="relative">
@@ -118,14 +186,23 @@ export function UserPatientManagement({
                     </div>
                 )}
                 {onExport && (
-                    <button 
-                        onClick={onExport}
-                        className="bg-white p-3 rounded-xl shadow-sm border border-slate-200 text-slate-400 hover:text-rose-500 transition-all flex items-center justify-center gap-2 group"
-                        title="Export to PDF"
-                    >
-                        <FileDown size={18} className="group-hover:scale-110 transition-transform" />
-                        <span className="text-[9px] font-black uppercase tracking-widest pr-2 hidden md:inline">Export</span>
-                    </button>
+                    <ExportDropdown 
+                        onExportAll={() => onExport(
+                            tab === 'USERS' ? "Complete User Directory" : "Complete Patient Records",
+                            tab === 'USERS' ? ["ID", "Name", "Email", "Role"] : ["ID", "Name", "Gender", "Location"],
+                            tab === 'USERS' 
+                                ? filteredUsers.map(u => ({ id: u.id, name: `${u.firstName} ${u.lastName}`, email: u.email, role: u.role }))
+                                : filteredPatients.map(p => ({ id: p.id, name: `${p.firstName} ${p.lastName}`, gender: p.gender, location: `${p.municipality}, ${p.district}` }))
+                        )}
+                        onExportPage={() => onExport(
+                            tab === 'USERS' ? "User Directory (Page)" : "Patient Records (Page)",
+                            tab === 'USERS' ? ["ID", "Name", "Email", "Role"] : ["ID", "Name", "Gender", "Location"],
+                            paginatedItems.map((item: any) => tab === 'USERS' 
+                                ? { id: item.id, name: `${item.firstName} ${item.lastName}`, email: item.email, role: item.role }
+                                : { id: item.id, name: `${item.firstName} ${item.lastName}`, gender: item.gender, location: `${item.municipality}, ${item.district}` }
+                            )
+                        )}
+                    />
                 )}
             </div>
 
@@ -134,11 +211,11 @@ export function UserPatientManagement({
                     <table className="w-full text-left whitespace-nowrap">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-100">
-                                <th className="px-3 py-2 text-[9px] uppercase font-black tracking-widest text-slate-400">Name</th>
-                                <th className="px-3 py-2 text-[9px] uppercase font-black tracking-widest text-slate-400">{tab === 'USERS' ? 'Email Address' : 'User Owner'}</th>
-                                <th className="px-3 py-2 text-[9px] uppercase font-black tracking-widest text-slate-400">{tab === 'USERS' ? 'Role' : 'Info'}</th>
-                                <th className="px-3 py-2 text-[9px] uppercase font-black tracking-widest text-slate-400">{tab === 'USERS' ? 'Joined' : 'Gender/Age'}</th>
-                                <th className="px-3 py-2 text-[9px] uppercase font-black tracking-widest text-slate-400 text-right">Actions</th>
+                                <th className="px-3 py-1.5 text-[8px] uppercase font-black tracking-widest text-slate-400">Name</th>
+                                <th className="px-3 py-1.5 text-[8px] uppercase font-black tracking-widest text-slate-400">{tab === 'USERS' ? 'Email' : 'User Owner'}</th>
+                                <th className="px-3 py-1.5 text-[8px] uppercase font-black tracking-widest text-slate-400">{tab === 'USERS' ? 'Role' : 'Info'}</th>
+                                <th className="px-3 py-1.5 text-[8px] uppercase font-black tracking-widest text-slate-400">{tab === 'USERS' ? 'Joined' : 'Gender/Age'}</th>
+                                <th className="px-3 py-1.5 text-[8px] uppercase font-black tracking-widest text-slate-400 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -151,22 +228,22 @@ export function UserPatientManagement({
                             )}
                             {tab === 'USERS' ? paginatedItems.map((u: any) => (
                                 <tr key={u.id} className="hover:bg-slate-50/80 transition-colors group">
-                                    <td className="px-3 py-2">
+                                    <td className="px-3 py-1.5">
                                         <div className="flex items-center gap-2">
                                             {u.profilePicture ? (
-                                                <img src={u.profilePicture} className="w-7 h-7 rounded-lg object-cover shadow-sm" alt={u.firstName} />
+                                                <img src={u.profilePicture} className="w-6 h-6 rounded-md object-cover" alt={u.firstName} />
                                             ) : (
-                                                <div className="w-7 h-7 bg-rose-50 rounded-lg flex items-center justify-center text-rose-500 font-black text-[9px]">{(u.firstName || 'U')[0]}</div>
+                                                <div className="w-6 h-6 bg-rose-50 rounded-md flex items-center justify-center text-rose-500 font-black text-[8px]">{(u.firstName || 'U')[0]}</div>
                                             )}
-                                            <p className="font-bold text-slate-900 text-xs">{u.firstName} {u.lastName}</p>
+                                            <p className="font-bold text-slate-900 text-[11px]">{u.firstName} {u.lastName}</p>
                                         </div>
                                     </td>
-                                    <td className="px-3 py-2 font-bold text-slate-500 text-xs">{u.email}</td>
-                                    <td className="px-3 py-2">
+                                    <td className="px-3 py-1.5 font-bold text-slate-500 text-[11px]">{u.email}</td>
+                                    <td className="px-3 py-1.5">
                                         <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${u.role === 'ADMIN' ? 'bg-slate-900 text-white shadow-md shadow-slate-200' : u.role === 'DOCTOR' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>{u.role}</span>
                                     </td>
-                                    <td className="px-3 py-2 font-bold text-slate-400 text-[10px]">{new Date(u.createdAt).toLocaleDateString()}</td>
-                                    <td className="px-3 py-2 text-right">
+                                    <td className="px-3 py-1.5 font-bold text-slate-400 text-[10px]">{new Date(u.createdAt).toLocaleDateString()}</td>
+                                    <td className="px-3 py-1.5 text-right">
                                         {u.id === auth?.user?.id ? (
                                             <span className="p-1 text-emerald-500 font-black text-[8px] uppercase tracking-widest inline-flex items-center justify-end gap-1">
                                                 <UserCheck size={10} />
@@ -174,6 +251,9 @@ export function UserPatientManagement({
                                             </span>
                                         ) : (
                                             <div className="flex justify-end gap-1 flex-nowrap">
+                                                <button onClick={() => { setSelectedUser(u); setShowEmailModal(true); }} className="p-1 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all border border-transparent hover:border-indigo-100" title="Send Email">
+                                                    <Mail size={12} />
+                                                </button>
                                                 <button onClick={() => openEdit('users', u)} className="p-1 text-slate-300 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-all border border-transparent hover:border-slate-200" title="Edit User">
                                                     <Edit3 size={12} />
                                                 </button>
@@ -196,23 +276,25 @@ export function UserPatientManagement({
                                 </tr>
                             )) : paginatedItems.map((p: any) => (
                                 <tr key={p.id} className="hover:bg-slate-50/80 transition-colors group">
-                                    <td className="px-3 py-2">
-                                        <p className="font-bold text-slate-900 text-xs">{p.firstName} {p.lastName}</p>
-                                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Patient Profile</p>
+                                    <td className="px-3 py-1.5">
+                                        <p className="font-bold text-slate-900 text-[11px]">{p.firstName} {p.lastName}</p>
+                                        <p className="text-[7px] text-slate-400 font-bold uppercase tracking-widest">Patient</p>
                                     </td>
-                                    <td className="px-3 py-2">
-                                        <p className="font-bold text-slate-700 text-xs">{p.user?.firstName} {p.user?.lastName}</p>
-                                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{p.user?.email}</p>
+                                    <td className="px-3 py-1.5">
+                                        <p className="font-bold text-slate-700 text-[11px]">{p.user?.firstName} {p.user?.lastName}</p>
+                                        <p className="text-[7px] text-slate-400 font-bold uppercase">{p.user?.email}</p>
                                     </td>
-                                    <td className="px-3 py-2 font-bold text-slate-700 text-[10px]">
+                                    <td className="px-3 py-1.5 font-bold text-slate-700 text-[10px]">
                                         {p.district}, {p.municipality}
-                                        <p className="text-[8px] text-slate-300 font-black uppercase tracking-[0.1em] mt-0.5">Location Registry</p>
                                     </td>
-                                    <td className="px-3 py-2 font-black text-rose-500 text-[9px] uppercase tracking-widest">
-                                        {p.gender} • {p.age || 'N/A'} YRS
+                                    <td className="px-3 py-1.5 font-black text-rose-500 text-[8px] uppercase tracking-widest">
+                                        {p.gender} • {p.age || 'N/A'}
                                     </td>
-                                    <td className="px-3 py-2 text-right">
+                                    <td className="px-3 py-1.5 text-right">
                                         <div className="flex justify-end gap-1 flex-nowrap">
+                                            <button onClick={() => { setSelectedUser(p); setShowEmailModal(true); }} className="p-1 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all border border-transparent hover:border-indigo-100" title="Send Email">
+                                                <Mail size={12} />
+                                            </button>
                                             <button onClick={() => openEdit('patients', p)} className="p-1 text-slate-300 hover:text-slate-900 hover:bg-slate-50 rounded-md transition-all border border-transparent hover:border-slate-200" title="Edit Patient">
                                                 <Edit3 size={12} />
                                             </button>
@@ -349,6 +431,114 @@ export function UserPatientManagement({
                 onConfirm={confirmModal.onConfirm}
                 onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
             />
+
+            {/* Email Dispatch Modal */}
+            <AnimatePresence>
+                {showEmailModal && selectedUser && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-20 bg-slate-900/40 backdrop-blur-2xl">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 40 }}
+                            className="bg-white rounded-[4rem] shadow-3xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            <div className="px-12 py-10 bg-slate-900 text-white flex items-center justify-between relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/10 rounded-full -mr-32 -mt-32 blur-3xl" />
+                                <div className="relative z-10 flex items-center gap-6">
+                                    <div className="w-16 h-16 bg-white/10 rounded-[1.75rem] flex items-center justify-center border border-white/10 backdrop-blur-md">
+                                        <Mail size={32} className="text-rose-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-3xl font-black tracking-tight">{tab === 'USERS' ? 'User Dispatch' : 'Patient Dispatch'}</h3>
+                                        <p className="text-[10px] font-black text-rose-400 uppercase tracking-[0.4em] mt-1">Official Communication Protocol</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowEmailModal(false)}
+                                    className="w-14 h-14 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-3xl transition-all border border-white/10 flex items-center justify-center group relative z-10 shadow-sm"
+                                >
+                                    <X size={28} className="group-hover:rotate-90 transition-transform duration-300" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto px-12 py-10 space-y-10 custom-scrollbar">
+                                <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 shadow-sm border border-slate-100">
+                                            <Mail size={24} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Recipient Identity</p>
+                                            <p className="text-sm font-black text-slate-900">{getRecipientName()}</p>
+                                        </div>
+                                    </div>
+                                    <div className="px-4 py-2 bg-white rounded-xl border border-slate-200">
+                                        <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{getRecipientEmail()}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Sparkles size={16} className="text-amber-500" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Rapid Response Templates</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {EMAIL_TEMPLATES.map((tpl, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => applyTemplate(tpl)}
+                                                className="px-5 py-4 bg-white border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30 rounded-2xl text-left transition-all group"
+                                            >
+                                                <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-1 group-hover:text-indigo-600 transition-colors">{tpl.label}</p>
+                                                <p className="text-[8px] font-bold text-slate-400 line-clamp-1">{tpl.subject}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-8 pt-4">
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Communication Subject</label>
+                                        <input
+                                            type="text"
+                                            value={emailSubject}
+                                            onChange={(e) => setEmailSubject(e.target.value)}
+                                            placeholder="Enter high-priority subject line..."
+                                            className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-[1.5rem] p-5 text-sm font-black text-slate-900 outline-none transition-all placeholder:text-slate-300"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Dispatch Narrative Content</label>
+                                        <textarea
+                                            value={emailMessage}
+                                            onChange={(e) => setEmailMessage(e.target.value)}
+                                            placeholder="Formulate official message context here..."
+                                            className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-[2.5rem] p-8 text-sm font-bold text-slate-700 outline-none min-h-[200px] transition-all leading-relaxed placeholder:text-slate-300"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="px-12 py-10 bg-slate-50/50 border-t border-slate-100 flex items-center gap-6">
+                                <button
+                                    onClick={() => setShowEmailModal(false)}
+                                    className="flex-1 py-5 rounded-[2rem] text-slate-400 font-black text-xs uppercase tracking-[0.3em] hover:bg-white hover:text-slate-900 transition-all border-2 border-transparent hover:border-slate-200"
+                                >
+                                    Abort Dispatch
+                                </button>
+                                <button
+                                    onClick={handleSendEmail}
+                                    disabled={isSending}
+                                    className="flex-[2] py-5 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-900/20 hover:bg-indigo-600 hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                                >
+                                    {isSending ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
+                                    Execute Dispatch
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

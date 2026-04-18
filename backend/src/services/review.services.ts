@@ -16,15 +16,27 @@ export const createReview = async (
         });
         if (!appt) throw new Error("Appointment not found or does not belong to you");
 
-        // Prevent duplicate review per appointment
+        // Use upsert or manual check/update
         const existing = await prisma.review.findUnique({ where: { appointmentId } });
-        if (existing) throw new Error("You have already reviewed this appointment");
+        if (existing) {
+            return prisma.review.update({
+                where: { appointmentId },
+                data: { rating, comment },
+                include: { user: { select: { firstName: true, lastName: true, profilePicture: true } } }
+            });
+        }
     } else {
-        // Without appointment — allow one direct review per user per doctor
+        // Without appointment — handle direct doctor reviews
         const existing = await prisma.review.findFirst({
-            where: { userId, doctorId, appointmentId: { equals: null } } as any
+            where: { userId, doctorId, appointmentId: null } as any
         });
-        if (existing) throw new Error("You have already reviewed this doctor");
+        if (existing) {
+            return prisma.review.update({
+                where: { id: existing.id },
+                data: { rating, comment },
+                include: { user: { select: { firstName: true, lastName: true, profilePicture: true } } }
+            });
+        }
     }
 
     return prisma.review.create({

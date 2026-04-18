@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useChat } from "@/hooks/useChat";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
+import { AssetPreviewModal } from "@/components/common/AssetPreviewModal";
 
 interface DoctorChatProps {
     appointmentId: number;
@@ -25,6 +26,7 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
     const [confirmModal, setConfirmModal] = useState<{ show: boolean; title: string; message: string; action: () => void }>({
         show: false, title: "", message: "", action: () => {}
     });
+    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string } | null>(null);
 
     const {
         messages,
@@ -205,6 +207,7 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
                                 setEditInput={setEditInput}
                                 onEdit={() => editMessage(m.id, editInput)}
                                 onDelete={deleteMessage}
+                                onPreviewFile={(url, title) => setPreviewAsset({ url, title })}
                                 colorScheme="indigo"
                             />
                         ))}
@@ -258,6 +261,12 @@ export function DoctorChat({ appointmentId, patientName, completedAt, onClose }:
                     message={confirmModal.message}
                     onConfirm={confirmModal.action}
                     onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+                />
+                
+                <AssetPreviewModal 
+                    url={previewAsset?.url || null} 
+                    title={previewAsset?.title || "Clinical Preview"} 
+                    onClose={() => setPreviewAsset(null)} 
                 />
             </motion.div>
         </motion.div>

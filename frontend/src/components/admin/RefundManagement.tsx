@@ -4,6 +4,9 @@ import toast from "react-hot-toast";
 import { Clock, CheckCircle2, XCircle, Loader2, Upload, Eye, AlertTriangle, Banknote, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pagination } from "./Pagination";
+import { TableStatsRow, type StatItem } from "./TableStatsRow";
+import { AssetPreviewModal } from "../common/AssetPreviewModal";
+
 
 interface RefundManagementProps {
     search: string;
@@ -20,7 +23,8 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const itemsPerPage = 10;
 
     const fetchRequests = async () => {
         setIsLoading(true);
@@ -75,6 +79,9 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
             r.appointment?.patient?.firstName?.toLowerCase().includes(search.toLowerCase()) ||
             r.appointment?.patient?.lastName?.toLowerCase().includes(search.toLowerCase());
         return matchesStatus && matchesSearch;
+    }).sort((a, b) => {
+        const order: Record<string, number> = { PENDING: 0, PROCESSING: 1, COMPLETED: 2, REJECTED: 3 };
+        return (order[a.status] ?? 4) - (order[b.status] ?? 4);
     });
 
     const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
@@ -95,29 +102,16 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
         REJECTED: { bg: "bg-red-50", text: "text-red-600", border: "border-red-100", icon: XCircle },
     };
 
-    const stats = {
-        pending: requests.filter(r => r.status === "PENDING").length,
-        processing: requests.filter(r => r.status === "PROCESSING").length,
-        completed: requests.filter(r => r.status === "COMPLETED").length,
-        total: requests.length,
-    };
+    const stats: StatItem[] = [
+        { label: "Pending", value: requests.filter(r => r.status === "PENDING").length, color: "amber" },
+        { label: "Processing", value: requests.filter(r => r.status === "PROCESSING").length, color: "blue" },
+        { label: "Completed", value: requests.filter(r => r.status === "COMPLETED").length, color: "emerald" },
+        { label: "Total Requests", value: requests.length, color: "slate" }
+    ];
 
     return (
         <div className="space-y-8">
-            {/* Stats Row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                    { label: "Pending", count: stats.pending, color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100" },
-                    { label: "Processing", count: stats.processing, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
-                    { label: "Completed", count: stats.completed, color: "text-emerald-500", bg: "bg-emerald-50", border: "border-emerald-100" },
-                    { label: "Total", count: stats.total, color: "text-slate-500", bg: "bg-slate-50", border: "border-slate-100" },
-                ].map(s => (
-                    <div key={s.label} className={`${s.bg} ${s.border} border rounded-xl p-4`}>
-                        <p className={`text-2xl font-black ${s.color}`}>{s.count}</p>
-                        <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-0.5">{s.label}</p>
-                    </div>
-                ))}
-            </div>
+            <TableStatsRow stats={stats} />
 
             {/* Filters */}
             <div className="flex items-center gap-3 flex-wrap">
@@ -161,13 +155,14 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                         <table className="w-full">
                             <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-100">
                                 <tr>
-                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Appointment</th>
-                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Patient</th>
-                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Doctor</th>
-                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Reason</th>
-                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Bank Info</th>
-                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400">Status</th>
-                                    <th className="text-left px-4 py-3 text-[8px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
+                                    <th className="text-left px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-400">Appointment</th>
+                                    <th className="text-left px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-400">Patient</th>
+                                    <th className="text-left px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-400">Doctor</th>
+                                    <th className="text-left px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-400">Reason</th>
+                                    <th className="text-left px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-400">Bank</th>
+                                    <th className="text-left px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-400">Admin Msg</th>
+                                    <th className="text-left px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-400">Status</th>
+                                    <th className="text-left px-3 py-2 text-[8px] font-black uppercase tracking-widest text-slate-400 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
@@ -176,48 +171,60 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                     const StatusIcon = sc.icon;
                                     return (
                                         <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-4 py-2.5">
-                                                <p className="font-black text-slate-900 text-xs">#{r.appointment?.appointmentNumber}</p>
-                                                <p className="text-[9px] text-slate-400 font-bold mt-0.5">
+                                            <td className="px-3 py-1.5">
+                                                <p className="font-black text-slate-900 text-[11px]">#{r.appointment?.appointmentNumber}</p>
+                                                <p className="text-[7px] text-slate-400 font-bold">
                                                     {r.appointment?.dateTime ? new Date(r.appointment.dateTime).toLocaleDateString() : "—"}
                                                 </p>
                                             </td>
-                                            <td className="px-4 py-2.5">
-                                                <p className="font-bold text-slate-700 text-xs">
+                                            <td className="px-3 py-1.5">
+                                                <p className="font-bold text-slate-700 text-[11px]">
                                                     {r.appointment?.patient?.firstName} {r.appointment?.patient?.lastName}
                                                 </p>
-                                                <p className="text-[9px] text-slate-400">{r.appointment?.patient?.user?.email}</p>
                                             </td>
-                                            <td className="px-4 py-2.5">
-                                                <p className="font-bold text-slate-700 text-xs">
+                                            <td className="px-3 py-1.5">
+                                                <p className="font-bold text-slate-700 text-[11px]">
                                                     Dr. {r.appointment?.doctor?.user?.firstName || r.appointment?.doctor?.firstName} {r.appointment?.doctor?.user?.lastName || r.appointment?.doctor?.lastName}
                                                 </p>
                                             </td>
-                                            <td className="px-4 py-2.5 max-w-[150px]">
-                                                <p className="text-[11px] text-slate-500 truncate" title={r.reason}>{r.reason}</p>
+                                            <td className="px-3 py-1.5 max-w-[120px]">
+                                                <p className="text-[10px] text-slate-500 truncate" title={r.reason}>{r.reason}</p>
                                             </td>
-                                            <td className="px-4 py-2.5">
+                                            <td className="px-3 py-1.5">
                                                 {r.bankName ? (
                                                     <div>
-                                                        <p className="text-[11px] font-bold text-slate-700">{r.bankName}</p>
-                                                        <p className="text-[9px] text-slate-400">{r.accountNumber} • {r.accountHolderName}</p>
+                                                        <p className="text-[10px] font-bold text-slate-700">{r.bankName}</p>
+                                                        <p className="text-[7px] text-slate-400">{r.accountNumber}</p>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-[9px] text-slate-300 font-bold uppercase">Not provided</span>
+                                                    <span className="text-[8px] text-slate-300 font-bold uppercase">N/A</span>
                                                 )}
                                             </td>
-                                            <td className="px-4 py-2.5">
-                                                <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${sc.bg} ${sc.text} ${sc.border} border text-[8px] font-black uppercase tracking-widest`}>
-                                                    <StatusIcon size={10} className={r.status === "PROCESSING" ? "animate-spin" : ""} />
+                                            <td className="px-3 py-1.5 max-w-[150px]">
+                                                {r.adminNotes ? (
+                                                    <p className="text-[10px] text-emerald-600 font-bold truncate" title={r.adminNotes}>
+                                                        {r.adminNotes}
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-[10px] text-slate-300 italic">No notes</p>
+                                                )}
+                                            </td>
+                                            <td className="px-3 py-1.5">
+                                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded ${sc.bg} ${sc.text} ${sc.border} border text-[7px] font-black uppercase tracking-widest`}>
+                                                    <StatusIcon size={9} className={r.status === "PROCESSING" ? "animate-spin" : ""} />
                                                     {r.status}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-2.5 text-right">
-                                                <div className="flex items-center justify-end gap-1.5">
+                                            <td className="px-3 py-1.5 text-right">
+                                                <div className="flex items-center justify-end gap-1">
                                                     {r.proofUrl && (
-                                                        <a href={r.proofUrl} target="_blank" rel="noreferrer" className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all" title="View Proof">
-                                                            <Eye size={14} />
-                                                        </a>
+                                                        <button 
+                                                            onClick={() => setPreviewUrl(r.proofUrl)}
+                                                            className="p-1 bg-emerald-50 text-emerald-600 rounded hover:bg-emerald-100 transition-all border border-emerald-100/50" 
+                                                            title="Preview Proof"
+                                                        >
+                                                            <Eye size={11} />
+                                                        </button>
                                                     )}
                                                     {r.status !== "COMPLETED" && r.status !== "REJECTED" && (
                                                         <button
@@ -226,7 +233,7 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                                                 setProcessForm({ status: "PROCESSING", proofUrl: r.proofUrl || "", adminNotes: r.adminNotes || "" });
                                                                 setProcessModalOpen(true);
                                                             }}
-                                                            className="px-3 py-1.5 bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest rounded transition-all hover:bg-rose-500"
+                                                            className="px-2 py-1 bg-slate-900 text-white text-[7px] font-black uppercase tracking-widest rounded transition-all hover:bg-rose-500"
                                                         >
                                                             Process
                                                         </button>
@@ -322,9 +329,13 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                                 )}
                                             </label>
                                             {processForm.proofUrl && (
-                                                <a href={processForm.proofUrl} target="_blank" rel="noreferrer" className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all" title="View uploaded proof">
+                                                <button 
+                                                    onClick={() => setPreviewUrl(processForm.proofUrl)}
+                                                    className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all border border-emerald-200/50" 
+                                                    title="Preview uploaded proof"
+                                                >
                                                     <Eye size={18} />
-                                                </a>
+                                                </button>
                                             )}
                                         </div>
                                     </div>
@@ -362,6 +373,11 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                     </motion.div>
                 )}
             </AnimatePresence>
+            <AssetPreviewModal 
+                url={previewUrl} 
+                title="Refund Proof" 
+                onClose={() => setPreviewUrl(null)} 
+            />
         </div>
     );
 }

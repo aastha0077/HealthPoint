@@ -11,11 +11,12 @@ interface AppointmentCardProps {
     onDownloadInvoice: (id: number) => void;
     onReview: (apt: any) => void;
     onRefundRequest: (apt: any) => void;
+    onPreviewProof: (url: string) => void;
 }
 
 export function AppointmentCard({
     apt, filter, refundStatus, statusBadge,
-    onReschedule, onCancel, onDetails, onDownloadInvoice, onReview, onRefundRequest
+    onReschedule, onCancel, onDetails, onDownloadInvoice, onReview, onRefundRequest, onPreviewProof
 }: AppointmentCardProps) {
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-3xl bg-white border border-slate-100 hover:border-indigo-100 transition-all group shadow-sm">
@@ -58,8 +59,10 @@ export function AppointmentCard({
                             </button>
                         )}
                         <button onClick={() => onDetails(apt)} className="h-9 px-4 rounded-xl text-[9px] font-bold uppercase tracking-wider text-slate-600 border border-slate-200 hover:bg-slate-50">Details</button>
-                        <button onClick={() => onDownloadInvoice(apt.id)} className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 bg-white border border-slate-200 hover:bg-slate-50"><Download size={14} /></button>
-                        <button onClick={() => onReview(apt)} className="h-9 px-4 rounded-xl text-[9px] font-bold uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-700">Review</button>
+                        <button onClick={() => onDownloadInvoice(apt.id)} className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 transition-all"><Download size={14} /></button>
+                        <button onClick={() => onReview(apt)} className="h-9 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest text-white bg-slate-900 hover:bg-rose-600 transition-all shadow-lg shadow-slate-200 active:scale-95">
+                            {apt.review ? "Edit Review" : "Review"}
+                        </button>
                     </>
                 )}
                 {filter === "MISSED" && (
@@ -82,9 +85,12 @@ export function AppointmentCard({
                                     Refund: {refundStatus.status}
                                 </div>
                                 {refundStatus.proofUrl && (
-                                    <a href={refundStatus.proofUrl} target="_blank" rel="noreferrer" className="h-9 px-4 rounded-xl text-[9px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 border border-emerald-100 flex items-center gap-1.5 hover:bg-emerald-100 transition-all">
-                                        <CheckCircle2 size={12} /> Proof
-                                    </a>
+                                    <button 
+                                        onClick={() => onPreviewProof(refundStatus.proofUrl)}
+                                        className="h-9 px-4 rounded-xl text-[9px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 border border-emerald-100 flex items-center gap-1.5 hover:bg-emerald-100 transition-all shadow-sm"
+                                    >
+                                        <CheckCircle2 size={12} /> View Proof
+                                    </button>
                                 )}
                             </div>
                         ) : (

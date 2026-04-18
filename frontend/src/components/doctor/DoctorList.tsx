@@ -80,7 +80,7 @@ function DoctorList() {
     try {
       setLoading(true);
       if (pageNumber > 1) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 800)); // slightly faster feel
       }
       const res = await apiClient.get<PaginatedResponse>(`/api/doctors/${pageNumber}/${pageSize}`, {
         params: {
@@ -89,8 +89,18 @@ function DoctorList() {
         }
       });
       const newDoctors = res.data.doctors;
-      setDoctors(prev => isNewSearch ? newDoctors : [...prev, ...newDoctors]);
-      setTotalDoctors(res.data.totalDoctors);
+      
+      if (isNewSearch) {
+        setDoctors(newDoctors);
+        setTotalDoctors(res.data.totalDoctors);
+      } else {
+        setDoctors(prev => {
+          const existingIds = new Set(prev.map(d => d.doctorId ?? d.id));
+          const filteredNew = newDoctors.filter(d => !existingIds.has(d.doctorId ?? d.id));
+          return [...prev, ...filteredNew];
+        });
+      }
+      
       setHasMore(newDoctors.length === pageSize);
     } catch {
       setError(true);

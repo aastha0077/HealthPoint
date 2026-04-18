@@ -1,15 +1,41 @@
 import { Router } from "express";
-import { getConversationController, askGeminiController, getAppointmentChatController, getDoctorConversationsController, clearChatHistoryController } from "../controllers/chat.controllers";
+import { 
+    getConversationController, 
+    askGeminiController, 
+    getAppointmentChatController, 
+    getDoctorConversationsController, 
+    clearChatHistoryController 
+} from "../controllers/chat.controllers";
+import { 
+    createGroupController, 
+    getMyGroupsController, 
+    sendGroupMessageController, 
+    getGroupMessagesController 
+} from "../controllers/groupChat.controllers";
+import { 
+    sendDirectMessageController, 
+    getDirectConversationsController,
+    getDirectMessagesController
+} from "../controllers/directMessage.controllers";
 import { verifyAccessToken } from "../middlewares/auth.middleware";
 
 const chatRoutes = Router();
 
-// Chat between doctor and patient (general)
-chatRoutes.get('/conversation/:otherUserId', verifyAccessToken, getConversationController);
-
-// Chat for a specific appointment
+// Chat between doctor and patient (appointment based)
 chatRoutes.get('/appointment/:appointmentId', verifyAccessToken, getAppointmentChatController as any);
 chatRoutes.delete('/appointment/:appointmentId', verifyAccessToken, clearChatHistoryController as any);
+
+// Direct Personal Messages (Chat between Doctor/Doctor or Admin/Doctor)
+chatRoutes.get('/conversation/:targetId', verifyAccessToken, getDirectMessagesController);
+chatRoutes.post('/direct/send', verifyAccessToken, sendDirectMessageController);
+chatRoutes.get('/direct/conversations', verifyAccessToken, getDirectConversationsController);
+
+// Group Chat Routes
+chatRoutes.post('/groups', verifyAccessToken, createGroupController);
+chatRoutes.get('/groups', verifyAccessToken, getMyGroupsController);
+chatRoutes.get('/groups/:groupId/messages', verifyAccessToken, getGroupMessagesController);
+chatRoutes.post('/groups/:groupId/messages', verifyAccessToken, sendGroupMessageController);
+
 
 // Get list of conversations for a doctor
 chatRoutes.get('/conversations', verifyAccessToken, getDoctorConversationsController);

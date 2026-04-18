@@ -47,3 +47,17 @@ export async function getAllUsersController(req: Request, res: Response) {
         res.status(500).json({ error: error.message });
     }
 }
+
+export async function getStaffUsersController(req: Request, res: Response) {
+    try {
+        const users = await prisma.user.findMany({
+            where: {
+                role: { in: ["ADMIN", "DOCTOR"] }
+            },
+            select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true, role: true }
+        });
+        res.json(users);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}

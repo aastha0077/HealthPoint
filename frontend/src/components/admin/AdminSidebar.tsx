@@ -1,4 +1,4 @@
-import { Calendar, Stethoscope, AlignLeft, Users, UserRound, CreditCard, LogOut, LayoutDashboard, Banknote } from "lucide-react";
+import { Calendar, Stethoscope, AlignLeft, Users, UserRound, CreditCard, LogOut, LayoutDashboard, Banknote, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useNavigate, NavLink } from "react-router";
 
@@ -18,6 +18,7 @@ export function AdminSidebar({ setSearch }: AdminSidebarProps) {
         { id: "PATIENTS", label: "Patients", icon: UserRound },
         { id: "PAYMENTS", label: "Financials", icon: CreditCard },
         { id: "REFUNDS", label: "Refunds", icon: Banknote },
+        { id: "STAFF_CHAT", label: "Staff Chat", icon: MessageSquare },
     ];
 
     const handleLogout = () => {

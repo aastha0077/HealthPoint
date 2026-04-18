@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Bell, MessageSquare, Trash2, MailOpen, Calendar, XCircle, Clock, CheckCircle2 } from "lucide-react";
+import { Bell, MessageSquare, Trash2, MailOpen, Calendar, XCircle, Clock, CheckCircle2, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications, type DBNotification } from "./NotificationProvider";
 import { formatDistanceToNow } from "date-fns";
@@ -99,6 +99,8 @@ export function NotificationBell() {
                                             CANCELLED: { bg: "bg-rose-500 text-white shadow-lg shadow-rose-200", icon: XCircle },
                                             RESCHEDULE: { bg: "bg-amber-100 text-amber-600", icon: Clock },
                                             COMPLETED: { bg: "bg-emerald-50 text-emerald-600", icon: CheckCircle2 },
+                                            ADMIN_ALERT: { bg: "bg-rose-50 text-rose-600 border border-rose-100", icon: Bell },
+                                            REFUND: { bg: "bg-amber-600 text-white shadow-lg shadow-amber-200", icon: CreditCard },
                                             DEFAULT: { bg: "bg-slate-50 text-slate-500", icon: Bell }
                                         };
                                         const style = typeStyles[n.type] || typeStyles.DEFAULT;
@@ -108,31 +110,24 @@ export function NotificationBell() {
                                             <div
                                                 key={n.id}
                                                 onClick={() => handleNotificationClick(n)}
-                                                className={`group p-5 flex gap-4 cursor-pointer hover:bg-slate-50/80 transition-all ${!n.read ? "bg-rose-50/10 border-l-4 border-l-rose-500" : "border-l-4 border-l-transparent"}`}
+                                                className={`group p-4 flex gap-4 cursor-pointer transition-all duration-300 ${!n.read ? "bg-rose-50/20 border-l-[3px] border-l-rose-500" : "hover:bg-slate-50 border-l-[3px] border-l-transparent"}`}
                                             >
-                                                <div className="shrink-0 pt-1">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${style.bg}`}>
+                                                <div className="shrink-0 pt-0.5">
+                                                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm ${style.bg}`}>
                                                         <Icon size={18} />
                                                     </div>
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex justify-between items-start gap-2 mb-1">
-                                                        <h5 className={`text-sm tracking-tight truncate ${!n.read ? "font-black text-slate-900" : "font-bold text-slate-600"}`}>
+                                                    <div className="flex justify-between items-start gap-3 mb-1">
+                                                        <h5 className={`text-[13px] tracking-tight leading-snug break-words ${!n.read ? "font-black text-slate-900" : "font-bold text-slate-600"}`}>
                                                             {n.title}
                                                         </h5>
-                                                        <span className="text-[10px] font-bold text-slate-300 whitespace-nowrap pt-1">
+                                                        <span className="text-[9px] font-black text-slate-300 uppercase whitespace-nowrap pt-1">
                                                             {formatDistanceToNow(n.timestamp, { addSuffix: true })}
                                                         </span>
                                                     </div>
-                                                    <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{n.content}</p>
-                                                </div>
-                                                <div className="shrink-0 self-center flex items-center gap-2">
-                                                    {!n.read && <div className="w-2 h-2 bg-rose-500 rounded-full shadow-lg shadow-rose-500/40" />}
-                                                    {n.type === "MESSAGE" && (
-                                                        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <MessageSquare size={14} />
-                                                        </div>
-                                                    )}
+                                                    <p className="text-[11px] font-medium text-slate-400 leading-relaxed line-clamp-2 pr-2">{n.content}</p>
+                                                    {/* Status indicator removed per user request */}
                                                 </div>
                                             </div>
                                         );

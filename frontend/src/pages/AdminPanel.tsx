@@ -11,6 +11,9 @@ import { DepartmentView } from "@/components/admin/DepartmentView";
 import { PaymentTable } from "@/components/admin/PaymentTable";
 import { Dashboard } from "@/components/admin/Dashboard";
 import { RefundManagement } from "@/components/admin/RefundManagement";
+import { PdfPreviewModal } from "@/components/PdfPreviewModal";
+import { NotificationBell } from "@/components/NotificationBell";
+import { StaffChatHub } from "@/components/chat/StaffChatHub";
 
 export function AdminPanel() {
     const { pathname } = useLocation();
@@ -36,6 +39,7 @@ export function AdminPanel() {
         profilePicture: ""
     });
     const [departments, setDepartments] = useState<any[]>([]);
+    const [previewPdf, setPreviewPdf] = useState<{ url: string, title: string, filename: string } | null>(null);
 
     const fetchAdminData = async () => {
         try {
@@ -104,14 +108,13 @@ export function AdminPanel() {
                 { title, columns, data }, 
                 { responseType: 'blob' }
             );
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `${title.toLowerCase().replace(/\s+/g, "_")}_export.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            toast.success(`${title} exported successfully`);
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+            setPreviewPdf({
+                url,
+                title: `${title} Report`,
+                filename: `${title.toLowerCase().replace(/\s+/g, "_")}_export.pdf`
+            });
+            toast.success(`${title} ready for preview`);
         } catch {
             toast.error("Failed to export PDF");
         }
@@ -120,13 +123,12 @@ export function AdminPanel() {
     const downloadInvoice = async (id: number) => {
         try {
             const res = await apiClient.get(`/api/pdf/invoice/${id}`, { responseType: 'blob' });
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `invoice_hp_${id}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+            setPreviewPdf({
+                url,
+                title: `Invoice #${id}`,
+                filename: `invoice_hp_${id}.pdf`
+            });
         } catch {
             toast.error("Failed to download invoice");
         }
@@ -149,15 +151,18 @@ export function AdminPanel() {
             />
 
             <main className="flex-1 overflow-auto">
-                <div className="p-4 max-w-6xl mx-auto">
+                <div className="p-4 max-w-7xl mx-auto">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                         <div>
                             <h1 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-3">
-                                {currentTab === 'DASHBOARD' ? "Executive Overview" : `${currentTab.charAt(0) + currentTab.slice(1).toLowerCase()} Management`}
+                                {currentTab === 'DASHBOARD' ? "Executive Overview" : `${currentTab.charAt(0) + currentTab.slice(1).toLowerCase().replace(/_/g, ' ')} Management`}
                             </h1>
                             <p className="text-slate-400 mt-0.5 text-[10px] font-bold uppercase tracking-widest">
-                                {currentTab === 'DASHBOARD' ? "System and healthcare metrics" : `Control center for managing ${currentTab.toLowerCase()}.`}
+                                {currentTab === 'DASHBOARD' ? "System and healthcare metrics" : `Control center for managing ${currentTab.toLowerCase().replace(/_/g, ' ')}.`}
                             </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <NotificationBell />
                         </div>
                     </div>
 
@@ -183,13 +188,7 @@ export function AdminPanel() {
                                 setDeptFilter={setDeptFilter}
                                 departments={departments}
                                 onDelete={(id: number) => handleDelete('appointments', id)}
-                                onExport={() => handleExportPDF("Appointments", ["ID", "Patient", "Doctor", "Date", "Status"], appointments.map(a => ({
-                                    id: a.appointmentNumber,
-                                    patient: `${a.patient.firstName} ${a.patient.lastName}`,
-                                    doctor: `Dr. ${a.doctor.user.firstName} ${a.doctor.user.lastName}`,
-                                    date: new Date(a.dateTime).toLocaleDateString(),
-                                    status: a.status
-                                })))}
+                                onExport={handleExportPDF}
                                 onDownloadInvoice={downloadInvoice}
                             />
                         } />
@@ -203,12 +202,7 @@ export function AdminPanel() {
                                 departments={departments}
                                 handleDoctorSubmit={handleDoctorSubmit}
                                 onDelete={(id: number) => handleDelete('doctors', id)}
-                                onExport={() => handleExportPDF("Doctor Registry", ["ID", "Name", "Speciality", "Email"], doctors.map(d => ({
-                                    id: d.doctorId,
-                                    name: `${d.firstName} ${d.lastName}`,
-                                    speciality: d.speciality,
-                                    email: d.email
-                                })))}
+                                onExport={handleExportPDF}
                             />
                         } />
                         <Route path="users" element={
@@ -219,12 +213,7 @@ export function AdminPanel() {
                                 users={users}
                                 patients={patients}
                                 onDelete={handleDelete}
-                                onExport={() => handleExportPDF("User Directory", ["ID", "Name", "Email", "Role"], users.map(u => ({
-                                    id: u.id,
-                                    name: `${u.firstName} ${u.lastName}`,
-                                    email: u.email,
-                                    role: u.role
-                                })))}
+                                onExport={handleExportPDF}
                             />
                         } />
                         <Route path="patients" element={
@@ -235,12 +224,7 @@ export function AdminPanel() {
                                 users={users}
                                 patients={patients}
                                 onDelete={handleDelete}
-                                onExport={() => handleExportPDF("Patient Records", ["ID", "Name", "Gender", "Location"], patients.map(p => ({
-                                    id: p.id,
-                                    name: `${p.firstName} ${p.lastName}`,
-                                    gender: p.gender,
-                                    location: `${p.municipality}, ${p.district}`
-                                })))}
+                                onExport={handleExportPDF}
                             />
                         } />
                         <Route path="departments" element={<DepartmentView onExport={() => handleExportPDF("Medical Departments", ["ID", "Name", "Description"], departments.map(d => ({ id: d.id, name: d.name, description: d.description })))} />} />
@@ -249,21 +233,33 @@ export function AdminPanel() {
                                 appointments={appointments}
                                 search={search}
                                 setSearch={setSearch}
-                                onExport={() => handleExportPDF("Payment Ledger", ["Transaction", "Patient", "Method", "Amount", "Status"], appointments.filter(a => a.payment).map(a => ({
-                                    transaction: a.payment.transactionId || 'N/A',
-                                    patient: `${a.patient.firstName} ${a.patient.lastName}`,
-                                    method: a.payment.method,
-                                    amount: `Rs. ${a.doctor.fee || 500}`,
-                                    status: a.payment.status
-                                })))}
+                                onExport={handleExportPDF}
                             />
                         } />
                         <Route path="refunds" element={
                             <RefundManagement search={search} setSearch={setSearch} />
                         } />
+                        <Route path="staff_chat" element={<StaffChatHub />} />
                     </Routes>
                 </div>
             </main>
+
+            {previewPdf && (
+                <PdfPreviewModal
+                    url={previewPdf.url}
+                    title={previewPdf.title}
+                    onClose={() => setPreviewPdf(null)}
+                    onDownload={() => {
+                        const link = document.createElement('a');
+                        link.href = previewPdf.url;
+                        link.setAttribute('download', previewPdf.filename);
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        toast.success('File saved successfully');
+                    }}
+                />
+            )}
         </div>
     );
 }

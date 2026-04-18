@@ -1,12 +1,15 @@
 import { Search, FileDown, CreditCard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Pagination } from "./Pagination";
+import { TableStatsRow, type StatItem } from "./TableStatsRow";
+import { ExportDropdown } from "@/components/common/ExportDropdown";
+
 
 interface PaymentTableProps {
     appointments: any[];
     search: string;
     setSearch: (s: string) => void;
-    onExport?: () => void;
+    onExport?: (title: string, columns: string[], data: any[]) => void;
 }
 
 export function PaymentTable({ appointments, search, setSearch, onExport }: PaymentTableProps) {
@@ -46,8 +49,17 @@ export function PaymentTable({ appointments, search, setSearch, onExport }: Paym
         REFUND_REQUESTED: "bg-orange-500",
     };
 
+    const totalCollected = appointments.reduce((sum, a) => sum + (a.payment?.status === 'COMPLETED' ? Number(a.payment?.amount || 0) : 0), 0);
+    const stats: StatItem[] = [
+        { label: "Total Completed", value: `Rs. ${totalCollected.toLocaleString()}`, color: "emerald" },
+        { label: "Transactions", value: appointments.filter(a => a.payment).length, color: "blue" },
+        { label: "Pending", value: appointments.filter(a => a.payment?.status === 'PENDING').length, color: "amber" },
+        { label: "Refunded", value: appointments.filter(a => a.payment?.status === 'REFUNDED').length, color: "violet" }
+    ];
+
     return (
         <div className="space-y-6">
+            <TableStatsRow stats={stats} />
             {/* Search & Export Bar */}
             <div className="flex flex-col md:flex-row gap-2.5">
                 <div className="bg-white/80 backdrop-blur-xl p-1.5 rounded-xl shadow-sm border border-slate-100 flex-1">
@@ -63,13 +75,22 @@ export function PaymentTable({ appointments, search, setSearch, onExport }: Paym
                     </div>
                 </div>
                 {onExport && (
-                    <button
-                        onClick={onExport}
-                        className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2.5 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200/50"
-                    >
-                        <FileDown size={14} className="text-rose-400" />
-                        Export Ledger
-                    </button>
+                    <ExportDropdown 
+                        onExportAll={() => onExport("Complete Payment Ledger", ["Transaction", "Patient", "Method", "Amount", "Status"], filteredPayments.map(a => ({
+                            transaction: a.payment?.transactionId || 'N/A',
+                            patient: `${a.patient?.firstName} ${a.patient?.lastName}`,
+                            method: a.payment?.method || 'N/A',
+                            amount: `Rs. ${a.payment?.amount || '0'}`,
+                            status: a.payment?.status || 'N/A'
+                        })))}
+                        onExportPage={() => onExport("Payment Ledger (Current Page)", ["Transaction", "Patient", "Method", "Amount", "Status"], paginatedPayments.map(a => ({
+                            transaction: a.payment?.transactionId || 'N/A',
+                            patient: `${a.patient?.firstName} ${a.patient?.lastName}`,
+                            method: a.payment?.method || 'N/A',
+                            amount: `Rs. ${a.payment?.amount || '0'}`,
+                            status: a.payment?.status || 'N/A'
+                        })))}
+                    />
                 )}
             </div>
 
@@ -78,61 +99,58 @@ export function PaymentTable({ appointments, search, setSearch, onExport }: Paym
                 <div className="overflow-x-auto">
                     <table className="w-full text-left whitespace-nowrap">
                         <thead>
-                            <tr className="bg-gradient-to-r from-slate-50 to-slate-50/50 border-b border-slate-100">
-                                <th className="px-4 py-3 text-[9px] uppercase font-black tracking-widest text-slate-400">Transaction</th>
-                                <th className="px-4 py-3 text-[9px] uppercase font-black tracking-widest text-slate-400">Patient</th>
-                                <th className="px-4 py-3 text-[9px] uppercase font-black tracking-widest text-slate-400">Amount</th>
-                                <th className="px-4 py-3 text-[9px] uppercase font-black tracking-widest text-slate-400 text-center">Status</th>
-                                <th className="px-4 py-3 text-[9px] uppercase font-black tracking-widest text-slate-400 text-right">Date/Time</th>
+                            <tr className="bg-slate-50 border-b border-slate-100">
+                                <th className="px-3 py-2 text-[8px] uppercase font-black tracking-widest text-slate-400">Transaction</th>
+                                <th className="px-3 py-2 text-[8px] uppercase font-black tracking-widest text-slate-400">Patient</th>
+                                <th className="px-3 py-2 text-[8px] uppercase font-black tracking-widest text-slate-400">Amount</th>
+                                <th className="px-3 py-2 text-[8px] uppercase font-black tracking-widest text-slate-400 text-center">Status</th>
+                                <th className="px-3 py-2 text-[8px] uppercase font-black tracking-widest text-slate-400 text-right">Date</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {paginatedPayments.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-4 py-12 text-center">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <CreditCard size={32} className="text-slate-200" />
-                                            <p className="text-slate-400 font-black uppercase tracking-widest text-[9px]">No transactions recorded</p>
-                                        </div>
+                                    <td colSpan={5} className="px-4 py-10 text-center">
+                                        <CreditCard size={24} className="text-slate-200 mx-auto mb-2" />
+                                        <p className="text-slate-400 font-black uppercase tracking-widest text-[9px]">No transactions recorded</p>
                                     </td>
                                 </tr>
                             )}
                             {paginatedPayments.map(a => (
                                 <tr key={a.id} className="hover:bg-slate-50/70 transition-all group">
-                                    <td className="px-4 py-2.5">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-                                                <CreditCard size={14} />
+                                    <td className="px-3 py-1.5">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-400">
+                                                <CreditCard size={11} />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-900 text-xs font-mono">{a.payment?.transactionId || 'PENDING'}</p>
-                                                <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{a.payment?.method}</p>
+                                                <p className="font-bold text-slate-900 text-[10px] font-mono">{a.payment?.transactionId || 'PENDING'}</p>
+                                                <p className="text-[7px] text-slate-400 font-bold uppercase">{a.payment?.method}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-2.5">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center text-rose-500 font-black text-[9px] border border-rose-100/50">
+                                    <td className="px-3 py-1.5">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-5 h-5 rounded bg-rose-50 flex items-center justify-center text-rose-500 font-black text-[8px]">
                                                 {(a.patient?.firstName || "P")[0]}
                                             </div>
                                             <div>
-                                                <p className="font-bold text-slate-700 text-xs">{a.patient?.firstName} {a.patient?.lastName}</p>
-                                                <p className="text-[8px] font-bold text-slate-400 mt-0.5">{a.patient?.user?.email}</p>
+                                                <p className="font-bold text-slate-700 text-[11px]">{a.patient?.firstName} {a.patient?.lastName}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-2.5">
-                                        <p className="font-black text-slate-900 text-xs">Rs. {a.payment?.amount || '—'}</p>
+                                    <td className="px-3 py-1.5">
+                                        <p className="font-black text-slate-900 text-[11px]">Rs. {a.payment?.amount || '—'}</p>
                                     </td>
-                                    <td className="px-4 py-2.5 text-center">
-                                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest border ${statusColors[a.payment?.status] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
+                                    <td className="px-3 py-1.5 text-center">
+                                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest border ${statusColors[a.payment?.status] || 'bg-slate-50 text-slate-500 border-slate-100'}`}>
                                             <span className={`w-1 h-1 rounded-full ${dotColors[a.payment?.status] || 'bg-slate-400'}`} />
                                             {a.payment?.status === 'REFUND_REQUESTED' ? 'REFUND REQ' : a.payment?.status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-2.5 text-right">
-                                        <p className="font-bold text-slate-700 text-[10px]">{new Date(a.dateTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{new Date(a.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                    <td className="px-3 py-1.5 text-right">
+                                        <p className="font-bold text-slate-700 text-[10px]">{new Date(a.dateTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+                                        <p className="text-[7px] text-slate-400 font-bold">{new Date(a.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                     </td>
                                 </tr>
                             ))}

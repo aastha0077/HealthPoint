@@ -7,27 +7,29 @@ interface ChatMessageProps {
     m: any;
     user?: any;
     isMe: boolean;
-    chatExpired: boolean;
-    editingMsg: any;
-    setEditingMsg: (m: any) => void;
-    editInput: string;
-    setEditInput: (s: string) => void;
-    onEdit: () => void;
-    onDelete: (id: number) => void;
-    colorScheme: 'blue' | 'indigo';
+    chatExpired?: boolean;
+    editingMsg?: any;
+    setEditingMsg?: (m: any) => void;
+    editInput?: string;
+    setEditInput?: (s: string) => void;
+    onEdit?: () => void;
+    onDelete?: (id: number) => void;
+    onPreviewFile?: (url: string, title: string) => void;
+    colorScheme: 'blue' | 'indigo' | 'rose' | 'emerald';
 }
 
 export function ChatMessage({ 
     m, 
     user: _user, 
     isMe, 
-    chatExpired, 
+    chatExpired = false, 
     editingMsg, 
     setEditingMsg, 
     editInput, 
     setEditInput, 
     onEdit, 
     onDelete,
+    onPreviewFile,
     colorScheme
 }: ChatMessageProps) {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -52,6 +54,24 @@ export function ChatMessage({
             icon: 'text-indigo-500',
             border: 'border-indigo-100',
             glow: 'shadow-indigo-200'
+        },
+        rose: {
+            bg: 'bg-rose-600',
+            bgSoft: 'bg-rose-500/10',
+            bgGlass: 'bg-rose-600/90 backdrop-blur-md',
+            text: 'text-rose-600',
+            icon: 'text-rose-500',
+            border: 'border-rose-100',
+            glow: 'shadow-rose-200'
+        },
+        emerald: {
+            bg: 'bg-emerald-600',
+            bgSoft: 'bg-emerald-500/10',
+            bgGlass: 'bg-emerald-600/90 backdrop-blur-md',
+            text: 'text-emerald-600',
+            icon: 'text-emerald-500',
+            border: 'border-emerald-100',
+            glow: 'shadow-emerald-200'
         }
     }[colorScheme];
 
@@ -66,6 +86,11 @@ export function ChatMessage({
             className={`flex group/msg ${isMe ? 'justify-end' : 'justify-start'} mb-1`}
         >
             <div className={`max-w-[85%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                {!isMe && m.sender && (
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 ml-1">
+                        {m.sender.firstName} {m.sender.lastName}
+                    </span>
+                )}
                 {/* Actions Toolbar (Desktop) */}
                 {isMe && !chatExpired && !isEditing && !showDeleteConfirm && (
                     <div className="flex items-center gap-1 mb-1 opacity-0 group-hover/msg:opacity-100 transition-all duration-300 translate-y-1 group-hover/msg:translate-y-0">
@@ -176,9 +201,12 @@ export function ChatMessage({
                                                 <div className="relative">
                                                     <img src={m.fileUrl} alt="attachment" className="rounded-xl max-w-full h-auto max-h-64 object-cover border border-white/10" />
                                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/attach:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                                                        <a href={m.fileUrl} target="_blank" rel="noreferrer" className="p-2.5 bg-white/20 backdrop-blur-xl rounded-2xl text-white hover:bg-white/40 transition-all border border-white/20">
+                                                        <button 
+                                                            onClick={() => onPreviewFile?.(m.fileUrl!, "Clinical Image")}
+                                                            className="p-2.5 bg-white/20 backdrop-blur-xl rounded-2xl text-white hover:bg-white/40 transition-all border border-white/20"
+                                                        >
                                                             <ImageIcon size={20} />
-                                                        </a>
+                                                        </button>
                                                         <button 
                                                             onClick={() => handleDownload(m.fileUrl!, `clinical-img-${m.id || Date.now()}.jpg`)}
                                                             className="p-2.5 bg-white/20 backdrop-blur-xl rounded-2xl text-white hover:bg-white/40 transition-all border border-white/20"
@@ -196,7 +224,12 @@ export function ChatMessage({
                                                         <div className="flex-1 min-w-0">
                                                             <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-0.5">{isPdf ? 'Medical PDF' : 'Laboratory Report'}</p>
                                                             <div className="flex gap-3">
-                                                                <a href={m.fileUrl} target="_blank" rel="noreferrer" className="text-[9px] font-bold uppercase tracking-widest hover:underline hover:opacity-100 opacity-80 transition-all">View Online</a>
+                                                                <button 
+                                                                    onClick={() => onPreviewFile?.(m.fileUrl!, isPdf ? "Medical Document" : "Laboratory Result")}
+                                                                    className="text-[9px] font-bold uppercase tracking-widest hover:underline hover:opacity-100 opacity-80 transition-all text-left"
+                                                                >
+                                                                    Preview Record
+                                                                </button>
                                                                 <button 
                                                                     onClick={() => handleDownload(m.fileUrl!, `medical-record-${m.id || Date.now()}.${isPdf ? 'pdf' : 'docx'}`)}
                                                                     className="text-[9px] font-bold uppercase tracking-widest hover:underline hover:opacity-100 opacity-80 transition-all"

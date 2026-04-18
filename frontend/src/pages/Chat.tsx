@@ -7,10 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { useChat } from "@/hooks/useChat";
 import { ChatMessage } from "@/components/chat/ChatMessage";
+import { AssetPreviewModal } from "@/components/common/AssetPreviewModal";
 import { ConfirmModal } from "@/components/admin/ConfirmModal";
 
 export default function Chat() {
     const { appointmentId } = useParams();
+    const [previewAsset, setPreviewAsset] = useState<{ url: string, title: string } | null>(null);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const completedAtParam = searchParams.get("completedAt") || "";
@@ -251,37 +253,7 @@ export default function Chat() {
                     )}
                 </AnimatePresence>
 
-                {/* Audio Recording Playback Banner */}
-                <AnimatePresence>
-                    {status === "COMPLETED" && audioRecordingUrl && (
-                        <motion.div 
-                            initial={{ height: 0, opacity: 0 }} 
-                            animate={{ height: 'auto', opacity: 1 }} 
-                            className="bg-slate-900 text-white overflow-hidden shadow-xl z-10 border-b border-slate-800"
-                        >
-                            <div className="px-8 py-4 flex items-center justify-between gap-6">
-                                <div className="flex items-center gap-4 min-w-0">
-                                    <div className="w-10 h-10 bg-rose-500 rounded-xl flex items-center justify-center shadow-lg shadow-rose-500/20 shrink-0">
-                                        <Volume2 size={20} className="text-white" />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h4 className="text-xs font-black uppercase tracking-widest text-white truncate">Consultation Recording</h4>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                                            Session End • {consultationDuration ? formatDuration(consultationDuration) : "Saved Record"}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex-1 flex items-center gap-4 max-w-sm">
-                                    <audio 
-                                        src={audioRecordingUrl} 
-                                        controls 
-                                        className="w-full h-8 custom-audio-player filter invert brightness-200"
-                                    />
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {/* Audio Recording Playback Banner Removed per user request */}
 
                 {/* Messages Viewport */}
                 <div 
@@ -330,6 +302,7 @@ export default function Chat() {
                                     setEditInput={setEditInput}
                                     onEdit={() => editMessage(m.id, editInput)}
                                     onDelete={deleteMessage}
+                                    onPreviewFile={(url, title) => setPreviewAsset({ url, title })}
                                     colorScheme={isDoctor ? "indigo" : "blue"}
                                 />
                             ))
@@ -386,6 +359,11 @@ export default function Chat() {
                     onCancel={() => setConfirmModal(prev => ({ ...prev, show: false }))}
                 />
             </motion.div>
+            <AssetPreviewModal 
+                url={previewAsset?.url || null} 
+                title={previewAsset?.title || "Clinical Preview"} 
+                onClose={() => setPreviewAsset(null)} 
+            />
         </div>
     );
 }

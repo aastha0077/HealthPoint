@@ -216,7 +216,8 @@ export async function getAllAppointments() {
             department: true, 
             payment: true, 
             documents: true,
-            review: true 
+            review: true,
+            refundRequest: true
         } as any,
         orderBy: { dateTime: 'desc' }
     });
@@ -238,7 +239,15 @@ export async function getUserAppointments(userId: number) {
 
     return await prisma.appointment.findMany({
         where: { patientId: { in: patientIds } },
-        include: { doctor: { include: { user: true } }, patient: true, department: true, payment: true, documents: true } as any,
+        include: { 
+            doctor: { include: { user: true } }, 
+            patient: true, 
+            department: true, 
+            payment: true, 
+            documents: true,
+            review: true,
+            refundRequest: true
+        } as any,
         orderBy: { dateTime: 'desc' }
     });
 }
@@ -500,9 +509,13 @@ export async function rescheduleAppointment(appointmentId: number, newDateTime: 
     }
     // Notify doctor
     if (appt.doctor.userId) {
+        const drMessage = appt.status === 'MISSED' 
+            ? `Corrective Action: Appointment #${appt.appointmentNumber} with ${appt.patient.firstName} (missed by you) has been rescheduled to ${parsedDate.toLocaleString()}.`
+            : `Appointment #${appt.appointmentNumber} with ${appt.patient.firstName} rescheduled to ${parsedDate.toLocaleString()}`;
+
         await createNotification(
             appt.doctor.userId,
-            `Appointment #${appt.appointmentNumber} with ${appt.patient.firstName} rescheduled to ${parsedDate.toLocaleString()}`,
+            drMessage,
             "RESCHEDULE"
         );
     }
@@ -728,6 +741,15 @@ export async function requestRefund(
             admin.id,
             `New refund request for appointment #${appt.appointmentNumber} (Dr. ${appt.doctor.user?.lastName} with ${appt.patient.firstName}). Reason: ${data.reason.substring(0, 100)}`,
             "ADMIN_ALERT"
+        );
+    }
+
+    // Notify doctor if refund is due to missed appointment
+    if (appt.doctor.userId && appt.status === 'MISSED') {
+        await createNotification(
+            appt.doctor.userId,
+            `Alert: A refund has been requested for Appointment #${appt.appointmentNumber} with ${appt.patient.firstName} because the session was marked as missed by doctor.`,
+            "REFUND_ALERT"
         );
     }
 

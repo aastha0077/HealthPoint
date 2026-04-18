@@ -42,30 +42,27 @@ export function Pagination({ currentPage, totalPages, onPageChange, totalItems, 
     };
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-8 py-5 bg-gradient-to-r from-slate-50/80 to-white border-t border-slate-100">
-            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <span className="hidden sm:inline">Showing</span>
-                <span className="text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-100 shadow-sm">{startItem}</span>
-                <span>–</span>
-                <span className="text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-100 shadow-sm">{endItem}</span>
+        <div className="flex items-center justify-between px-4 py-2 bg-slate-50/80 border-t border-slate-100">
+            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                <span className="text-slate-600">{startItem}–{endItem}</span>
                 <span>of</span>
-                <span className="text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-100 shadow-sm">{totalItems}</span>
+                <span className="text-slate-600">{totalItems}</span>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
                 <button
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-all border border-transparent hover:border-rose-100 disabled:hover:border-transparent"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 disabled:opacity-25 transition-all"
                 >
-                    <ChevronLeft size={18} />
+                    <ChevronLeft size={14} />
                 </button>
 
                 {getPageNumbers().map((item) => {
                     if (typeof item === 'string') {
                         return (
-                            <span key={item} className="w-9 h-9 flex items-center justify-center text-slate-300 text-xs font-bold">
-                                •••
+                            <span key={item} className="w-7 h-7 flex items-center justify-center text-slate-300 text-[10px] font-bold">
+                                ···
                             </span>
                         );
                     }
@@ -74,9 +71,9 @@ export function Pagination({ currentPage, totalPages, onPageChange, totalItems, 
                         <button
                             key={item}
                             onClick={() => onPageChange(item)}
-                            className={`w-9 h-9 rounded-xl text-xs font-black transition-all ${
+                            className={`w-7 h-7 rounded-lg text-[10px] font-black transition-all ${
                                 currentPage === item
-                                    ? "bg-slate-900 text-white shadow-lg shadow-slate-300/50 scale-105"
+                                    ? "bg-slate-900 text-white shadow-sm"
                                     : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
                             }`}
                         >
@@ -88,9 +85,9 @@ export function Pagination({ currentPage, totalPages, onPageChange, totalItems, 
                 <button
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-400 transition-all border border-transparent hover:border-rose-100 disabled:hover:border-transparent"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 disabled:opacity-25 transition-all"
                 >
-                    <ChevronRight size={18} />
+                    <ChevronRight size={14} />
                 </button>
             </div>
         </div>
