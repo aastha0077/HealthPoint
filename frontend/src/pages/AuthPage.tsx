@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ChevronLeft, Activity, ShieldCheck } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ChevronLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useToast } from "@/components/ui/toast-provider";
 import { motion, AnimatePresence } from "framer-motion";
@@ -238,23 +238,6 @@ export function AuthPage() {
                                 </div>
                             </motion.form>
                         </AnimatePresence>
-
-                        <div className="my-8 flex items-center gap-4">
-                            <div className="h-px bg-slate-100 flex-1" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-200">Quick Access</span>
-                            <div className="h-px bg-slate-100 flex-1" />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <button className="flex items-center justify-center gap-3 py-3 rounded-2xl border border-slate-100 font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group">
-                                <Activity className="w-4 h-4 text-emerald-500" />
-                                Patient Login
-                            </button>
-                            <button className="flex items-center justify-center gap-3 py-3 rounded-2xl border border-slate-100 font-black text-[10px] uppercase tracking-widest text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group">
-                                <ShieldCheck className="w-4 h-4 text-rose-500" />
-                                Provider Login
-                            </button>
-                        </div>
                     </div>
                 </div>
             </motion.div>
