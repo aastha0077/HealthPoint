@@ -10,7 +10,10 @@ import {
     createGroupController, 
     getMyGroupsController, 
     sendGroupMessageController, 
-    getGroupMessagesController 
+    getGroupMessagesController,
+    deleteGroupController,
+    removeMemberController,
+    addMemberController 
 } from "../controllers/groupChat.controllers";
 import { 
     sendDirectMessageController, 
@@ -35,6 +38,9 @@ chatRoutes.post('/groups', verifyAccessToken, createGroupController);
 chatRoutes.get('/groups', verifyAccessToken, getMyGroupsController);
 chatRoutes.get('/groups/:groupId/messages', verifyAccessToken, getGroupMessagesController);
 chatRoutes.post('/groups/:groupId/messages', verifyAccessToken, sendGroupMessageController);
+chatRoutes.delete('/groups/:groupId', verifyAccessToken, deleteGroupController as any);
+chatRoutes.post('/groups/:groupId/members', verifyAccessToken, addMemberController as any);
+chatRoutes.delete('/groups/:groupId/members/:userId', verifyAccessToken, removeMemberController as any);
 
 
 // Get list of conversations for a doctor

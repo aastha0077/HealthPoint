@@ -74,7 +74,7 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
 
     const filteredRequests = requests.filter(r => {
         const matchesStatus = statusFilter === "ALL" || r.status === statusFilter;
-        const matchesSearch = !search || 
+        const matchesSearch = !search ||
             r.appointment?.appointmentNumber?.toLowerCase().includes(search.toLowerCase()) ||
             r.appointment?.patient?.firstName?.toLowerCase().includes(search.toLowerCase()) ||
             r.appointment?.patient?.lastName?.toLowerCase().includes(search.toLowerCase());
@@ -129,9 +129,8 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                         <button
                             key={s}
                             onClick={() => setStatusFilter(s)}
-                            className={`px-3 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
-                                statusFilter === s ? "bg-slate-900 text-white" : "text-slate-400 hover:bg-slate-50"
-                            }`}
+                            className={`px-3 py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${statusFilter === s ? "bg-slate-900 text-white" : "text-slate-400 hover:bg-slate-50"
+                                }`}
                         >
                             {s}
                         </button>
@@ -218,9 +217,9 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                             <td className="px-3 py-1.5 text-right">
                                                 <div className="flex items-center justify-end gap-1">
                                                     {r.proofUrl && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => setPreviewUrl(r.proofUrl)}
-                                                            className="p-1 bg-emerald-50 text-emerald-600 rounded hover:bg-emerald-100 transition-all border border-emerald-100/50" 
+                                                            className="p-1 bg-emerald-50 text-emerald-600 rounded hover:bg-emerald-100 transition-all border border-emerald-100/50"
                                                             title="Preview Proof"
                                                         >
                                                             <Eye size={11} />
@@ -329,9 +328,9 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                                 )}
                                             </label>
                                             {processForm.proofUrl && (
-                                                <button 
+                                                <button
                                                     onClick={() => setPreviewUrl(processForm.proofUrl)}
-                                                    className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all border border-emerald-200/50" 
+                                                    className="p-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all border border-emerald-200/50"
                                                     title="Preview uploaded proof"
                                                 >
                                                     <Eye size={18} />
@@ -357,11 +356,10 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                                         <button
                                             onClick={handleProcess}
                                             disabled={isProcessing}
-                                            className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 ${
-                                                processForm.status === "COMPLETED" ? "bg-emerald-500 text-white shadow-emerald-200 hover:bg-emerald-600" :
+                                            className={`flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 ${processForm.status === "COMPLETED" ? "bg-emerald-500 text-white shadow-emerald-200 hover:bg-emerald-600" :
                                                 processForm.status === "REJECTED" ? "bg-red-500 text-white shadow-red-200 hover:bg-red-600" :
-                                                "bg-blue-500 text-white shadow-blue-200 hover:bg-blue-600"
-                                            }`}
+                                                    "bg-blue-500 text-white shadow-blue-200 hover:bg-blue-600"
+                                                }`}
                                         >
                                             {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
                                             {processForm.status === "COMPLETED" ? "Confirm Refund" : processForm.status === "REJECTED" ? "Reject Request" : "Save Progress"}
@@ -373,11 +371,11 @@ export function RefundManagement({ search, setSearch }: RefundManagementProps) {
                     </motion.div>
                 )}
             </AnimatePresence>
-            <AssetPreviewModal 
-                url={previewUrl} 
-                title="Refund Proof" 
+            <AssetPreviewModal
+                url={previewUrl}
+                title="Refund Proof"
                 type="image"
-                onClose={() => setPreviewUrl(null)} 
+                onClose={() => setPreviewUrl(null)}
             />
         </div>
     );
