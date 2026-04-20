@@ -21,7 +21,7 @@ export default function AdminLayout() {
             <nav className="bg-slate-900 text-white px-8 py-4 shadow-lg flex justify-between items-center sticky top-0 z-[60]">
                 <div className="flex items-center gap-6">
                     <Link to="/admin" className="text-xl font-black tracking-tight">
-                        PLU <span className="text-rose-500">Admin</span>
+                        Health Point <span className="text-rose-500">Admin</span>
                     </Link>
                     <div className="hidden md:flex h-4 w-px bg-slate-800" />
                     <span className="hidden md:inline text-slate-400 uppercase tracking-widest text-[10px] font-black">Control Center</span>

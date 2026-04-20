@@ -100,7 +100,7 @@ export async function getDirectMessages(userA: number, userB: number) {
         },
         include: {
             sender: {
-                select: { id: true, firstName: true, lastName: true, profilePicture: true }
+                select: { id: true, firstName: true, lastName: true, profilePicture: true, role: true }
             }
         },
         orderBy: {

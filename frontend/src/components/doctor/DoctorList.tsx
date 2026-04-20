@@ -130,7 +130,7 @@ function DoctorList() {
                 Trusted Specialists
               </div>
               <h1 className="text-xl md:text-3xl font-black text-slate-900 leading-tight tracking-tight">
-                Our Expert <span className="text-rose-600">PLU Specialists</span>
+                Our Expert <span className="text-rose-600">Health Point Specialists</span>
               </h1>
 
               {/* Filter tabs */}

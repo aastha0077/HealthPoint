@@ -32,7 +32,7 @@ export default function DoctorLayout() {
                 <div className="flex items-center gap-8">
                     <Link to="/doctor-panel" className="flex items-center gap-3 group">
                         <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-rose-200 transition-transform group-hover:scale-105">
-                            <span className="text-white font-black text-lg tracking-tighter">PLU</span>
+                            <span className="text-white font-black text-lg tracking-tighter">Health Point</span>
                         </div>
                         <div className="flex flex-col">
                             <span className="text-base font-black text-slate-900 leading-none group-hover:text-rose-600 transition-colors">Doctor Panel</span>

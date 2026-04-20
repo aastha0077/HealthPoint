@@ -78,7 +78,7 @@ export async function createNewAppointment(patientId: number, doctorId: number, 
     // Generate unique appointment number
     const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
     const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const appointmentNumber = `PLU-${dateStr}-${randomStr}`;
+    const appointmentNumber = `HP-${dateStr}-${randomStr}`;
 
     const paymentStatusToUse = paymentMethod === 'Khalti' ? PaymentStatus.PENDING : PaymentStatus.COMPLETED;
     const amountToCharge = 500; // E.g., Rs 500

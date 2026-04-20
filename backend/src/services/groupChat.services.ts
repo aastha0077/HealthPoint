@@ -100,7 +100,8 @@ export async function sendGroupMessage(groupId: number, senderId: number, conten
                     id: true,
                     firstName: true,
                     lastName: true,
-                    profilePicture: true
+                    profilePicture: true,
+                    role: true
                 }
             }
         }
@@ -138,4 +139,100 @@ export async function getGroupMessages(groupId: number) {
             createdAt: 'asc'
         }
     });
+}
+
+export async function addGroupMember(groupId: number, userId: number, adminId: number) {
+    const group = await prisma.chatGroup.findUnique({
+        where: { id: groupId },
+        select: { creatorId: true }
+    });
+
+    const admin = await prisma.user.findUnique({
+        where: { id: adminId },
+        select: { role: true }
+    });
+
+    if (group?.creatorId !== adminId && admin?.role !== 'ADMIN') {
+        throw new Error("Unauthorized to add members");
+    }
+
+    // Check if already a member
+    const existing = await prisma.chatGroupMember.findUnique({
+        where: {
+            groupId_userId: {
+                groupId,
+                userId
+            }
+        }
+    });
+
+    if (existing) {
+        throw new Error("User is already a member of this circle");
+    }
+
+    const member = await prisma.chatGroupMember.create({
+        data: {
+            groupId,
+            userId
+        },
+        include: {
+            user: {
+                select: { id: true, firstName: true, lastName: true, role: true, profilePicture: true }
+            }
+        }
+    });
+
+    // Notify the user via socket
+    emitToUser(userId, "addedToGroup", { groupId, member });
+
+    return member;
+}
+
+export async function removeGroupMember(groupId: number, userId: number, adminId: number) {
+    const group = await prisma.chatGroup.findUnique({
+        where: { id: groupId },
+        select: { creatorId: true }
+    });
+
+    const admin = await prisma.user.findUnique({
+        where: { id: adminId },
+        select: { role: true }
+    });
+
+    if (group?.creatorId !== adminId && admin?.role !== 'ADMIN') {
+        throw new Error("Unauthorized to remove members");
+    }
+
+    await prisma.chatGroupMember.delete({
+        where: {
+            groupId_userId: {
+                groupId,
+                userId
+            }
+        }
+    });
+
+    return { success: true };
+}
+
+export async function deleteChatGroup(groupId: number, adminId: number) {
+    const group = await prisma.chatGroup.findUnique({
+        where: { id: groupId },
+        select: { creatorId: true }
+    });
+
+    const admin = await prisma.user.findUnique({
+        where: { id: adminId },
+        select: { role: true }
+    });
+
+    if (group?.creatorId !== adminId && admin?.role !== 'ADMIN') {
+        throw new Error("Unauthorized to delete group");
+    }
+
+    await prisma.chatGroup.delete({
+        where: { id: groupId }
+    });
+
+    return { success: true };
 }

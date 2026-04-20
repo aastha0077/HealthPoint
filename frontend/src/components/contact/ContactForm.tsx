@@ -13,7 +13,6 @@ interface ContactFormData {
 interface ContactFormProps {
   onSubmit: (data: ContactFormData) => void;
 }
-
 function ContactForm({ onSubmit }: ContactFormProps) {
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: "",

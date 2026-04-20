@@ -43,38 +43,11 @@ export const DoctorStats = ({ doctorStats, upcomingCount, todayCount }: DoctorSt
             bg: "bg-amber-50", 
             text: "text-amber-600", 
             hover: "hover:border-amber-100" 
-        },
-        { 
-            label: "Retention", 
-            value: "88%", 
-            suffix: "Rate", 
-            icon: Heart, 
-            bg: "bg-rose-50", 
-            text: "text-rose-500", 
-            hover: "hover:border-rose-200" 
-        },
-        { 
-            label: "Rating", 
-            value: "4.8/5", 
-            suffix: "Feedback", 
-            icon: Star, 
-            bg: "bg-amber-50", 
-            text: "text-amber-500", 
-            hover: "hover:border-amber-200" 
-        },
-        { 
-            label: "Efficiency", 
-            value: "High", 
-            suffix: "Speed", 
-            icon: Zap, 
-            bg: "bg-indigo-50", 
-            text: "text-indigo-500", 
-            hover: "hover:border-indigo-200" 
-        },
+        }
     ];
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
             {stats.map((s, idx) => (
                 <div key={idx} className={`bg-white p-4 rounded-2xl border border-slate-100 shadow-sm group ${s.hover} transition-all`}>
                     <div className="flex items-center gap-2 mb-2.5">
