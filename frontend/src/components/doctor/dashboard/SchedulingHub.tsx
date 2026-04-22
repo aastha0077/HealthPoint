@@ -10,6 +10,7 @@ interface SchedulingHubProps {
     selectedDate: string | null;
     setSelectedDate: (date: string | null) => void;
     appointmentsOnSelectedDate: any[];
+    isAdmin?: boolean;
 }
 
 export const SchedulingHub = ({ 
@@ -20,7 +21,8 @@ export const SchedulingHub = ({
     calendarDays, 
     selectedDate, 
     setSelectedDate, 
-    appointmentsOnSelectedDate 
+    appointmentsOnSelectedDate,
+    isAdmin = false
 }: SchedulingHubProps) => {
     return (
         <AnimatePresence>
@@ -39,8 +41,10 @@ export const SchedulingHub = ({
                     >
                         <div className="bg-slate-900 px-8 py-6 flex items-center justify-between text-white shrink-0">
                             <div>
-                                <h2 className="text-xl font-black tracking-tight">Practice Calendar</h2>
-                                <p className="text-rose-400 text-[10px] font-black uppercase tracking-widest mt-1">Schedule Audit</p>
+                                <h2 className="text-xl font-black tracking-tight">{isAdmin ? "Global Enterprise Calendar" : "Practice Calendar"}</h2>
+                                <p className="text-rose-400 text-[10px] font-black uppercase tracking-widest mt-1">
+                                    {isAdmin ? "Network-Wide Scheduling Audit" : "Clinical Practice Audit"}
+                                </p>
                             </div>
                             <button 
                                 onClick={onClose}
@@ -89,26 +93,32 @@ export const SchedulingHub = ({
                                 <AnimatePresence mode="wait">
                                     {selectedDate ? (
                                         <motion.div key={selectedDate} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                                            <div className="mb-8">
+                                            <div className="mb-8 border-b border-slate-200 pb-4">
                                                 <h4 className="text-xl font-black text-slate-900">{new Date(selectedDate).toLocaleDateString(undefined, {month:'long', day:'numeric'})}</h4>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{appointmentsOnSelectedDate.length} Patients Configured</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{appointmentsOnSelectedDate.length} Active Slots</p>
                                             </div>
                                             <div className="space-y-3">
                                                 {appointmentsOnSelectedDate.length === 0 ? (
-                                                    <div className="py-12 text-center">
+                                                    <div className="py-12 text-center bg-white rounded-3xl border border-dashed border-slate-200">
                                                         <Activity size={32} className="mx-auto text-slate-200 mb-2" />
-                                                        <p className="text-slate-300 font-bold italic text-xs">No entries found</p>
+                                                        <p className="text-slate-300 font-bold italic text-xs uppercase tracking-tighter">Day is clear</p>
                                                     </div>
                                                 ) : appointmentsOnSelectedDate.map(apt => (
-                                                    <div key={apt.id} className="p-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all">
+                                                    <div key={apt.id} className="p-4 bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all group">
                                                         <div className="flex justify-between items-center mb-2">
-                                                            <div className="flex items-center gap-1.5 text-[10px] font-black text-rose-500">
-                                                                <Clock size={12} />
+                                                            <div className="flex items-center gap-1.5 text-[10px] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100">
+                                                                <Clock size={10} />
                                                                 <span>{new Date(apt.dateTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                                                             </div>
-                                                            <span className={`text-[8px] font-black uppercase tracking-widest ${apt.status === 'COMPLETED' ? 'text-emerald-500' : 'text-indigo-600'}`}>{apt.status}</span>
+                                                            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-lg ${apt.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-500 border border-emerald-100' : 'bg-indigo-50 text-indigo-600 border border-indigo-100'}`}>{apt.status}</span>
                                                         </div>
                                                         <p className="font-black text-slate-800 text-sm tracking-tight truncate">{apt.patient?.firstName} {apt.patient?.lastName}</p>
+                                                        {isAdmin && (
+                                                            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center gap-2">
+                                                                <div className="w-5 h-5 bg-slate-900 rounded-md flex items-center justify-center text-[8px] text-white font-bold">Dr</div>
+                                                                <p className="text-[10px] font-bold text-slate-400">Dr. {apt.doctor?.user?.firstName || apt.doctor?.firstName} {apt.doctor?.user?.lastName || apt.doctor?.lastName}</p>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 ))}
                                             </div>

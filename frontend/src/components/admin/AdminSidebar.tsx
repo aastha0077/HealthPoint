@@ -11,7 +11,8 @@ export function AdminSidebar({ setSearch }: AdminSidebarProps) {
     const navigate = useNavigate();
     const tabs = [
         { id: "DASHBOARD", label: "Dashboard", icon: LayoutDashboard },
-        { id: "APPOINTMENTS", label: "Appointments", icon: Calendar },
+        { id: "CALENDAR", label: "Scheduler", icon: Calendar },
+        { id: "APPOINTMENTS", label: "Appointments", icon: AlignLeft },
         { id: "DOCTORS", label: "Doctors", icon: Stethoscope },
         { id: "DEPARTMENTS", label: "Departments", icon: AlignLeft },
         { id: "USERS", label: "Users", icon: Users },
