@@ -3,10 +3,10 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const getAdminAnalytics = async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly') => {
-    // Determine start date based on period
     const now = new Date();
     let startDate = new Date();
-    
+    startDate.setHours(0, 0, 0, 0);
+
     if (period === 'weekly') {
         startDate.setDate(now.getDate() - 7);
     } else if (period === 'monthly') {
@@ -15,19 +15,19 @@ export const getAdminAnalytics = async (period: 'weekly' | 'monthly' | 'yearly' 
         startDate.setFullYear(now.getFullYear() - 1);
     }
 
-    // Global stats (Total/Lifetime for summary cards)
+    // Global stats
     const [totalAppointments, completedAppointments, cancelledAppointments, totalUsers, totalPatients, pendingRefunds] = await Promise.all([
-        prisma.appointment.count({ where: { dateTime: { gte: startDate.toISOString() } } }),
-        prisma.appointment.count({ where: { dateTime: { gte: startDate.toISOString() }, status: "COMPLETED" } }),
-        prisma.appointment.count({ where: { dateTime: { gte: startDate.toISOString() }, status: "CANCELLED" } }),
-        prisma.user.count(),
-        prisma.patient.count(),
+        prisma.appointment.count({ where: { dateTime: { gte: startDate } } }),
+        prisma.appointment.count({ where: { dateTime: { gte: startDate }, status: "COMPLETED" } }),
+        prisma.appointment.count({ where: { dateTime: { gte: startDate }, status: "CANCELLED" } }),
+        prisma.user.count({ where: { createdAt: { gte: startDate } } }),
+        prisma.patient.count({ where: { user: { createdAt: { gte: startDate } } } }),
         (prisma as any).refundRequest.count({ where: { status: "PENDING" } })
     ]);
 
-    // Trend data (grouped by date) - already correct with gte: startDate
+    // Trend data
     const appointmentsTrend = await prisma.appointment.findMany({
-        where: { dateTime: { gte: startDate.toISOString() } },
+        where: { dateTime: { gte: startDate } },
         select: { dateTime: true, status: true },
         orderBy: { dateTime: 'asc' }
     });
@@ -44,31 +44,49 @@ export const getAdminAnalytics = async (period: 'weekly' | 'monthly' | 'yearly' 
         orderBy: { createdAt: 'asc' }
     });
 
-    // Helper to group by date
-    const groupByDate = (data: any[], dateField: string, valueField?: string) => {
+    // Enhanced grouping helper
+    const groupByPeriod = (data: any[], dateField: string, valueField?: string) => {
         const groups: Record<string, number> = {};
         data.forEach(item => {
-            const date = new Date(item[dateField]).toISOString().split('T')[0];
-            if (valueField) {
-                groups[date] = (groups[date] || 0) + (item[valueField] || 0);
+            const d = new Date(item[dateField]);
+            let key: string;
+
+            if (period === 'yearly') {
+                // Group by Month: "2024-01"
+                key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
             } else {
-                groups[date] = (groups[date] || 0) + 1;
+                // Group by Day: "2024-04-20"
+                key = d.toISOString().split('T')[0];
+            }
+
+            if (valueField) {
+                groups[key] = (groups[key] || 0) + (item[valueField] || 0);
+            } else {
+                groups[key] = (groups[key] || 0) + 1;
             }
         });
-        return Object.entries(groups).map(([date, value]) => ({ date, value }));
+
+        return Object.entries(groups).map(([date, value]) => {
+            if (period === 'yearly') {
+                const [year, month] = date.split('-');
+                const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'short' });
+                return { date: `${monthName} ${year}`, value };
+            }
+            return { date, value };
+        });
     };
 
     // Department Performance
     const deptPerformance = await prisma.department.findMany({
         include: {
             _count: {
-                select: { appointments: { where: { dateTime: { gte: startDate.toISOString() } } } }
+                select: { appointments: { where: { dateTime: { gte: startDate } } } }
             },
             doctors: {
                 select: {
                     user: { select: { firstName: true, lastName: true } },
                     Appointments: {
-                        where: { status: 'COMPLETED', dateTime: { gte: startDate.toISOString() } },
+                        where: { status: 'COMPLETED', dateTime: { gte: startDate } },
                         select: { id: true }
                     }
                 }
@@ -82,7 +100,7 @@ export const getAdminAnalytics = async (period: 'weekly' | 'monthly' | 'yearly' 
         completedScale: d.doctors.reduce((acc, doc) => acc + doc.Appointments.length, 0)
     }));
 
-    // Regional Analytics (All patients)
+    // Regional Analytics (Filter by patient creation if possible, or keep lifetime for demographic overview)
     const patientDistricts = await prisma.patient.groupBy({
         by: ['district'],
         _count: {
@@ -95,13 +113,34 @@ export const getAdminAnalytics = async (period: 'weekly' | 'monthly' | 'yearly' 
         count: d._count?.district || 0
     })).sort((a: any, b: any) => b.count - a.count);
 
-    // Appointment Status Breakdown (Filtered by period)
+    // Appointment Status Breakdown
     const statusCounts = await prisma.appointment.groupBy({
         by: ['status'],
-        where: { dateTime: { gte: startDate.toISOString() } },
+        where: { dateTime: { gte: startDate } },
         _count: {
             status: true
         }
+    });
+
+    // Personnel Performance (Top Doctors by completion)
+    const topDoctors = await prisma.doctor.findMany({
+        include: {
+            user: { select: { firstName: true, lastName: true, profilePicture: true } },
+            department: { select: { name: true } },
+            _count: {
+                select: {
+                    Appointments: {
+                        where: { status: 'COMPLETED', dateTime: { gte: startDate } }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            Appointments: {
+                _count: 'desc'
+            }
+        },
+        take: 5
     });
 
     const summary = {
@@ -114,15 +153,22 @@ export const getAdminAnalytics = async (period: 'weekly' | 'monthly' | 'yearly' 
         statusDistribution: statusCounts.map((s: any) => ({
             status: s.status,
             count: s._count?.status || 0
+        })),
+        topDoctors: topDoctors.map(d => ({
+            id: d.id,
+            name: `Dr. ${d.user.firstName} ${d.user.lastName}`,
+            completed: d._count.Appointments,
+            dept: d.department.name,
+            pic: d.user.profilePicture
         }))
     };
 
     return {
         summary,
         trends: {
-            appointments: groupByDate(appointmentsTrend, 'dateTime'),
-            revenue: groupByDate(paymentsTrend, 'createdAt', 'amount'),
-            users: groupByDate(userTrend, 'createdAt')
+            appointments: groupByPeriod(appointmentsTrend, 'dateTime'),
+            revenue: groupByPeriod(paymentsTrend, 'createdAt', 'amount'),
+            users: groupByPeriod(userTrend, 'createdAt')
         },
         departmentStats,
         regionalStats,

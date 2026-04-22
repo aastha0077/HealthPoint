@@ -53,10 +53,10 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
     };
 
     const stats = [
-        { label: "Active Users", value: summary.totalUsers, icon: Users, color: "bg-blue-600", trend: "+12%", bg: "bg-blue-50/50" },
-        { label: "Total Patients", value: summary.totalPatients, icon: UserCheck, color: "bg-indigo-600", trend: "+5%", bg: "bg-indigo-50/50" },
-        { label: "Medical Staff", value: doctors.length, icon: Stethoscope, color: "bg-rose-600", trend: "0%", bg: "bg-rose-50/50" },
-        { label: "Consultations", value: summary.totalAppointments, icon: Activity, color: "bg-emerald-600", trend: "+8%", bg: "bg-emerald-50/50" },
+        { label: `New ${period.replace('ly', '')} Users`, value: summary.totalUsers, icon: Users, color: "bg-blue-600", trend: "+12%", bg: "bg-blue-50/50" },
+        { label: "Patient Onboarding", value: summary.totalPatients, icon: UserCheck, color: "bg-indigo-600", trend: "+5%", bg: "bg-indigo-50/50" },
+        { label: "Medical Staff", value: doctors.length, icon: Stethoscope, color: "bg-rose-600", trend: "Active", bg: "bg-rose-50/50" },
+        { label: "Total Consultations", value: summary.totalAppointments, icon: Activity, color: "bg-emerald-600", trend: "+8%", bg: "bg-emerald-50/50" },
         { label: "Pending Refunds", value: summary.pendingRefunds, icon: Wallet2, color: "bg-amber-500", trend: "Action", bg: "bg-amber-50/50", urgent: summary.pendingRefunds > 0 },
     ];
 
@@ -67,44 +67,7 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
 
     const [sortMetric, setSortMetric] = useState<'COMPLETED' | 'CANCELLED' | 'RATING_HIGH' | 'RATING_LOW'>('COMPLETED');
 
-    const topDoctors = useMemo(() => {
-        const statsMap: any = {};
-        initialAppointments.forEach(app => {
-            if (!app.doctorId) return;
-            if (!statsMap[app.doctorId]) {
-                statsMap[app.doctorId] = { completed: 0, cancelled: 0, totalRating: 0, reviewCount: 0 };
-            }
-            if (app.status === 'COMPLETED') statsMap[app.doctorId].completed++;
-            if (app.status === 'CANCELLED') statsMap[app.doctorId].cancelled++;
-            if (app.review?.rating) {
-                statsMap[app.doctorId].totalRating += app.review.rating;
-                statsMap[app.doctorId].reviewCount++;
-            }
-        });
-
-        return doctors
-            .map(doc => {
-                const s = statsMap[doc.id] || { completed: 0, cancelled: 0, totalRating: 0, reviewCount: 0 };
-                return {
-                    id: doc.id,
-                    name: `Dr. ${doc.user?.firstName || doc.firstName} ${doc.user?.lastName || doc.lastName}`,
-                    completed: s.completed,
-                    cancelled: s.cancelled,
-                    avgRating: s.reviewCount > 0 ? (s.totalRating / s.reviewCount).toFixed(1) : "0.0",
-                    reviewCount: s.reviewCount,
-                    dept: doc.department?.name || "Medical Generalist",
-                    pic: doc.user?.profilePicture || doc.profilePicture
-                };
-            })
-            .sort((a, b) => {
-                if (sortMetric === 'COMPLETED') return b.completed - a.completed;
-                if (sortMetric === 'CANCELLED') return b.cancelled - a.cancelled;
-                if (sortMetric === 'RATING_HIGH') return Number(b.avgRating) - Number(a.avgRating);
-                if (sortMetric === 'RATING_LOW') return Number(a.avgRating) - Number(b.avgRating);
-                return 0;
-            })
-            .slice(0, 5);
-    }, [initialAppointments, doctors, sortMetric]);
+    const topDoctors = analytics?.summary?.topDoctors || [];
 
     // Calendar Calculations
     const calendarDays = useMemo(() => {
@@ -139,6 +102,61 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
         const todayStr = new Date().toISOString().split('T')[0];
         return initialAppointments.filter(a => a.dateTime.startsWith(todayStr)).length;
     }, [initialAppointments]);
+
+    const handleDownloadReport = async () => {
+        if (!analytics) {
+            toast.error("Analytics data not ready for report");
+            return;
+        }
+
+        try {
+            const reportTitle = `Executive HealthPoint Report - ${period.toUpperCase()} Cycle`;
+            const columns = ["Metric", "Value", "Context"];
+            
+            // Construct report data
+            const reportData = [
+                { metric: "Total Appointments", value: summary.totalAppointments, context: `Total of ${period} activities` },
+                { metric: "Completed Services", value: summary.completedAppointments, context: "Successful clinical sessions" },
+                { metric: "Cancelled/Missed", value: summary.cancelledAppointments, context: "Service drop-offs" },
+                { metric: "New Patient Onboarding", value: summary.totalPatients, context: "Growth in patient registry" },
+                { metric: "Staff Enrolled", value: doctors.length, context: "Total active medical practitioners" },
+                { metric: "Revenue Realized", value: `Rs. ${revenueData.reduce((acc: number, curr: any) => acc + curr.value, 0).toLocaleString()}`, context: "Total collection for period" },
+            ];
+
+            // Add department performance divider
+            reportData.push({ metric: "---", value: "---", context: "DEPARTMENT PERFORMANCE" });
+            analytics.departmentStats.forEach((d: any) => {
+                reportData.push({ metric: d.name, value: d.appointments, context: `${d.completedScale} Sessions completed` });
+            });
+
+            // Add top doctors divider
+            reportData.push({ metric: "---", value: "---", context: "TOP PERFORMERS" });
+            topDoctors.forEach((d: any) => {
+                reportData.push({ metric: d.name, value: d.completed, context: `Dept: ${d.dept}` });
+            });
+
+            const res = await apiClient.post("/api/pdf/table-export", 
+                { title: reportTitle, columns, data: reportData }, 
+                { responseType: 'blob' }
+            );
+
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+            setPreviewUrl(url); // Reusing setPreviewUrl (mapping to AssetPreviewModal for PDF if supported, or just download)
+            
+            // For immediate download as well
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${reportTitle.toLowerCase().replace(/\s+/g, '_')}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            toast.success("Executive report generated successfully");
+        } catch (error) {
+            console.error("Report Generation Error:", error);
+            toast.error("Failed to generate executive report");
+        }
+    };
 
     return (
         <div className="space-y-5 pb-10 max-w-[1600px] mx-auto relative px-2">
@@ -179,9 +197,8 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                                 <button
                                     key={p}
                                     onClick={() => setPeriod(p)}
-                                    className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${
-                                        period === p ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'
-                                    }`}
+                                    className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${period === p ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'
+                                        }`}
                                 >
                                     {p}
                                 </button>
@@ -251,14 +268,14 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                                         <AreaChart data={revenueData}>
                                             <defs>
                                                 <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                                 </linearGradient>
                                             </defs>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8fafc" />
                                             <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#64748b', fontWeight: 900 }} axisLine={false} tickLine={false} />
-                                            <YAxis tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 900 }} axisLine={false} tickLine={false} tickFormatter={(val) => `Rs.${val/1000}k`} />
-                                            <Tooltip 
+                                            <YAxis tick={{ fontSize: 9, fill: '#94a3b8', fontWeight: 900 }} axisLine={false} tickLine={false} tickFormatter={(val) => `Rs.${val / 1000}k`} />
+                                            <Tooltip
                                                 contentStyle={{ borderRadius: '1.5rem', border: 'none', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)', fontSize: '11px', fontWeight: '900', padding: '15px' }}
                                                 itemStyle={{ color: '#10b981' }}
                                             />
@@ -269,8 +286,8 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                                 {!isLoading && revenueData.length === 0 && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/5 backdrop-blur-[2px]">
                                         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/50 flex flex-col items-center gap-2 shadow-sm">
-                                             <TrendingUp size={24} className="text-slate-200" />
-                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No Revenue Data Available</p>
+                                            <TrendingUp size={24} className="text-slate-200" />
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No Revenue Data Available</p>
                                         </div>
                                     </div>
                                 )}
@@ -299,7 +316,12 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                                         "Patient flow is steady. Consider booking more appointments this {period} in Dermatology due to high demand."
                                     </p>
                                     <div className="pt-2">
-                                        <button className="w-full py-3 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-400 hover:text-white transition-all">Download Report</button>
+                                        <button 
+                                            onClick={handleDownloadReport}
+                                            className="w-full py-3 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-400 hover:text-white transition-all"
+                                        >
+                                            Download Report
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -309,8 +331,8 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                         {/* Regional Analytics */}
                         <div className="bg-slate-900 p-6 rounded-3xl text-white shadow-xl relative overflow-hidden group">
-                             <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -mr-12 -mt-12" />
-                             <div className="flex items-center gap-2.5 mb-6">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl -mr-12 -mt-12" />
+                            <div className="flex items-center gap-2.5 mb-6">
                                 <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center text-indigo-400">
                                     <Globe size={18} />
                                 </div>
@@ -337,9 +359,9 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                             </div>
                         </div>
 
-                         {/* Personnel Performance */}
+                        {/* Personnel Performance */}
                         <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                           <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-2.5">
                                     <div className="w-9 h-9 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center">
                                         <Target size={18} />
@@ -403,9 +425,9 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                     </motion.div>
 
                     {summary.pendingRefunds > 0 && (
-                        <motion.div 
-                            initial={{ opacity: 0, y: -20, scale: 0.98 }} 
-                            animate={{ opacity: 1, y: 0, scale: 1 }} 
+                        <motion.div
+                            initial={{ opacity: 0, y: -20, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
                             className="p-1 bg-gradient-to-r from-rose-600 via-rose-500 to-rose-600 rounded-[2rem] shadow-[0_20px_40px_-15px_rgba(244,63,94,0.3)] mb-4"
                         >
                             <div className="bg-white/95 backdrop-blur-md rounded-[1.9rem] p-4 px-6 flex items-center justify-between">
@@ -454,34 +476,34 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                                 })
                                 .slice(0, 6)
                                 .map(apt => (
-                                <div key={apt.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 relative group">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="px-2.5 py-0.5 bg-white rounded-lg text-[8px] font-black text-slate-900 shadow-sm">{new Date(apt.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-md border ${(apt.refundRequest?.status === 'COMPLETED') ? 'text-violet-600 border-violet-100 bg-violet-50' : (apt.status === 'COMPLETED' ? 'text-emerald-600 border-emerald-100' : 'text-blue-600 border-blue-100')}`}>
-                                                {apt.refundRequest?.status === 'COMPLETED' ? 'REFUNDED' : apt.status}
-                                            </span>
-                                            {apt.refundRequest?.proofUrl && (
-                                                <button 
-                                                    onClick={() => setPreviewUrl(apt.refundRequest.proofUrl)}
-                                                    className="text-violet-400 hover:text-violet-600 transition-colors p-1"
-                                                >
-                                                    <Eye size={10} />
-                                                </button>
+                                    <div key={apt.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 relative group">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="px-2.5 py-0.5 bg-white rounded-lg text-[8px] font-black text-slate-900 shadow-sm">{new Date(apt.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-md border ${(apt.refundRequest?.status === 'COMPLETED') ? 'text-violet-600 border-violet-100 bg-violet-50' : (apt.status === 'COMPLETED' ? 'text-emerald-600 border-emerald-100' : 'text-blue-600 border-blue-100')}`}>
+                                                    {apt.refundRequest?.status === 'COMPLETED' ? 'REFUNDED' : apt.status}
+                                                </span>
+                                                {apt.refundRequest?.proofUrl && (
+                                                    <button
+                                                        onClick={() => setPreviewUrl(apt.refundRequest.proofUrl)}
+                                                        className="text-violet-400 hover:text-violet-600 transition-colors p-1"
+                                                    >
+                                                        <Eye size={10} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <p className="font-black text-slate-900 text-xs tracking-tight">{apt.patient?.firstName} {apt.patient?.lastName}</p>
+                                        <div className="flex items-center justify-between mt-0.5">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Dr. {apt.doctor?.user?.firstName || apt.doctor?.firstName}</p>
+                                            {apt.refundRequest?.adminNotes && (
+                                                <span className="text-[7px] font-bold text-emerald-500 truncate max-w-[80px]" title={apt.refundRequest.adminNotes}>
+                                                    • {apt.refundRequest.adminNotes}
+                                                </span>
                                             )}
                                         </div>
                                     </div>
-                                    <p className="font-black text-slate-900 text-xs tracking-tight">{apt.patient?.firstName} {apt.patient?.lastName}</p>
-                                    <div className="flex items-center justify-between mt-0.5">
-                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Dr. {apt.doctor?.user?.firstName || apt.doctor?.firstName}</p>
-                                        {apt.refundRequest?.adminNotes && (
-                                            <span className="text-[7px] font-bold text-emerald-500 truncate max-w-[80px]" title={apt.refundRequest.adminNotes}>
-                                                • {apt.refundRequest.adminNotes}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </div>
@@ -533,7 +555,7 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                                                     ))}
                                                 </div>
                                             </motion.div>
-                                        ) : (<div className="bg-white/5 rounded-3xl p-10 border border-white/5 flex flex-col items-center justify-center text-center h-full min-h-[500px] backdrop-blur-3xl"><Activity size={80} className="text-white/5 mb-8 animate-pulse" /><p className="text-white/20 text-[10px] font-black uppercase tracking-[0.3em]">Select a Day<br/>To view scheduled patients</p></div>)}
+                                        ) : (<div className="bg-white/5 rounded-3xl p-10 border border-white/5 flex flex-col items-center justify-center text-center h-full min-h-[500px] backdrop-blur-3xl"><Activity size={80} className="text-white/5 mb-8 animate-pulse" /><p className="text-white/20 text-[10px] font-black uppercase tracking-[0.3em]">Select a Day<br />To view scheduled patients</p></div>)}
                                     </AnimatePresence>
                                 </div>
                             </div>
@@ -541,11 +563,11 @@ export function Dashboard({ doctors, appointments: initialAppointments }: Dashbo
                     </motion.div>
                 )}
             </AnimatePresence>
-            <AssetPreviewModal 
-                url={previewUrl} 
-                title="Refund Proof" 
+            <AssetPreviewModal
+                url={previewUrl}
+                title="Refund Proof"
                 type="image"
-                onClose={() => setPreviewUrl(null)} 
+                onClose={() => setPreviewUrl(null)}
             />
         </div>
     );

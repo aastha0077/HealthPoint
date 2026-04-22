@@ -14,6 +14,8 @@ import { RefundManagement } from "@/components/admin/RefundManagement";
 import { PdfPreviewModal } from "@/components/PdfPreviewModal";
 import { NotificationBell } from "@/components/NotificationBell";
 import { StaffChatHub } from "@/components/chat/StaffChatHub";
+import { SchedulingHub } from "@/components/doctor/dashboard/SchedulingHub";
+import { useMemo } from "react";
 
 export function AdminPanel() {
     const { pathname } = useLocation();
@@ -41,10 +43,14 @@ export function AdminPanel() {
     const [departments, setDepartments] = useState<any[]>([]);
     const [previewPdf, setPreviewPdf] = useState<{ url: string, title: string, filename: string } | null>(null);
 
+    // Calendar States
+    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+
     const fetchAdminData = async () => {
         try {
             const [aptRes, userRes, patientRes, docRes] = await Promise.all([
-                apiClient.get("/api/appointments"),
+                apiClient.get("/api/appointments?limit=1000"),
                 apiClient.get("/api/user/all"),
                 apiClient.get("/api/patients/all"),
                 apiClient.get("/api/doctors/1/100")
@@ -144,6 +150,31 @@ export function AdminPanel() {
         }
     };
 
+    const changeMonth = (offset: number) => {
+        const next = new Date(currentMonth);
+        next.setMonth(next.getMonth() + offset);
+        setCurrentMonth(next);
+    };
+
+    const calendarDays = useMemo(() => {
+        const start = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        const end = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+        const days = [];
+        for (let i = 0; i < start.getDay(); i++) days.push(null);
+        for (let d = 1; d <= end.getDate(); d++) {
+            const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), d);
+            const dateStr = date.toISOString().split('T')[0];
+            const count = appointments.filter((a: any) => a.dateTime.startsWith(dateStr)).length;
+            days.push({ day: d, dateStr, count });
+        }
+        return days;
+    }, [currentMonth, appointments]);
+
+    const appointmentsOnSelectedDate = useMemo(() => {
+        if (!selectedDate) return [];
+        return appointments.filter((a: any) => a.dateTime.startsWith(selectedDate));
+    }, [selectedDate, appointments]);
+
     return (
         <div className="flex min-h-screen bg-slate-50">
             <AdminSidebar
@@ -176,6 +207,21 @@ export function AdminPanel() {
                                 appointments={appointments}
                                 departments={departments}
                             />
+                        } />
+                        <Route path="calendar" element={
+                            <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 h-[80vh]">
+                                <SchedulingHub 
+                                    show={true}
+                                    onClose={() => {}}
+                                    currentMonth={currentMonth}
+                                    changeMonth={changeMonth}
+                                    calendarDays={calendarDays}
+                                    selectedDate={selectedDate}
+                                    setSelectedDate={setSelectedDate}
+                                    appointmentsOnSelectedDate={appointmentsOnSelectedDate}
+                                    isAdmin={true}
+                                />
+                            </div>
                         } />
                         <Route path="appointments" element={
                             <AppointmentTable
